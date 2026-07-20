@@ -1,6 +1,6 @@
-﻿package entities;
+package entities;
 
-public class User extends BaseEntity
+public abstract class User extends BaseEntity
 {
     private String name;
     private String password;
@@ -20,9 +20,17 @@ public class User extends BaseEntity
 
     public String getName() {return name;}
     public String getPassword() {return password;}
-
+    @Override
     public String getIdPrefix()
     {
         return "US";
     }
+    @Override
+    public String toString()
+    {
+        return
+                "Name:" + this.getName() +  "\n"
+                +"Password:" + this.getPassword();
+    }
+
 }
