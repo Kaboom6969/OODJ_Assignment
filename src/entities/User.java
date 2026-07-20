@@ -20,11 +20,7 @@ public abstract class User extends BaseEntity
 
     public String getName() {return name;}
     public String getPassword() {return password;}
-    @Override
-    public String getIdPrefix()
-    {
-        return "US";
-    }
+
     @Override
     public String toString()
     {
