@@ -20,9 +20,16 @@ public class Bill extends BaseEntity
         this.money = money;
     }
 
+    @Override
     public String getIdPrefix()
     {
         return "BL";
+    }
+
+    @Override
+    public String toFileData()
+    {
+        return this.getId() + "|" + this.getMoney() + "\n";
     }
 
 

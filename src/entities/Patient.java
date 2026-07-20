@@ -18,4 +18,10 @@ public class Patient extends User
         return "PT";
     }
 
+    @Override
+    public String toFileData()
+    {
+        return this.getId() + "|" + this.getName() + "|" + this.getPassword() + "\n";
+    }
+
 }
