@@ -1,6 +1,6 @@
 ﻿package Exceptions;
 
-public class IdPrefixNotMatchException extends RuntimeException
+public class IdPrefixNotMatchException extends IdPrefixException
 {
     public IdPrefixNotMatchException() {super();}
     public IdPrefixNotMatchException(String message) {super(message);}
