@@ -1,4 +1,4 @@
-﻿package Exceptions;
+package Exceptions;
 
 public class IdPrefixException extends RuntimeException
 {
