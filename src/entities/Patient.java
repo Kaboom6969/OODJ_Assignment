@@ -1,18 +1,19 @@
 package entities;
 
 import java.lang.reflect.Method;
+import java.time.LocalDate;
 
-public class Patient extends User
+public class Patient extends UserWithDetails
 {
 
     public final static String PREFIX = "PT";
     public Patient(String[] data)
     {
-        this(data[0],data[1],data[2]);
+        super(data);
     }
-    public Patient(String id, String name, String password)
+    public Patient(String id, String name, String password,Gender gender, LocalDate dateOfBirth)
     {
-        super(id,name,password);
+        super(id,name,password,gender,dateOfBirth);
     }
 
     @Override
