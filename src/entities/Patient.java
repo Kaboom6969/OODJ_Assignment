@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 public class Patient extends User
 {
 
+    public final static String PREFIX = "PT";
     public Patient(String[] data)
     {
         this(data[0],data[1],data[2]);
@@ -13,11 +14,12 @@ public class Patient extends User
     {
         super(id,name,password);
     }
-    @Override
-    public String getIdPrefix() {
-        return "PT";
-    }
 
+    @Override
+    public String getIdPrefix()
+    {
+        return PREFIX;
+    }
     @Override
     public String toFileData()
     {

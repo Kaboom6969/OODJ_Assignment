@@ -7,6 +7,7 @@ public abstract class BaseEntity
 {
     private final Integer idNumber;
 
+
     public abstract String getIdPrefix();
     public abstract String toFileData();
     public Integer getIdNumber() {return idNumber;}

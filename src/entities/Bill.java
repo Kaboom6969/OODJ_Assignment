@@ -2,6 +2,7 @@ package entities;
 
 public class Bill extends BaseEntity
 {
+    public static final String PREFIX = "BL";
     private int money;
     public int getMoney() {return money;}
     public void setMoney(int money)
@@ -23,7 +24,7 @@ public class Bill extends BaseEntity
     @Override
     public String getIdPrefix()
     {
-        return "BL";
+        return PREFIX;
     }
 
     @Override
