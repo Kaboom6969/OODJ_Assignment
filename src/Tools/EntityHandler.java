@@ -17,16 +17,14 @@ public class EntityHandler
         this.fileDataHandler = fileDataHandler;
     }
 
-
-    public <T extends BaseEntity> T getEntity(int rowInFile)
+    public BaseEntity getEntity(int rowInFile)
     {
-
         String[] data = fileDataHandler.getDataFromSpecificRow(rowInFile);
         String prefix = FileDataHandler.prefixFinder(data[0]);
 
         try
         {
-            return (T) ecm.convertMap.get(prefix).apply(data);
+            return ecm.convertMap.get(prefix).apply(data);
         }
         catch (IdPrefixNotMatchException e)
         {
@@ -34,4 +32,5 @@ public class EntityHandler
             return null;
         }
     }
+
 }
