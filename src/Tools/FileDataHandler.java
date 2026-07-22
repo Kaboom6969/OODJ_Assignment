@@ -1,77 +1,240 @@
 package Tools;
 
+import Exceptions.IdPrefixException;
+import Exceptions.IdPrefixNotFoundException;
 import Exceptions.IdPrefixNotMatchException;
 import Exceptions.ReaderPrepareFailedException;
 import entities.BaseEntity;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class FileDataHandler
 {
+    public static final String DEFAULT_SEPARATOR_REGEX = "\\|";
+    public static final String BACKUP_FILE_SUFFIX = "BACKUP";
+    private static final int MAXIMUM_PREFIX_LENGTH = 10;
+    private final String separatorRegex;
     private final File file;
-    private BufferedReader fileReader;
-
-    public void prepareReader()
+    public String getSeparatorRegex() {return separatorRegex;}
+    public String getSeparator() //只做了简单过滤
     {
-        if (fileReader != null)
+        if (getSeparatorRegex().charAt(0) == '\\' && getSeparatorRegex().charAt(1) == '\\')
+        {
+            return getSeparatorRegex().substring(2);
+        }
+        return getSeparatorRegex();
+    }
+    public File getFile() {return file;}
+    private File getBackUpFile()
+    {
+        boolean isTouchPoint = false;
+        char[] backUpFileChar = new char[260]; //Windows 文件最长260
+        final int[] pointer = {0};
+        String originalFileName = getFile().getName();
+        String originalFilePath = getFile().getParent();
+        Consumer<Character> addCharToFile = (character)->
+        {
+            backUpFileChar[pointer[0]] = character;
+            pointer[0]++;
+        };
+        for (int i = 0; i < originalFileName.length(); i ++)
+        {
+            if(originalFileName.charAt(i) == '.' && !isTouchPoint)
+            {
+                for (int j = 0;j < BACKUP_FILE_SUFFIX.length(); j++)
+                {
+                    addCharToFile.accept(BACKUP_FILE_SUFFIX.charAt(j));
+                }
+                isTouchPoint = true;
+            }
+            addCharToFile.accept(originalFileName.charAt(i));
+        }
+        if (!isTouchPoint)
+        {
+            for (int j = 0; j < BACKUP_FILE_SUFFIX.length(); j++)
+            {
+                addCharToFile.accept(BACKUP_FILE_SUFFIX.charAt(j));
+            }
+        }
+        String backUpFileName = new String(backUpFileChar,0,pointer[0]);
+        return new File(originalFilePath + File.separator + backUpFileName);
+    }
+
+    private BufferedReader prepareReader()
+    {
+        return _pr(true);
+    }
+    private BufferedReader prepareReader(boolean skipFirstRow)
+    {
+        return _pr(skipFirstRow);
+    }
+    private BufferedReader _pr(boolean skipFirstRow)
+    {
+        BufferedReader br = null;
+        try
+        {
+            br = new BufferedReader(new FileReader(this.file));
+            if (skipFirstRow) br.readLine();
+            return br;
+        } catch (FileNotFoundException e)
+        {
+            System.err.println("File:" + getFile().getName() + "not Found!");
+            throw new ReaderPrepareFailedException();
+        } catch (IOException e)
         {
             try
             {
-                fileReader.close();
+                System.err.println(e.getMessage() + "\n" + "Trying to close Reader...");
+                br.close();
+                System.err.println("Reader close Successfully!");
+                throw new ReaderPrepareFailedException(e);
+            } catch (IOException _)
+            {
+                throw new RuntimeException("Try to close Reader but failed",e);
             }
-            catch (IOException _){}
-        }
-        try
-        {
-            fileReader = new BufferedReader(new FileReader(this.file));
-        }
-        catch (FileNotFoundException e)
-        {
-            System.err.println("File:" + file.getName() + "not Found!");
-            throw new ReaderPrepareFailedException();
         }
     }
-
-    public FileDataHandler(String filePath) throws FileNotFoundException
+    public FileDataHandler(String filePath,String separator)
     {
         this.file = new File(filePath);
-        prepareReader();
+        this.separatorRegex = separator;
     }
 
-                                                            //类型擦除导致只能让T自己把方法丢给这里
-    public <T extends BaseEntity> T getEntity(int rowInFile, Function<String[],T> constructorFunctionForT)
+    public FileDataHandler(String filePath)
     {
-        try
+        this.file = new File(filePath);
+        this.separatorRegex = DEFAULT_SEPARATOR_REGEX;
+    }
+    public String findPrefixInSpecificRow(int row)
+    {
+        try (BufferedReader fileReader = prepareReader())
         {
-            prepareReader();
-            for(int i = 0;i < rowInFile - 1;i ++) { fileReader.readLine();}
-            String[] data = fileReader.readLine().split("\\|");
             try
             {
-                return constructorFunctionForT.apply(data);
+                return prefixFinder(Objects.requireNonNull(getDataFromSpecificRow(row))[0]);
             }
-            catch (IdPrefixNotMatchException e)
+            catch (IdPrefixException e)
             {
-                System.err.println("Please Check Your File,The idPrefix didn't match!\n" + e.getMessage());
+                System.err.println("Prefix cannot found in this file!");
                 return null;
             }
         }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String prefixFinder(String id)
+    {
+        if (id == null || id.isEmpty()) throw new IdPrefixNotFoundException("The id is empty!");
+        char[] prefix = new char[MAXIMUM_PREFIX_LENGTH];
+        int prefixPointer = 0;
+        for (int i = 0;i < id.length(); i ++)
+        {
+            if (Character.isLetter(id.charAt(i)))
+            {
+                if (prefixPointer >= MAXIMUM_PREFIX_LENGTH)
+                    throw new IllegalArgumentException
+                            ("prefix length is larger than maximum prefix length\n" +
+                            "Please check your file Or change the maximum prefix length");
+                prefix[prefixPointer] = id.charAt(i);
+                prefixPointer ++;
+                continue;
+            }
+            if (Character.isDigit(id.charAt(i))) {break;}
+        }
+        if (prefixPointer == 0) throw new IdPrefixNotFoundException("No Prefix Found in this id!");
+        return new String(prefix,0,prefixPointer);
+    }
+
+                                                            //类型擦除导致只能让T自己把方法丢给这里
+
+    private List<String[]> DataToArrayList (List<String> data)
+    {
+        List<String[]> list = new ArrayList<String[]>();
+        for (String rowData : data)
+        {
+            list.add(DataToArray(rowData));
+        }
+        return list;
+    }
+    private String[] DataToArray (String data)
+    {
+        return data.split(getSeparatorRegex());
+    }
+
+    private String ArrayToData (String[] array)
+    {
+        return String.join(getSeparator(),array);
+    }
+
+    public String[] getDataFromSpecificRow(int row)
+    {
+        try (BufferedReader fileReader = prepareReader())
+        {
+            for (int i = 0; i < row; i++)
+            {
+                fileReader.readLine();
+            }
+            return DataToArray(fileReader.readLine());
+        }
         catch (IOException _) {return null;}
     }
-    public List<String> cacheFile() throws IOException
+    private List<String> cacheFile() throws IOException
     {
-        prepareReader();
-        return this.fileReader.readAllLines();
+        try (BufferedReader fileReader = prepareReader(false))
+        {
+            return fileReader.readAllLines();
+        }
     }
-    public int getFileRow()
+    private  void writeFile(List<String> fileData)
     {
-        prepareReader();
         try
         {
+            Files.copy(file.toPath(), getBackUpFile().toPath());
+        } catch (IOException e)
+        {
+            System.err.println(e.getMessage());
+            System.err.println("BackUp File Failed,for secure reason,cannot write file");
+            return;
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file)))
+        {
+            for (String data : fileData)
+            {
+                writer.write(data);
+                writer.newLine();
+            }
+        } catch (IOException e)
+        {
+            System.err.println("Got Error when writing file,copying backUp File to original File...");
+            try
+            {
+                Files.copy(getBackUpFile().toPath(), file.toPath());
+            } catch (IOException e2)
+            {
+                System.err.println(e2.getMessage());
+                System.err.println("Got Error when copying backUp File to original File");
+                System.err.println("System must forced close to save the data File");
+                System.exit(1);
+            }
+        }
+
+    }
+    private int getFileRow()
+    {
+        try (BufferedReader fileReader = prepareReader())
+        {
             int row = 0;
-            while (this.fileReader.readLine() != null)
+            while (fileReader.readLine() != null)
             {
                 row += 1;
             }
@@ -82,7 +245,7 @@ public class FileDataHandler
             throw new UncheckedIOException(e);
         }
     }
-    public void DeleteRow (int row)
+    private void DeleteRow (int row)
     {
         if (row+1 > getFileRow()) throw new IllegalArgumentException("row should not be bigger than file row");
         List<String> originalFile = null;
@@ -96,5 +259,6 @@ public class FileDataHandler
         }
         if (originalFile == null) return;
         originalFile.remove(row + 1);
+        writeFile(originalFile);
     }
 }
