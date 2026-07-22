@@ -1,4 +1,4 @@
-﻿package Exceptions;
+package Exceptions;
 
 public class ReaderPrepareFailedException extends RuntimeException
 {
