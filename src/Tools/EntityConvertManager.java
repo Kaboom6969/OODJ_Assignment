@@ -1,5 +1,9 @@
-package entities;
+package Tools;
 
+import Exceptions.IdPrefixException;
+import Exceptions.IdPrefixNotFoundException;
+import Exceptions.IdPrefixNotMatchException;
+import entities.BaseEntity;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfoList;
 import io.github.classgraph.ScanResult;
@@ -9,11 +13,17 @@ import java.util.function.Function;
 
 public class EntityConvertManager
 {
-    public HashMap<String,Function<String[],BaseEntity>> convertMap;
+    private static HashMap<String,Function<String[], BaseEntity>> convertMap;
 
     public EntityConvertManager()
     {
-        convertMapInit();
+        if (convertMap == null) convertMapInit();
+    }
+    public BaseEntity convertEntity(String[] data)
+    {
+        String prefix = FileDataHandler.prefixFinder(data[0]);
+        if (convertMap.get(prefix) == null) throw new IdPrefixNotFoundException("Convert Failed: No mapping found in this prefix %s".formatted(prefix));
+        return convertMap.get(prefix).apply(data);
     }
     public void convertMapInit()
     {
