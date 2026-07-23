@@ -15,6 +15,10 @@ public class Patient extends UserWithDetails
     {
         super(id,name,password,gender,dateOfBirth);
     }
+    public Patient(String id, String name, String password,Gender gender, String dateOfBirth)
+    {
+        super(id,name,password,gender,dateOfBirth);
+    }
 
     @Override
     public String getIdPrefix()
@@ -24,7 +28,18 @@ public class Patient extends UserWithDetails
     @Override
     public String toFileData()
     {
-        return this.getId() + "|" + this.getName() + "|" + this.getPassword() + "\n";
+        return this.getId() + "|" + this.getName() + "|" + this.getPassword() + "|" + this.getGender() + "|" + this.getDateOfBirth() + "\n";
     }
+    @Override
+    public String toString()
+    {
+        return
+                "Name:" + this.getName() +  "\n"
+                +"Password:" + this.getPassword() + "\n"
+                +"Gender:" +this.getGender() + "\n"
+                +"Date Of Birth:" + this.getDateOfBirth();
+
+    }
+
 
 }
