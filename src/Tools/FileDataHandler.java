@@ -291,4 +291,31 @@ public class FileDataHandler
         originalFile.remove(row + 1);
         writeFile(originalFile);
     }
+    public void updateData(String data,int row)
+    {
+        try
+        {
+            List<String> dataToWrite = cacheFile();
+            if (row >= dataToWrite.size())
+                throw new IllegalArgumentException("updateData failed : row %d is bigger than file row %d".formatted(row,dataToWrite.size()));
+            dataToWrite.set(row - 1,data);
+            writeFile(dataToWrite);
+        } catch(IOException e)
+        {
+            System.err.printf("updateData failed : Error when caching data: %s%n", e.getMessage());
+        }
+    }
+
+    public void addData(String data)
+    {
+        try
+        {
+            List<String> dataToWrite = cacheFile();
+            dataToWrite.add(data);
+            writeFile(dataToWrite);
+        } catch(IOException e)
+        {
+            System.err.printf("addData failed : Error when caching data: %s%n", e.getMessage());
+        }
+    }
 }
