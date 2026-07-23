@@ -222,13 +222,15 @@ public class FileDataHandler
     }
     private  void writeFile(List<String> fileData)
     {
+        File backUpFile = getBackUpFile();
         try
         {
-            Files.copy(file.toPath(), getBackUpFile().toPath());
+            Files.copy(file.toPath(), backUpFile.toPath());
         } catch (IOException e)
         {
             System.err.println(e.getMessage());
             System.err.println("BackUp File Failed,for secure reason,cannot write file");
+            backUpFile.delete();
             return;
         }
 
@@ -239,12 +241,14 @@ public class FileDataHandler
                 writer.write(data);
                 writer.newLine();
             }
+            backUpFile.delete();
         } catch (IOException e)
         {
             System.err.println("Got Error when writing file,copying backUp File to original File...");
             try
             {
-                Files.copy(getBackUpFile().toPath(), file.toPath());
+                Files.copy(backUpFile.toPath(), file.toPath());
+                backUpFile.delete();
             } catch (IOException e2)
             {
                 System.err.println(e2.getMessage());
