@@ -1,4 +1,4 @@
-﻿package entities;
+package entities;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -7,6 +7,16 @@ import java.time.format.DateTimeParseException;
 
 public abstract class UserWithDetails extends User
 {
+    public Gender getGender()
+    {
+        return gender;
+    }
+
+    public LocalDate getDateOfBirth()
+    {
+        return dateOfBirth;
+    }
+
     public enum Gender
     {
         MALE,FEMALE,UNKNOWN
@@ -14,11 +24,18 @@ public abstract class UserWithDetails extends User
     private LocalDate dateOfBirth;
     private Gender gender;
 
+
     public UserWithDetails(String id,String name,String password,Gender gender,LocalDate dateOfBirth)
     {
         super(id,name,password);
         this.gender = gender;
         this.dateOfBirth = dateOfBirth;
+    }
+    public UserWithDetails(String id,String name,String password,Gender gender,String dateOfBirth)
+    {
+        super(id,name,password);
+        this.gender = gender;
+        this.dateOfBirth = LocalDate.parse(dateOfBirth,LocalDateParser.getDateFormatterAuto(dateOfBirth));
     }
     public UserWithDetails(String[] data)
     {
