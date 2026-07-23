@@ -175,6 +175,24 @@ public class FileDataHandler
         return String.join(getSeparator(),array);
     }
 
+    public String[] getDataFromSpecificId (String id)
+    {
+        try (BufferedReader fileReader = prepareReader())
+        {
+            for (String data; (data = fileReader.readLine()) != null; )
+            {
+                String[] arrayData = DataToArray(data);
+                if (!arrayData[0].equals(id)) continue;
+                return arrayData;
+            }
+            return null;
+        } catch (IOException e)
+        {
+            System.err.println("Something happen while getting data\n" + e.getMessage());
+            throw new ReaderPrepareFailedException(e);
+        }
+    }
+
     public String[] getDataFromSpecificRow(int row)
     {
         try (BufferedReader fileReader = prepareReader())
