@@ -2,10 +2,6 @@ package Tools;
 
 import Exceptions.IdPrefixNotMatchException;
 import entities.BaseEntity;
-import entities.EntityConvertManager;
-
-import java.nio.file.Path;
-import java.util.function.Function;
 
 public class EntityHandler
 {
@@ -17,6 +13,21 @@ public class EntityHandler
         this.fileDataHandler = fileDataHandler;
     }
 
+    public BaseEntity getEntity(String id)
+    {
+        String[] data = fileDataHandler.getDataFromSpecificId(id);
+        if (data == null) return null;
+        try
+        {
+            return ecm.convertEntity(data);
+        }
+        catch (IdPrefixNotMatchException e)
+        {
+            System.err.println("Please Check Your File,The idPrefix didn't match!\n" + e.getMessage());
+            return null;
+        }
+    }
+
     public BaseEntity getEntity(int rowInFile)
     {
         String[] data = fileDataHandler.getDataFromSpecificRow(rowInFile);
@@ -24,7 +35,7 @@ public class EntityHandler
 
         try
         {
-            return ecm.convertMap.get(prefix).apply(data);
+            return ecm.convertEntity(data);
         }
         catch (IdPrefixNotMatchException e)
         {
