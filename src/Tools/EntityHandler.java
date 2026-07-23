@@ -5,6 +5,10 @@ import entities.BaseEntity;
 
 public class EntityHandler
 {
+    public enum ReviewStyle
+    {
+        STRICT,NORMAL
+    }
     public static EntityConvertManager ecm = new EntityConvertManager();
     private FileDataHandler fileDataHandler;
 
@@ -42,6 +46,12 @@ public class EntityHandler
             System.err.println("Please Check Your File,The idPrefix didn't match!\n" + e.getMessage());
             return null;
         }
+    }
+
+
+    public <T extends BaseEntity> void addEntity(T Entity,ReviewStyle style)
+    {
+        fileDataHandler.addData(Entity.toFileData());
     }
 
 }
