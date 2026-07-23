@@ -198,13 +198,20 @@ public class FileDataHandler
     {
         try (BufferedReader fileReader = prepareReader())
         {
-            for (int i = 0; i < row; i++)
+            for (int i = 0; i < row-1; i++)
             {
                 fileReader.readLine();
             }
-            return DataToArray(fileReader.readLine());
+            String data = fileReader.readLine();
+            if (data == null)
+                throw new IndexOutOfBoundsException("Cannot get data : row %d is out of bounds from file %S".formatted(row,file.getName()));
+            return DataToArray(data);
         }
-        catch (IOException _) {return null;}
+        catch (IOException e)
+        {
+            System.err.println("Something happen while getting data\n" + e.getMessage());
+            throw new ReaderPrepareFailedException(e);
+        }
     }
     private List<String> cacheFile() throws IOException
     {
