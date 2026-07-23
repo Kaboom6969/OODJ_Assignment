@@ -167,6 +167,7 @@ public class FileDataHandler
     }
     private String[] DataToArray (String data)
     {
+        if (data == null) throw new IllegalArgumentException("Data should not be null!");
         return data.split(getSeparatorRegex());
     }
 
