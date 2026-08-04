@@ -67,4 +67,11 @@ public class EntityHandler
         fileDataHandler.addData(Entity.toFileData());
     }
 
+    public <T extends BaseEntity> void updateEntity(T Entity) throws IdNotFoundException
+    {
+        Integer row = fileDataHandler.getRowFromSpecificId(Entity.getId());
+        if (row == null) throw new IdNotFoundException("Entity in file is not founded!");
+        fileDataHandler.updateData(Entity.toFileData(), row);
+    }
+
 }
