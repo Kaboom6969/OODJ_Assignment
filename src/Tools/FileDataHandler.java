@@ -177,22 +177,35 @@ public class FileDataHandler
         return String.join(getSeparator(),array);
     }
 
-    public String[] getDataFromSpecificId (String id)
+    private DataInformation getDataInformationFromSpecificId (String id)
     {
         try (BufferedReader fileReader = prepareReader())
         {
+            int row = 1;
             for (String data; (data = fileReader.readLine()) != null; )
             {
                 String[] arrayData = DataToArray(data);
-                if (!arrayData[0].equals(id)) continue;
-                return arrayData;
+                if (!arrayData[0].equals(id))
+                {
+                    row++;continue;
+                }
+                return new DataInformation(arrayData, row);
             }
-            return null;
+            return new DataInformation(null,null);
         } catch (IOException e)
         {
             System.err.println("Something happen while getting data\n" + e.getMessage());
             throw new ReaderPrepareFailedException(e);
         }
+    }
+    public String[] getDataFromSpecificId (String id)
+    {
+        return getDataInformationFromSpecificId(id).data;
+    }
+
+    public Integer getRowFromSpecificId (String id)
+    {
+        return getDataInformationFromSpecificId(id).row;
     }
 
     public String[] getDataFromSpecificRow(int row)
@@ -300,7 +313,7 @@ public class FileDataHandler
             List<String> dataToWrite = cacheFile();
             if (row >= dataToWrite.size())
                 throw new IllegalArgumentException("updateData failed : row %d is bigger than file row %d".formatted(row,dataToWrite.size()));
-            dataToWrite.set(row - 1,data);
+            dataToWrite.set(row,data);
             writeFile(dataToWrite);
         } catch(IOException e)
         {
