@@ -1,2 +1,3 @@
-PatientID|PatientName|PatientPassword
-PT0001|Lee Zhi Hao|KKKKK
+PatientID|PatientName|PatientPassword|PatientGender|PatientDateOfBirth
+PT0001|Lee Zhi Hao|KKKKK|MALE|2006-11-05
+PT0002|Kek|YYYY|MALE|2004-09-01
