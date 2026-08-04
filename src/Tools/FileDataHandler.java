@@ -154,7 +154,7 @@ public class FileDataHandler
         return new String(prefix,0,prefixPointer);
     }
 
-                                                            //类型擦除导致只能让T自己把方法丢给这里
+
 
     private List<String[]> DataToArrayList (List<String> data)
     {
@@ -236,9 +236,10 @@ public class FileDataHandler
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file)))
         {
-            for (String data : fileData)
+            for (int i = 0;i < fileData.size();i++)
             {
-                writer.write(data);
+                writer.write(fileData.get(i));
+                if (i == fileData.size()-1) continue;
                 writer.newLine();
             }
             backUpFile.delete();
@@ -275,7 +276,7 @@ public class FileDataHandler
             throw new UncheckedIOException(e);
         }
     }
-    private void DeleteRow (int row)
+    private void deleteRow (int row)
     {
         if (row+1 > getFileRow()) throw new IllegalArgumentException("row should not be bigger than file row");
         List<String> originalFile = null;
