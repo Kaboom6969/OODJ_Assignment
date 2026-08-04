@@ -1,6 +1,8 @@
 package Tools;
 
+import Exceptions.IdNotFoundException;
 import Exceptions.IdPrefixNotMatchException;
+import Exceptions.IdRepeatedException;
 import entities.BaseEntity;
 
 public class EntityHandler
@@ -48,9 +50,20 @@ public class EntityHandler
         }
     }
 
-
-    public <T extends BaseEntity> void addEntity(T Entity,ReviewStyle style)
+    public <T extends BaseEntity> void addEntity(T Entity) throws IdRepeatedException
     {
+        addEntity(Entity, ReviewStyle.STRICT);
+    }
+
+    public <T extends BaseEntity> void addEntity(T Entity, ReviewStyle style) throws IdRepeatedException
+    {
+        if (style == ReviewStyle.STRICT)
+        {
+            if (fileDataHandler.getDataFromSpecificId(Entity.getId()) != null)
+            {
+                throw new IdRepeatedException("Entity already exists!");
+            }
+        }
         fileDataHandler.addData(Entity.toFileData());
     }
 
