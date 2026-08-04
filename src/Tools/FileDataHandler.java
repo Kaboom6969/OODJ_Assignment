@@ -21,6 +21,7 @@ public class FileDataHandler
     private static final int MAXIMUM_PREFIX_LENGTH = 10;
     private final String separatorRegex;
     private final File file;
+    private record DataInformation(String[] data,Integer row){}
     public String getSeparatorRegex() {return separatorRegex;}
     public String getSeparator() //只做了简单过滤
     {
