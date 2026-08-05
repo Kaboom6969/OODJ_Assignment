@@ -21,7 +21,13 @@ public class FileDataHandler
     private static final int MAXIMUM_PREFIX_LENGTH = 10;
     private final String separatorRegex;
     private final File file;
-    private record DataInformation(String[] data,Integer row){}
+    public record DataInformation(String[] data,Integer row)
+    {
+        public boolean isEmpty()
+        {
+            return (data == null && row == null);
+        }
+    }
     public String getSeparatorRegex() {return separatorRegex;}
     public String getSeparator() //只做了简单过滤
     {
@@ -177,7 +183,7 @@ public class FileDataHandler
         return String.join(getSeparator(),array);
     }
 
-    private DataInformation getDataInformationFromSpecificId (String id)
+    public DataInformation getDataInformationFromSpecificId (String id)
     {
         try (BufferedReader fileReader = prepareReader())
         {
@@ -197,15 +203,6 @@ public class FileDataHandler
             System.err.println("Something happen while getting data\n" + e.getMessage());
             throw new ReaderPrepareFailedException(e);
         }
-    }
-    public String[] getDataFromSpecificId (String id)
-    {
-        return getDataInformationFromSpecificId(id).data;
-    }
-
-    public Integer getRowFromSpecificId (String id)
-    {
-        return getDataInformationFromSpecificId(id).row;
     }
 
     public String[] getDataFromSpecificRow(int row)
@@ -290,9 +287,9 @@ public class FileDataHandler
             throw new UncheckedIOException(e);
         }
     }
-    private void deleteRow (int row)
+    public void deleteRow (int row)
     {
-        if (row+1 > getFileRow()) throw new IllegalArgumentException("row should not be bigger than file row");
+        if (row > getFileRow()) throw new IllegalArgumentException("row should not be bigger than file row");
         List<String> originalFile = null;
         try
         {
@@ -303,7 +300,7 @@ public class FileDataHandler
             System.err.println("Error while delete row");
         }
         if (originalFile == null) return;
-        originalFile.remove(row + 1);
+        originalFile.remove(row);
         writeFile(originalFile);
     }
     public void updateData(String data,int row)
