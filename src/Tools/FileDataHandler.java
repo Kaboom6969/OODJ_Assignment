@@ -4,15 +4,14 @@ import Exceptions.IdPrefixException;
 import Exceptions.IdPrefixNotFoundException;
 import Exceptions.IdPrefixNotMatchException;
 import Exceptions.ReaderPrepareFailedException;
-import entities.BaseEntity;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class FileDataHandler
 {
@@ -112,6 +111,10 @@ public class FileDataHandler
         this.file = new File(filePath);
         this.separatorRegex = separator;
     }
+    public FileDataHandler(Path filePath)
+    {
+        this(filePath.toString());
+    }
 
     public FileDataHandler(String filePath)
     {
@@ -120,21 +123,39 @@ public class FileDataHandler
     }
     public String findPrefixInSpecificRow(int row)
     {
-        try (BufferedReader fileReader = prepareReader())
+        try
         {
-            try
+            return prefixFinder(Objects.requireNonNull(getDataFromSpecificRow(row))[0]);
+        }
+        catch (IdPrefixException e)
+        {
+            System.err.println("Prefix cannot found in this file!");
+            return null;
+        }
+    }
+    public String findPrefixStrict()
+    {
+        try(BufferedReader fileReader = prepareReader())
+        {
+            String prefix = null;
+            for(int i = 0; i < getFileRow(); i++)
             {
-                return prefixFinder(Objects.requireNonNull(getDataFromSpecificRow(row))[0]);
+                String data = fileReader.readLine();
+                if (prefix == null)
+                {
+                    prefix = prefixFinder(dataToArray(data)[0]);
+                    continue;
+                }
+                if (!prefix.equals( prefixFinder(dataToArray(data)[0])))
+                    throw new IdPrefixNotMatchException("Id prefix is not all matched in file:"+file.getName());
             }
-            catch (IdPrefixException e)
-            {
-                System.err.println("Prefix cannot found in this file!");
-                return null;
-            }
+            if (prefix == null) throw new IdPrefixNotFoundException("Id prefix not found! in file:"+file.getName());
+            return prefix;
         }
         catch (IOException e)
         {
-            throw new RuntimeException(e);
+            System.err.println("Something happen while getting data\n" + e.getMessage());
+            throw new ReaderPrepareFailedException(e);
         }
     }
 
@@ -163,16 +184,16 @@ public class FileDataHandler
 
 
 
-    private List<String[]> DataToArrayList (List<String> data)
+    private List<String[]> dataToArrayList(List<String> data)
     {
         List<String[]> list = new ArrayList<String[]>();
         for (String rowData : data)
         {
-            list.add(DataToArray(rowData));
+            list.add(dataToArray(rowData));
         }
         return list;
     }
-    private String[] DataToArray (String data)
+    private String[] dataToArray(String data)
     {
         if (data == null) throw new IllegalArgumentException("Data should not be null!");
         return data.split(getSeparatorRegex());
@@ -190,7 +211,7 @@ public class FileDataHandler
             int row = 1;
             for (String data; (data = fileReader.readLine()) != null; )
             {
-                String[] arrayData = DataToArray(data);
+                String[] arrayData = dataToArray(data);
                 if (!arrayData[0].equals(id))
                 {
                     row++;continue;
@@ -216,7 +237,7 @@ public class FileDataHandler
             String data = fileReader.readLine();
             if (data == null)
                 throw new IndexOutOfBoundsException("Cannot get data : row %d is out of bounds from file %S".formatted(row,file.getName()));
-            return DataToArray(data);
+            return dataToArray(data);
         }
         catch (IOException e)
         {
