@@ -1,15 +1,23 @@
 package Tools;
 
-import Exceptions.IdNotFoundException;
+import Exceptions.EntityNotFoundException;
+import Exceptions.EntityNotMatchException;
 import Exceptions.IdPrefixNotMatchException;
-import Exceptions.IdRepeatedException;
+import Exceptions.EntityRepeatedException;
 import entities.BaseEntity;
+import jdk.jshell.spi.ExecutionControl;
+
+import java.util.Arrays;
 
 public class EntityHandler
 {
     public enum ReviewStyle
     {
         STRICT,NORMAL
+    }
+    public enum MatchLogic
+    {
+        CODE_ONLY, EXACT_DATA
     }
     public static EntityConvertManager ecm = new EntityConvertManager();
     private FileDataHandler fileDataHandler;
