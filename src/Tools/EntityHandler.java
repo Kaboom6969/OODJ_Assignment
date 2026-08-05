@@ -29,7 +29,7 @@ public class EntityHandler
 
     public BaseEntity getEntity(String id)
     {
-        String[] data = fileDataHandler.getDataFromSpecificId(id);
+        String[] data = fileDataHandler.getDataInformationFromSpecificId(id).data();
         if (data == null) return null;
         try
         {
@@ -58,28 +58,42 @@ public class EntityHandler
         }
     }
 
-    public <T extends BaseEntity> void addEntity(T Entity) throws IdRepeatedException
+    public <T extends BaseEntity> void addEntity(T Entity) throws EntityRepeatedException
     {
         addEntity(Entity, ReviewStyle.STRICT);
     }
 
-    public <T extends BaseEntity> void addEntity(T Entity, ReviewStyle style) throws IdRepeatedException
+    public <T extends BaseEntity> void addEntity(T Entity, ReviewStyle style) throws EntityRepeatedException
     {
         if (style == ReviewStyle.STRICT)
         {
-            if (fileDataHandler.getDataFromSpecificId(Entity.getId()) != null)
+            if (fileDataHandler.getDataInformationFromSpecificId(Entity.getId()).data() != null)
             {
-                throw new IdRepeatedException("Entity already exists!");
+                throw new EntityRepeatedException("Entity already exists!");
             }
         }
         fileDataHandler.addData(Entity.toFileData());
     }
 
-    public <T extends BaseEntity> void updateEntity(T Entity) throws IdNotFoundException
+    public <T extends BaseEntity> void updateEntity(T Entity) throws EntityNotFoundException
     {
-        Integer row = fileDataHandler.getRowFromSpecificId(Entity.getId());
-        if (row == null) throw new IdNotFoundException("Entity in file is not founded!");
+        Integer row = fileDataHandler.getDataInformationFromSpecificId(Entity.getId()).row();
+        if (row == null) throw new EntityNotFoundException("Entity in file is not founded!");
         fileDataHandler.updateData(Entity.toFileData(), row);
+    }
+
+    public <T extends BaseEntity> void deleteEntity(T Entity, MatchLogic matchLogic) throws EntityNotFoundException, EntityNotMatchException
+    {
+        FileDataHandler.DataInformation entityDataInFile = fileDataHandler.getDataInformationFromSpecificId(Entity.getId());
+        if (entityDataInFile.isEmpty()) throw new EntityNotFoundException("Entity in file is not founded!");
+        switch (matchLogic)
+        {
+            case CODE_ONLY: break;
+            case EXACT_DATA: break;
+
+
+        }
+        fileDataHandler.deleteRow(entityDataInFile.row());
     }
 
 }
