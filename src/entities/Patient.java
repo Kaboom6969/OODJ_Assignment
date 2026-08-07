@@ -41,5 +41,4 @@ public class Patient extends UserWithDetails
 
     }
 
-
 }

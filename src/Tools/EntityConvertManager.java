@@ -19,11 +19,11 @@ public class EntityConvertManager
     {
         if (convertMap == null) convertMapInit();
     }
-    public BaseEntity convertEntity(String[] data)
+    public <T extends BaseEntity> T convertEntity(String[] data)
     {
         String prefix = FileDataHandler.prefixFinder(data[0]);
         if (convertMap.get(prefix) == null) throw new IdPrefixNotFoundException("Convert Failed: No mapping found in this prefix %s".formatted(prefix));
-        return convertMap.get(prefix).apply(data);
+        return (T)convertMap.get(prefix).apply(data);
     }
     public void convertMapInit()
     {

@@ -27,7 +27,7 @@ public class EntityHandler
         this.fileDataHandler = fileDataHandler;
     }
 
-    public BaseEntity getEntity(String id)
+    public <T extends BaseEntity> T getEntity(String id)
     {
         String[] data = fileDataHandler.getDataInformationFromSpecificId(id).data();
         if (data == null) return null;
@@ -63,7 +63,7 @@ public class EntityHandler
         addEntity(Entity, ReviewStyle.STRICT);
     }
 
-    public <T extends BaseEntity> void addEntity(T Entity, ReviewStyle style) throws EntityRepeatedException
+    public void addEntity(BaseEntity Entity, ReviewStyle style) throws EntityRepeatedException
     {
         if (style == ReviewStyle.STRICT)
         {

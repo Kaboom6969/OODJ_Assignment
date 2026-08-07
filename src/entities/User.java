@@ -21,12 +21,6 @@ public abstract class User extends BaseEntity
     public String getName() {return name;}
     public String getPassword() {return password;}
 
-    @Override
-    public String toString()
-    {
-        return
-                "Name:" + this.getName() +  "\n"
-                +"Password:" + this.getPassword();
-    }
+
 
 }
