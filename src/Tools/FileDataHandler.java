@@ -9,6 +9,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -202,6 +203,27 @@ public class FileDataHandler
     private String ArrayToData (String[] array)
     {
         return String.join(getSeparator(),array);
+    }
+
+    public String[][] getAllData()
+    {
+        String[][] allData = new String[getFileRow()][];
+        try (BufferedReader fileReader = prepareReader())
+        {
+            int index = 0;
+            for (String data; (data = fileReader.readLine()) != null; )
+            {
+                if (data.isEmpty()) continue;
+                String[] arrayData = dataToArray(data);
+                allData[index++] = arrayData;
+            }
+            allData = Arrays.copyOf(allData, index-1);
+            return allData;
+        } catch (IOException e)
+        {
+            System.err.println("Something happen while getting data\n" + e.getMessage());
+            throw new ReaderPrepareFailedException(e);
+        }
     }
 
     public DataInformation getDataInformationFromSpecificId (String id)
