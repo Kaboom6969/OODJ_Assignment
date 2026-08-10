@@ -14,7 +14,6 @@ public abstract class BaseEntity
 
     public abstract String getIdPrefix();
 
-    public abstract String toFileData();
 
     public Integer getIdNumber()
     {

@@ -1,6 +1,8 @@
 package entities;
 
-public class Admin extends User
+import Interfaces.ConvertToFileData;
+
+public class Admin extends User implements ConvertToFileData
 {
     public static final String PREFIX = "AD";
     public Admin(String id, String name, String password)

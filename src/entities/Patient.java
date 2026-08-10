@@ -1,9 +1,11 @@
 package entities;
 
+import Interfaces.ConvertToFileData;
+
 import java.lang.reflect.Method;
 import java.time.LocalDate;
 
-public class Patient extends UserWithDetails
+public class Patient extends UserWithDetails implements ConvertToFileData
 {
 
     public final static String PREFIX = "PT";
