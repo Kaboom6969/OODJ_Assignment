@@ -4,10 +4,13 @@ import Exceptions.EntityNotFoundException;
 import Exceptions.EntityNotMatchException;
 import Exceptions.IdPrefixNotMatchException;
 import Exceptions.EntityRepeatedException;
+import Interfaces.ConvertToFileData;
 import entities.BaseEntity;
 import jdk.jshell.spi.ExecutionControl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class EntityHandler
 {
@@ -25,6 +28,17 @@ public class EntityHandler
     public EntityHandler(FileDataHandler fileDataHandler)
     {
         this.fileDataHandler = fileDataHandler;
+    }
+
+    public <T extends BaseEntity> List<T> getAllEntities()
+    {
+        List<T> allEntities = new ArrayList<>();
+        String[][] allData = fileDataHandler.getAllData();
+        for (String[] allDatum : allData)
+        {
+            allEntities.add(ecm.convertEntity(allDatum));
+        }
+        return allEntities;
     }
 
     public <T extends BaseEntity> T getEntity(String id)
@@ -58,12 +72,12 @@ public class EntityHandler
         }
     }
 
-    public <T extends BaseEntity> void addEntity(T Entity) throws EntityRepeatedException
+    public <T extends BaseEntity & ConvertToFileData> void addEntity(T Entity) throws EntityRepeatedException
     {
         addEntity(Entity, ReviewStyle.STRICT);
     }
 
-    public void addEntity(BaseEntity Entity, ReviewStyle style) throws EntityRepeatedException
+    public <T extends BaseEntity & ConvertToFileData> void addEntity(T Entity, ReviewStyle style) throws EntityRepeatedException
     {
         if (style == ReviewStyle.STRICT)
         {
@@ -75,7 +89,7 @@ public class EntityHandler
         fileDataHandler.addData(Entity.toFileData());
     }
 
-    public <T extends BaseEntity> void updateEntity(T Entity) throws EntityNotFoundException
+    public <T extends BaseEntity & ConvertToFileData> void updateEntity(T Entity) throws EntityNotFoundException
     {
         Integer row = fileDataHandler.getDataInformationFromSpecificId(Entity.getId()).row();
         if (row == null) throw new EntityNotFoundException("Entity in file is not founded!");
