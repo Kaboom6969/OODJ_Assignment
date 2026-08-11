@@ -5,11 +5,11 @@ import Exceptions.EntityNotMatchException;
 import Exceptions.IdPrefixNotMatchException;
 import Exceptions.EntityRepeatedException;
 import Interfaces.ConvertToFileData;
-import entities.BaseEntity;
-import jdk.jshell.spi.ExecutionControl;
+import entities.BaseEntity.BaseEntity;
+import entities.Linker.Linker;
+import entities.Linker.LinkerManager;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class EntityHandler
@@ -56,6 +56,17 @@ public class EntityHandler
         }
     }
 
+    public LinkerManager getLinker()
+    {
+        List<Linker> linkers = new ArrayList<>();
+        String[][] allData = fileDataHandler.getAllData();
+        for(String[] allDatum : allData)
+        {
+            Linker linker = new Linker(allDatum[0],allDatum[1]);
+            linkers.add(linker);
+        }
+        return new LinkerManager(linkers);
+    }
     public BaseEntity getEntity(int rowInFile)
     {
         String[] data = fileDataHandler.getDataFromSpecificRow(rowInFile);
