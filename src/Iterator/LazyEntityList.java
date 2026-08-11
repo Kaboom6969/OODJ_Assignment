@@ -1,8 +1,9 @@
 package Iterator;
 
+import Exceptions.LazyListEntityCantGetException;
 import Tools.EntityHandler;
 import Tools.FileDataHandler;
-import entities.BaseEntity;
+import entities.BaseEntity.BaseEntity;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -12,20 +13,42 @@ public class LazyEntityList<T extends BaseEntity> implements Iterable<T>
     private List<T> entityList;
     private List<String> entityIdList;
     private FileDataHandler entityFile;
+    private EntityHandler entityHandler;
 
-    private int idListPointer;
 
-    private LazyEntityList()
-    {
-        idListPointer = 0;
-    }
+
 
     public LazyEntityList(List<String> entityIdList, FileDataHandler entityFile)
     {
-        this();
         this.entityList = new ArrayList<T>(Collections.nCopies(entityIdList.size(),null));
         this.entityIdList = entityIdList;
         this.entityFile = entityFile;
+        this.entityHandler = new EntityHandler(entityFile);
+    }
+
+    public T get(int index)
+    {
+        if (index < 0 || index >= entityList.size())
+            throw new IndexOutOfBoundsException("Index out of bounds exception");
+        if (entityList.get(index) == null)
+        {
+            T entity = null;
+            if ((entity = entityHandler.getEntity(entityIdList.get(index))) == null)
+            {
+                throw new LazyListEntityCantGetException("Entity not found,check your file!");
+            }
+            entityList.set(index, entity);
+        }
+        return entityList.get(index);
+    }
+
+    public T get(String id)
+    {
+        if (id == null) throw new IllegalArgumentException("id cannot be null");
+        if (id.isEmpty()) throw new IllegalArgumentException("id cannot be empty");
+        int index = 0;
+        if ((index = entityIdList.indexOf(id)) == -1) throw new NoSuchElementException("id should be in list!");
+        return this.get(index);
     }
 
     @Override
