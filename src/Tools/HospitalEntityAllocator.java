@@ -1,15 +1,17 @@
-﻿package Tools;
+package Tools;
 
 import Exceptions.*;
-import entities.Admin;
-import entities.BaseEntity;
-import entities.Doctor;
-import entities.Patient;
+import Interfaces.ConvertToFileData;
+import Interfaces.OwnEntities;
+import entities.BaseEntity.*;
+import entities.BusinessEntity.BusinessEntity;
+import entities.BusinessEntity.Department;
+import entities.Linker.LinkerManager;
 
 import java.lang.reflect.Field;
 import java.nio.file.Path;
-import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class HospitalEntityAllocator
@@ -19,13 +21,17 @@ public class HospitalEntityAllocator
     private EntityFile adminEntityFile = new EntityFile(Admin.PREFIX);
     private EntityFile patientEntityFile = new EntityFile(Patient.PREFIX);
     private EntityFile doctorEntityFile = new EntityFile(Doctor.PREFIX);
+
+    private EntityFile DepartmentEntityFile = new EntityFile(DepartmentToFile.PREFIX);
     //private EntityHandler entityHandler;
 
-    public HospitalEntityAllocator(Path adminPath, Path patientPath, Path doctorPath)
+    public HospitalEntityAllocator(Path adminPath, Path patientPath, Path doctorPath, Path DepartmentPath, Path DepartmentDoctorLinkPath)
     {
-        adminEntityFile.fileDataHandler = new FileDataHandler(adminPath);
-        patientEntityFile.fileDataHandler = new FileDataHandler(patientPath);
-        doctorEntityFile.fileDataHandler = new FileDataHandler(doctorPath);
+        adminEntityFile.mainFile = new FileDataHandler(adminPath);
+        patientEntityFile.mainFile = new FileDataHandler(patientPath);
+        doctorEntityFile.mainFile = new FileDataHandler(doctorPath);
+        DepartmentEntityFile.mainFile = new FileDataHandler(DepartmentPath);
+        DepartmentEntityFile.linkFiles.set(0,new FileDataHandler(DepartmentDoctorLinkPath));
         prefixFileMap = new HashMap<String, FileDataHandler>();
         FilePrefixMatchRecord filePrefixMatchRecord = classInit();
         if (!filePrefixMatchRecord.isAllMatch())
@@ -52,19 +58,19 @@ public class HospitalEntityAllocator
             }
             try
             {
-                String prefixInFile = entityFile.fileDataHandler.findPrefixStrict();
+                String prefixInFile = entityFile.mainFile.findPrefixStrict();
                 if (!prefixInFile.equals(entityFile.prefix))
                 {
                     System.err.printf
                             ("Prefix in file: %s is not match the prefix:%s,prefix in file:%s\n",
-                                entityFile.fileDataHandler.getFile().getName(),
+                                entityFile.mainFile.getFile().getName(),
                                 entityFile.prefix,
                                 prefixInFile
                             );
                     prefixFileMap = null;
                     return new FilePrefixMatchRecord(false, field.getName());
                 }
-                prefixFileMap.put(entityFile.prefix, entityFile.fileDataHandler);
+                prefixFileMap.put(entityFile.prefix, entityFile.mainFile);
             }
             catch (NullPointerException e)
             {
@@ -90,6 +96,13 @@ public class HospitalEntityAllocator
         return new FilePrefixMatchRecord(true, null);
     }
 
+    public Department getDepartment(String id)
+    {
+        DepartmentToFile department = getEntity(id);
+        List<String> doctorIds = new EntityHandler(DepartmentEntityFile.linkFiles.getFirst()).getLinker().findBasedOnSecond(id);
+        return new Department(department,doctorIds,doctorEntityFile.mainFile);
+    }
+
     public <T extends BaseEntity> T getEntity(String id)
     {
         EntityHandler entityHandler = getEntityHandler(id);
@@ -97,7 +110,7 @@ public class HospitalEntityAllocator
         return entityHandler.getEntity(id);
     }
 
-    public void addEntity (BaseEntity entity) throws EntityRepeatedException
+    public <T extends BaseEntity & ConvertToFileData> void addEntity (T entity) throws EntityRepeatedException
     {
         EntityHandler entityHandler = getEntityHandler(entity.getId());
         if (entityHandler == null) throw new IdPrefixNotFoundException(entity.getId());
@@ -111,7 +124,7 @@ public class HospitalEntityAllocator
         entityHandler.deleteEntity(entity, EntityHandler.MatchLogic.CODE_ONLY);
     }
 
-    public void updateEntity(BaseEntity entity) throws EntityNotFoundException
+    public <T extends BaseEntity & ConvertToFileData> void updateEntity(T entity) throws EntityNotFoundException
     {
         EntityHandler entityHandler = getEntityHandler(entity.getId());
         if (entityHandler == null) throw new IdPrefixNotFoundException(entity.getId());
@@ -128,7 +141,8 @@ public class HospitalEntityAllocator
 }
 class EntityFile
 {
-    public FileDataHandler fileDataHandler;
+    public FileDataHandler mainFile;
+    public List<FileDataHandler> linkFiles;
     public final String prefix;
 
     public EntityFile(String prefix)
