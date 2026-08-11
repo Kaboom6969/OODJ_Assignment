@@ -1,14 +1,16 @@
 package Tools;
 
-import Exceptions.IdPrefixException;
 import Exceptions.IdPrefixNotFoundException;
-import Exceptions.IdPrefixNotMatchException;
-import entities.BaseEntity;
+import entities.BaseEntity.BaseEntity;
+import entities.BaseEntity.DepartmentToFile;
+import entities.BusinessEntity.BusinessEntity;
+import entities.BusinessEntity.Department;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfoList;
 import io.github.classgraph.ScanResult;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.function.Function;
 
 public class EntityConvertManager
@@ -25,6 +27,18 @@ public class EntityConvertManager
         if (convertMap.get(prefix) == null) throw new IdPrefixNotFoundException("Convert Failed: No mapping found in this prefix %s".formatted(prefix));
         return (T)convertMap.get(prefix).apply(data);
     }
+
+
+    public BusinessEntity<?> convertBusinessEntity(BaseEntity self, List<Object> parameters)
+    {
+        switch (self.getIdPrefix())
+        {
+            case DepartmentToFile.PREFIX:
+                return new Department((DepartmentToFile) self,(List<String>)parameters.get(0),(FileDataHandler) parameters.get(1));
+            default:
+                throw new IllegalStateException();
+        }
+    }
     public void convertMapInit()
     {
         convertMap = new HashMap<String,Function<String[],BaseEntity>>();
@@ -33,7 +47,7 @@ public class EntityConvertManager
                 .acceptPackages("entities")
                 .scan())
         {
-            ClassInfoList subclasses = scanResult.getSubclasses("entities.BaseEntity");
+            ClassInfoList subclasses = scanResult.getSubclasses("entities.BaseEntity.BaseEntity");
             for (Class<?> clazz : subclasses.loadClasses())
             {
                 if (!java.lang.reflect.Modifier.isAbstract(clazz.getModifiers()))
