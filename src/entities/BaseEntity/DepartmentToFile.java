@@ -1,19 +1,27 @@
-package entities;
+package entities.BaseEntity;
 
 import Interfaces.ConvertToFileData;
-
-import java.io.Serializable;
-import java.util.ArrayList;
 
 public class DepartmentToFile extends BaseEntity implements ConvertToFileData
 {
     public static final String PREFIX = "DP";
+
+    public String getName()
+    {
+        return name;
+    }
+
     private String name;
 
 
     public DepartmentToFile(String id)
     {
         super(id);
+    }
+    public DepartmentToFile(String id,String name)
+    {
+        super(id);
+        this.name = name;
     }
 
     @Override
@@ -25,6 +33,6 @@ public class DepartmentToFile extends BaseEntity implements ConvertToFileData
     @Override
     public String toFileData()
     {
-        return "";
+        return getId() + "|" + getName();
     }
 }

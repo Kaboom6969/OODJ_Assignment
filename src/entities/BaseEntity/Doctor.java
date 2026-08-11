@@ -1,4 +1,4 @@
-package entities;
+package entities.BaseEntity;
 
 import Interfaces.ConvertToFileData;
 
@@ -8,6 +8,8 @@ public class Doctor extends UserWithDetails implements ConvertToFileData
 {
     public static final String PREFIX = "DT";
     private String departmentId;
+
+    public Doctor(String id) {super(id);}
 
     public Doctor(String id, String name, String password, Gender gender, LocalDate dateOfBirth,String departmentId)
     {
