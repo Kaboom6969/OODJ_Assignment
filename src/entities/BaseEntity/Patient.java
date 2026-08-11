@@ -1,8 +1,7 @@
-package entities;
+package entities.BaseEntity;
 
 import Interfaces.ConvertToFileData;
 
-import java.lang.reflect.Method;
 import java.time.LocalDate;
 
 public class Patient extends UserWithDetails implements ConvertToFileData

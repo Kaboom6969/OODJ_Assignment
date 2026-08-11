@@ -1,8 +1,7 @@
-package entities;
+package entities.BaseEntity;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
 
 public abstract class UserWithDetails extends User
@@ -24,7 +23,7 @@ public abstract class UserWithDetails extends User
     private LocalDate dateOfBirth;
     private Gender gender;
 
-
+    public UserWithDetails(String id) {super(id);}
     public UserWithDetails(String id,String name,String password,Gender gender,LocalDate dateOfBirth)
     {
         super(id,name,password);

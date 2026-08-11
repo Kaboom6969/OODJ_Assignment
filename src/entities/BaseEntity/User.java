@@ -1,9 +1,10 @@
-package entities;
+package entities.BaseEntity;
 
 public abstract class User extends BaseEntity
 {
     private String name;
     private String password;
+    public User(String id) {super(id);}
 
     public User(String id,String name,String password)
     {
