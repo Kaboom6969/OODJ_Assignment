@@ -1,6 +1,7 @@
 ﻿package entities.Linker;
 
-import entities.BaseEntity.BaseEntity;
+import Exceptions.IdPrefixExceptions.IdPrefixReapeatedException;
+import Tools.FileHandler.FileDataHandler;
 
 public class Linker
 {
@@ -10,6 +11,11 @@ public class Linker
     public Linker(String first, String second)
     {
         this.first = first;
+        if (FileDataHandler.prefixFinder(first).equals(FileDataHandler.prefixFinder(second)))
+        {
+            throw new IdPrefixReapeatedException("first and second prefixes are the same");
+        }
         this.second = second;
     }
+
 }
