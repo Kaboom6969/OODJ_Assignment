@@ -1,10 +1,11 @@
 package Tools;
 
-import Exceptions.EntityNotFoundException;
-import Exceptions.EntityNotMatchException;
-import Exceptions.IdPrefixNotMatchException;
-import Exceptions.EntityRepeatedException;
+import Exceptions.EntityExceptions.EntityNotFoundException;
+import Exceptions.EntityExceptions.EntityNotMatchException;
+import Exceptions.IdPrefixExceptions.IdPrefixNotMatchException;
+import Exceptions.EntityExceptions.EntityRepeatedException;
 import Interfaces.ConvertToFileData;
+import Tools.FileHandler.FileDataHandler;
 import entities.BaseEntity.BaseEntity;
 import entities.Linker.Linker;
 import entities.Linker.LinkerManager;
@@ -28,6 +29,11 @@ public class EntityHandler
     public EntityHandler(FileDataHandler fileDataHandler)
     {
         this.fileDataHandler = fileDataHandler;
+    }
+
+    public String getFileName()
+    {
+        return fileDataHandler.getFile().getName();
     }
 
     public <T extends BaseEntity> List<T> getAllEntities()
