@@ -62,17 +62,7 @@ public class EntityHandler
         }
     }
 
-    public LinkerManager getLinker()
-    {
-        List<Linker> linkers = new ArrayList<>();
-        String[][] allData = fileDataHandler.getAllData();
-        for(String[] allDatum : allData)
-        {
-            Linker linker = new Linker(allDatum[0],allDatum[1]);
-            linkers.add(linker);
-        }
-        return new LinkerManager(linkers);
-    }
+
     public BaseEntity getEntity(int rowInFile)
     {
         String[] data = fileDataHandler.getDataFromSpecificRow(rowInFile);
