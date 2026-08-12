@@ -1,4 +1,4 @@
-package Exceptions;
+package Exceptions.EntityExceptions;
 
 public class EntityRepeatedException extends EntityException
 {

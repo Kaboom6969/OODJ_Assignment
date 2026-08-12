@@ -1,4 +1,4 @@
-package Exceptions;
+package Exceptions.IdPrefixExceptions;
 
 public class IdPrefixException extends RuntimeException
 {
