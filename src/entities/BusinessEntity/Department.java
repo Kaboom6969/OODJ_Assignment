@@ -2,63 +2,54 @@ package entities.BusinessEntity;
 
 import Interfaces.Linkable;
 import Interfaces.OwnEntities;
-import Iterator.LazyEntityList;
-import Tools.FileDataHandler;
+import entities.LazyEntity.LazyEntityList;
+import Tools.FileHandler.FileDataHandler;
 import entities.BaseEntity.DepartmentToFile;
-import entities.BaseEntity.Doctor;
+import entities.BaseEntity.DoctorToFile;
 
 import java.util.List;
 
-public class Department extends BusinessEntity<DepartmentToFile> implements OwnEntities<Doctor>, Linkable
+public class Department extends BusinessEntity<DepartmentToFile> implements OwnEntities<DoctorToFile>, Linkable
 {
 
     public FileDataHandler linkFile;
-    private LazyEntityList<Doctor> doctors;
+    private LazyEntityList<DoctorToFile> doctors;
 
-    public Department(String id, String name, List<String> doctorIds, FileDataHandler doctorDataHandler)
+    public Department(String selfId,FileDataHandler selfFile,List<String> doctorIds, FileDataHandler doctorDataHandler)
     {
-        super(new DepartmentToFile(id,name));
-        doctors = new LazyEntityList<Doctor>(doctorIds, doctorDataHandler);
+        super(selfId,selfFile);
+        doctors = new LazyEntityList<DoctorToFile>(doctorIds, doctorDataHandler);
     }
 
-    public Department(DepartmentToFile self, List<String> doctorIds, FileDataHandler doctorDataHandler)
-    {
-        super(self);
-        doctors = new LazyEntityList<Doctor>(doctorIds, doctorDataHandler);
-    }
 
-    public Department(DepartmentToFile self)
-    {
-        super(self);
-    }
 
 
     @Override
-    public LazyEntityList<Doctor> getEntities()
+    public LazyEntityList<DoctorToFile> getEntities()
     {
         return doctors;
     }
 
     @Override
-    public void setEntities(LazyEntityList<Doctor> entities)
+    public void setEntities(LazyEntityList<DoctorToFile> entities)
     {
         this.doctors = entities;
     }
 
     @Override
-    public Doctor getEntity(int index)
+    public DoctorToFile getEntity(int index)
     {
         return getEntities().get(index);
     }
 
     @Override
-    public Doctor getEntity(String id)
+    public DoctorToFile getEntity(String id)
     {
         return getEntities().get(id);
     }
 
     @Override
-    public void setEntity(int index, Doctor entity)
+    public void setEntity(int index, DoctorToFile entity)
     {
     }
 
