@@ -1,25 +1,23 @@
 package Tools;
 
-import Exceptions.IdPrefixNotFoundException;
+import Exceptions.IdPrefixExceptions.IdPrefixNotFoundException;
+import Tools.FileHandler.FileDataHandler;
 import entities.BaseEntity.BaseEntity;
-import entities.BaseEntity.DepartmentToFile;
-import entities.BusinessEntity.BusinessEntity;
-import entities.BusinessEntity.Department;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfoList;
 import io.github.classgraph.ScanResult;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.function.Function;
 
 public class EntityConvertManager
 {
     private static HashMap<String,Function<String[], BaseEntity>> convertMap;
+    private static HashMap<String,Class<? extends BaseEntity>> entityMap;
 
     public EntityConvertManager()
     {
-        if (convertMap == null) convertMapInit();
+        if (convertMap == null) mapInit();
     }
     public <T extends BaseEntity> T convertEntity(String[] data)
     {
@@ -28,20 +26,20 @@ public class EntityConvertManager
         return (T)convertMap.get(prefix).apply(data);
     }
 
-
-    public BusinessEntity<?> convertBusinessEntity(BaseEntity self, List<Object> parameters)
+    public static HashMap<String,Function<String[], BaseEntity>> getConvertMap()
     {
-        switch (self.getIdPrefix())
-        {
-            case DepartmentToFile.PREFIX:
-                return new Department((DepartmentToFile) self,(List<String>)parameters.get(0),(FileDataHandler) parameters.get(1));
-            default:
-                throw new IllegalStateException();
-        }
+        return convertMap;
     }
-    public void convertMapInit()
+
+    public static HashMap<String, Class<? extends BaseEntity>> getEntityMap()
+    {
+        return entityMap;
+    }
+
+    public static void mapInit()
     {
         convertMap = new HashMap<String,Function<String[],BaseEntity>>();
+        entityMap = new HashMap<String,Class<? extends BaseEntity>>();
         try (ScanResult scanResult = new ClassGraph()
                 .enableClassInfo()
                 .acceptPackages("entities")
@@ -60,7 +58,7 @@ public class EntityConvertManager
                         }
                     };
                     convertMap.put(clazz.getField("PREFIX").get(null).toString(),constructEntity);
-
+                    entityMap.put(clazz.getField("PREFIX").get(null).toString(), (Class<? extends BaseEntity>) clazz);
                 }
             }
         } catch (NoSuchFieldException | IllegalAccessException e)
