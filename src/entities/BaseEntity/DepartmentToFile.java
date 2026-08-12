@@ -24,6 +24,11 @@ public class DepartmentToFile extends BaseEntity implements ConvertToFileData
         this.name = name;
     }
 
+    public DepartmentToFile(String[] data)
+    {
+        this(data[0],data[1]);
+    }
+
     @Override
     public String getIdPrefix()
     {
