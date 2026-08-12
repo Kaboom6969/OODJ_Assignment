@@ -1,8 +1,8 @@
 package entities.BaseEntity;
 
 
-import Exceptions.IdPrefixNotMatchException;
-import Exceptions.IdPrefixOversizeException;
+import Exceptions.IdPrefixExceptions.IdPrefixNotMatchException;
+import Exceptions.IdPrefixExceptions.IdPrefixOversizeException;
 
 import java.util.Objects;
 
