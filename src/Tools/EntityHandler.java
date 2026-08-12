@@ -127,4 +127,25 @@ public class EntityHandler
         fileDataHandler.deleteRow(entityDataInFile.row());
     }
 
+    public <T extends BaseEntity & ConvertToFileData> void upsertEntity(T entity)
+    {
+        try
+        {
+            updateEntity(entity);
+        }
+        catch (EntityNotFoundException e)
+        {
+            try
+            {
+                addEntity(entity);
+            }
+            catch (EntityRepeatedException f)
+            {
+                throw new IllegalArgumentException("It should not supposed to go in this catch side!"+f.getMessage());
+            }
+
+        }
+
+    }
+
 }
