@@ -1,9 +1,11 @@
 ﻿package entities.Linker;
 
+import Interfaces.ConvertToFileData;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class LinkerManager
+public class LinkerManager implements ConvertToFileData
 {
     public List<Linker> linkers;
 
@@ -15,6 +17,11 @@ public class LinkerManager
     public LinkerManager(List<Linker> linkers)
     {
         this.linkers = linkers;
+    }
+
+    public void addLinker(Linker linker)
+    {
+        linkers.add(linker);
     }
 
     public List<String> findBasedOnFirst(String first)
@@ -30,6 +37,7 @@ public class LinkerManager
         if (ans.isEmpty()) return null;
         return ans;
     }
+
     public List<String> findBasedOnSecond(String second)
     {
         List<String> ans = new ArrayList<>();
@@ -42,5 +50,16 @@ public class LinkerManager
         }
         if (ans.isEmpty()) return null;
         return ans;
+    }
+
+    @Override
+    public String toFileData()
+    {
+        List<String> ans = new ArrayList<>();
+        for (Linker linker : linkers)
+        {
+            ans.add(linker.first + "|" + linker.second);
+        }
+        return String.join("\n", ans);
     }
 }
