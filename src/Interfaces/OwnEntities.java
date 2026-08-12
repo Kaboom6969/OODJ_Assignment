@@ -1,9 +1,9 @@
 ﻿package Interfaces;
 
-import Iterator.LazyEntityList;
+import entities.LazyEntity.LazyEntityList;
 import entities.BaseEntity.BaseEntity;
 
-public interface OwnEntities<T extends BaseEntity>
+public interface OwnEntities<T extends BaseEntity & ConvertToFileData>
 {
     public LazyEntityList<T> getEntities();
 
