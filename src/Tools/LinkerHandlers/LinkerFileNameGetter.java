@@ -1,7 +1,8 @@
-﻿package Tools.LinkerHandlers;
+package Tools.LinkerHandlers;
 
 import Tools.EntityConvertManager;
 import Tools.FileHandler.FileDataHandler;
+import entities.BaseEntity.BaseEntity;
 import entities.Linker.Linker;
 
 public class LinkerFileNameGetter
@@ -15,5 +16,11 @@ public class LinkerFileNameGetter
         String firstClassName = EntityConvertManager.getEntityMap().get(firstPrefix).getSimpleName();
         String secondClassName = EntityConvertManager.getEntityMap().get(secondPrefix).getSimpleName();
         return firstClassName + "_" + secondClassName + "_" + "linker.txt";
+    }
+
+    public static String getFileName(Class<? extends BaseEntity> classOne,Class<? extends BaseEntity> classTwo)
+    {
+        return classOne.getSimpleName() + "_" + classTwo.getSimpleName() + "_" + "linker.txt";
+
     }
 }

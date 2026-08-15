@@ -1,6 +1,7 @@
-﻿package Tools.LinkerHandlers;
+package Tools.LinkerHandlers;
 
 import Tools.FileHandler.FileDataHandler;
+import entities.BaseEntity.BaseEntity;
 import entities.Linker.Linker;
 import entities.Linker.LinkerManager;
 
@@ -12,17 +13,29 @@ public class LinkerHandler
 {
     private LinkerGetter linkerGetter;
     private LinkerWriter linkerWriter;
+    private String fileName;
 
 
 
-    public LinkerHandler(Path directory)
+    public LinkerHandler(Path directory, Class<? extends BaseEntity> linkClass1,Class<? extends BaseEntity> linkClass2 )
     {
-        linkerGetter = new LinkerGetter(directory);
-        linkerWriter = new LinkerWriter(null,directory);
+        fileName = LinkerFileNameGetter.getFileName(linkClass1,linkClass2);
+        linkerGetter = new LinkerGetter(directory,fileName);
+        linkerWriter = new LinkerWriter(null,directory,fileName);
+    }
+
+    public LinkerWriter getWriter() {return linkerWriter;}
+
+    public LinkerGetter getGetter()
+    {
+        return linkerGetter;
     }
 
     public LinkerManager getLinkers()
     {
-        return linkerGetter.getAllLinkers();
+        if (linkerGetter.getAllLinkers() != null) return linkerGetter.getAllLinkers();
+        linkerWriter.saveLinker();
+        return null;
+
     }
 }

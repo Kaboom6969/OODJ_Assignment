@@ -1,4 +1,4 @@
-﻿package entities.Linker;
+package entities.Linker;
 
 import Interfaces.ConvertToFileData;
 

@@ -1,4 +1,4 @@
-﻿package Tools.LinkerHandlers;
+package Tools.LinkerHandlers;
 
 import Tools.FileHandler.FileDataHandler;
 import entities.Linker.Linker;
@@ -6,15 +6,20 @@ import entities.Linker.LinkerManager;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 
 public class LinkerGetter
 {
-    private final Path file;
-    public LinkerGetter(Path file)
+    private final Path directory;
+    private String fileName;
+    private Path file;
+    public LinkerGetter(Path directory,String fileName)
     {
-        this.file = file;
+        this.directory = directory;
+        this.fileName = fileName;
+        this.file = directory.resolve(fileName);
     }
 
     private boolean isRowLegal(String[] data)
@@ -36,6 +41,10 @@ public class LinkerGetter
             stream.map(this::parseRow)
                   .map(line -> new Linker(line[0],line[1]))
                   .forEach(manager::addLinker);
+        }
+        catch (NoSuchFileException e)
+        {
+            return null;
         }
         catch (IOException e)
         {
