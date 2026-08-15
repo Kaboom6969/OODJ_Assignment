@@ -1,3 +1,0 @@
-﻿DoctorId|DepartmentId
-DT0001|DP0001
-DT0002|DP0001
