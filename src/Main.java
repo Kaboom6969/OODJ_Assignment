@@ -1,14 +1,13 @@
-import Exceptions.EntityNotFoundException;
-import Exceptions.EntityNotMatchException;
-import Exceptions.EntityRepeatedException;
-import Tools.EntityConvertManager;
+import Exceptions.EntityExceptions.EntityNotFoundException;
+import Exceptions.EntityExceptions.EntityNotMatchException;
+import Exceptions.EntityExceptions.EntityRepeatedException;
 import Tools.EntityHandler;
-import Tools.FileDataHandler;
-import entities.BaseEntity;
-import entities.Doctor;
-import entities.Patient;
-import entities.UserWithDetails;
-import Iterator.LazyEntityList;
+import Tools.FileHandler.FileDataHandler;
+import Tools.HospitalEntityAllocator;
+import entities.BaseEntity.BaseEntity;
+import entities.BaseEntity.DoctorToFile;
+import entities.BusinessEntity.Department;
+import entities.LazyEntity.LazyEntityList;
 
 //TIP 要<b>运行</b>代码，请按 <shortcut actionId="Run"/> 或
 
@@ -25,17 +24,13 @@ void main() throws EntityRepeatedException, EntityNotFoundException, EntityNotMa
 //    eh.deleteEntity(myPatient2, EntityHandler.MatchLogic.EXACT_DATA);
 
     //Test for LazyEntityList
-    FileDataHandler DoctorFile = new FileDataHandler("C:/Users/leezh/IdeaProjects/OODJ Assignment/data/Doctor.txt");
-    List<String> AllDoctorsId = new ArrayList<>();
-    List<Doctor> allDoctors = new EntityHandler(DoctorFile).getAllEntities();
-    for(Doctor doctor : allDoctors)
-    {
-        AllDoctorsId.add(doctor.getId());
-    }
-    allDoctors = null;
-    LazyEntityList<Doctor> lazyDoctorList = new LazyEntityList<Doctor>(AllDoctorsId,DoctorFile);
-    for(Doctor doctor : lazyDoctorList)
-    {
-        System.out.println(doctor.toFileData());
-    }
+    HospitalEntityAllocator hea = new HospitalEntityAllocator
+            (Path.of("C:\\Users\\leezh\\IdeaProjects\\OODJ Assignment\\data\\Linker"),
+                    Path.of("C:\\Users\\leezh\\IdeaProjects\\OODJ Assignment\\data\\Admin.txt"),
+                    Path.of("C:\\Users\\leezh\\IdeaProjects\\OODJ Assignment\\data\\Patient.txt"),
+                    Path.of("C:\\Users\\leezh\\IdeaProjects\\OODJ Assignment\\data\\Doctor.txt"),
+                    Path.of("C:\\Users\\leezh\\IdeaProjects\\OODJ Assignment\\data\\Department.txt")
+            );
+
+    Department department = hea.getDepartment("DP0001");
 }
