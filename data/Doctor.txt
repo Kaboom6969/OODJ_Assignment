@@ -1,6 +1,9 @@
-﻿DoctorId|DoctorName|DoctorPassword|DoctorGender|DoctorDateOfBirth
+DoctorId|DoctorName|DoctorPassword|DoctorGender|DoctorDateOfBirth
 DT0001|Test|123|MALE|2006-11-05
-DT0002|Test2|1213|MALE|2006-11-02
+DT0002|Test2|12132|MALE|2006-11-02
+DT0003|Test12|12131212|MALE|2016-11-02
+DT0004|Test3|12123|MALE|2006-11-05
+DT0005|Test4|11213|MALE|2006-11-01
 
 
 
