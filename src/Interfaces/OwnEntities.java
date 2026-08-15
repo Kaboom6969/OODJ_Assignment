@@ -1,4 +1,4 @@
-﻿package Interfaces;
+package Interfaces;
 
 import entities.LazyEntity.LazyEntityList;
 import entities.BaseEntity.BaseEntity;

@@ -1,4 +1,4 @@
-﻿package entities.BusinessEntity;
+package entities.BusinessEntity;
 
 import Interfaces.OwnEntity;
 import entities.LazyEntity.LazyEntity;

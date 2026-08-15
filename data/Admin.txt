@@ -1,2 +1,2 @@
-﻿AdminId|AdminName|AdminPassword
+AdminId|AdminName|AdminPassword
 AD0001|TestAdmin|oopp

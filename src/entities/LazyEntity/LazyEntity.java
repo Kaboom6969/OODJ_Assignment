@@ -1,4 +1,4 @@
-﻿package entities.LazyEntity;
+package entities.LazyEntity;
 
 import Exceptions.LazyEntityExceptions.LazyEntityCantGetException;
 import Interfaces.ConvertToFileData;

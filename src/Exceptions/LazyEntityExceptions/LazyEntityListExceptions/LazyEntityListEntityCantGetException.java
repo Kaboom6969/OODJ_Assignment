@@ -1,4 +1,4 @@
-﻿package Exceptions.LazyEntityExceptions.LazyEntityListExceptions;
+package Exceptions.LazyEntityExceptions.LazyEntityListExceptions;
 
 public class LazyEntityListEntityCantGetException extends LazyEntityListException
 {

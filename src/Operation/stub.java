@@ -1,4 +1,4 @@
-﻿package Operation;
+package Operation;
 
 public class stub
 {

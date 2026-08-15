@@ -1,4 +1,4 @@
-﻿package Exceptions.LazyEntityExceptions.LazyEntityListExceptions;
+package Exceptions.LazyEntityExceptions.LazyEntityListExceptions;
 
 import Exceptions.LazyEntityExceptions.LazyEntityException;
 

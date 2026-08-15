@@ -1,4 +1,4 @@
-﻿package Interfaces;
+package Interfaces;
 
 import Tools.FileHandler.FileDataHandler;
 

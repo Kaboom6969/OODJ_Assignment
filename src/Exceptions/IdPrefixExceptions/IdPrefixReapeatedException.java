@@ -1,4 +1,4 @@
-﻿package Exceptions.IdPrefixExceptions;
+package Exceptions.IdPrefixExceptions;
 
 public class IdPrefixReapeatedException extends IdPrefixException
 {

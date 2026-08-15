@@ -1,4 +1,4 @@
-﻿package Forms;
+package Forms;
 
 public class stub
 {
