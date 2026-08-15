@@ -7,6 +7,8 @@ import Exceptions.IdPrefixExceptions.IdPrefixNotFoundException;
 import Exceptions.IdPrefixExceptions.IdPrefixNotMatchException;
 import Interfaces.ConvertToFileData;
 import Tools.FileHandler.FileDataHandler;
+import Tools.LinkerHandlers.LinkerGetter;
+import Tools.LinkerHandlers.LinkerHandler;
 import entities.BaseEntity.*;
 import entities.BusinessEntity.Department;
 
@@ -100,7 +102,7 @@ public class HospitalEntityAllocator
 
     public Department getDepartment(String id)
     {
-        List<String> doctorIds = new EntityHandler(departmentEntityFile.linkFiles.getFirst()).getLinker().findBasedOnSecond(id);
+        List<String> doctorIds = new LinkerHandler(departmentEntityFile.linkFiles.get(0).getFile().toPath()).getLinkers().findBasedOnFirst(id);
         return new Department(id,departmentEntityFile.mainFile,doctorIds,doctorEntityFile.mainFile);
     }
 
