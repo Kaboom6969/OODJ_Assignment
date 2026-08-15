@@ -143,6 +143,7 @@ public class FileDataHandler
             for(int i = 0; i < getFileRow(); i++)
             {
                 String data = fileReader.readLine();
+                if (data == null) continue;
                 if (prefix == null)
                 {
                     prefix = prefixFinder(dataToArray(data)[0]);
