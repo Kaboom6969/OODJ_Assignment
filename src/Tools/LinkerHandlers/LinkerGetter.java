@@ -12,7 +12,6 @@ import java.util.stream.Stream;
 public class LinkerGetter
 {
     private final Path file;
-
     public LinkerGetter(Path file)
     {
         this.file = file;

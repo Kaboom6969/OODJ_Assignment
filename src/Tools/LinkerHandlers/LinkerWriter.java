@@ -24,13 +24,7 @@ public class LinkerWriter
     public void setLinkerManager(LinkerManager linkerManager)
     {
         this.linkerManager = linkerManager;
-        String firstId = linkerManager.linkers.getFirst().first;
-        String SecondId = linkerManager.linkers.getFirst().second;
-        String firstPrefix = FileDataHandler.prefixFinder(firstId);
-        String secondPrefix = FileDataHandler.prefixFinder(SecondId);
-        String firstClassName = EntityConvertManager.getEntityMap().get(firstPrefix).getSimpleName();
-        String secondClassName = EntityConvertManager.getEntityMap().get(secondPrefix).getSimpleName();
-        fileName = firstClassName + "_" + secondClassName + "_" + "linker.txt";
+        this.fileName = LinkerFileNameGetter.getFileName(linkerManager.linkers.getFirst());
     }
 
     public void saveLinker()

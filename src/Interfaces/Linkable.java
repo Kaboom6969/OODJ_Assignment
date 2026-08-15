@@ -1,6 +1,6 @@
 ﻿package Interfaces;
 
-import Tools.FileDataHandler;
+import Tools.FileHandler.FileDataHandler;
 
 public interface Linkable
 {

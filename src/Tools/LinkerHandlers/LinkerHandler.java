@@ -15,10 +15,10 @@ public class LinkerHandler
 
 
 
-    public LinkerHandler(Path file)
+    public LinkerHandler(Path directory)
     {
-        linkerGetter = new LinkerGetter(file);
-        linkerWriter = new LinkerWriter(null,file.getParent().toAbsolutePath());
+        linkerGetter = new LinkerGetter(directory);
+        linkerWriter = new LinkerWriter(null,directory);
     }
 
     public LinkerManager getLinkers()
