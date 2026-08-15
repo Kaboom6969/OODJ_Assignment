@@ -14,6 +14,7 @@ import entities.BusinessEntity.Department;
 
 import java.lang.reflect.Field;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ public class HospitalEntityAllocator
 {
     public record FilePrefixMatchRecord(boolean isAllMatch,String propertiesName){}
     private Map<String, FileDataHandler> prefixFileMap;
+    private Path linkerDirectory;
     private EntityFile adminEntityFile = new EntityFile(Admin.PREFIX);
     private EntityFile patientEntityFile = new EntityFile(Patient.PREFIX);
     private EntityFile doctorEntityFile = new EntityFile(DoctorToFile.PREFIX);
@@ -29,13 +31,13 @@ public class HospitalEntityAllocator
     private EntityFile departmentEntityFile = new EntityFile(DepartmentToFile.PREFIX);
     //private EntityHandler entityHandler;
 
-    public HospitalEntityAllocator(Path adminPath, Path patientPath, Path doctorPath, Path DepartmentPath, Path DepartmentDoctorLinkPath)
+    public HospitalEntityAllocator(Path linkerDirectory,Path adminPath, Path patientPath, Path doctorPath, Path DepartmentPath)
     {
+        this.linkerDirectory = linkerDirectory;
         adminEntityFile.mainFile = new FileDataHandler(adminPath);
         patientEntityFile.mainFile = new FileDataHandler(patientPath);
         doctorEntityFile.mainFile = new FileDataHandler(doctorPath);
         departmentEntityFile.mainFile = new FileDataHandler(DepartmentPath);
-        departmentEntityFile.linkFiles.set(0,new FileDataHandler(DepartmentDoctorLinkPath));
         prefixFileMap = new HashMap<String, FileDataHandler>();
         FilePrefixMatchRecord filePrefixMatchRecord = classInit();
         if (!filePrefixMatchRecord.isAllMatch())
@@ -102,7 +104,10 @@ public class HospitalEntityAllocator
 
     public Department getDepartment(String id)
     {
-        List<String> doctorIds = new LinkerHandler(departmentEntityFile.linkFiles.get(0).getFile().toPath()).getLinkers().findBasedOnFirst(id);
+        LinkerHandler linkerHandler = new LinkerHandler(linkerDirectory,DoctorToFile.class,DepartmentToFile.class);
+        List<String> doctorIds = new ArrayList<>();
+        if (linkerHandler.getLinkers() != null) doctorIds = linkerHandler.getLinkers().findBasedOnFirst(id);
+        if(doctorIds == null) doctorIds = new ArrayList<>();
         return new Department(id,departmentEntityFile.mainFile,doctorIds,doctorEntityFile.mainFile);
     }
 
@@ -145,7 +150,6 @@ public class HospitalEntityAllocator
 class EntityFile
 {
     public FileDataHandler mainFile;
-    public List<FileDataHandler> linkFiles;
     public final String prefix;
 
     public EntityFile(String prefix)
