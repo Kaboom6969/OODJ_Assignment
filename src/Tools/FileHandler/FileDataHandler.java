@@ -1,13 +1,14 @@
-package Tools;
+package Tools.FileHandler;
 
-import Exceptions.IdPrefixException;
-import Exceptions.IdPrefixNotFoundException;
-import Exceptions.IdPrefixNotMatchException;
+import Exceptions.IdPrefixExceptions.IdPrefixException;
+import Exceptions.IdPrefixExceptions.IdPrefixNotFoundException;
+import Exceptions.IdPrefixExceptions.IdPrefixNotMatchException;
 import Exceptions.ReaderPrepareFailedException;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -276,34 +277,33 @@ public class FileDataHandler
     }
     private  void writeFile(List<String> fileData)
     {
-        File backUpFile = getBackUpFile();
+        Path backUpFile = Path.of(file.toPath().toAbsolutePath() + BACKUP_FILE_SUFFIX);
         try
         {
-            Files.copy(file.toPath(), backUpFile.toPath());
+            Files.copy(file.toPath(), backUpFile, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e)
         {
             System.err.println(e.getMessage());
             System.err.println("BackUp File Failed,for secure reason,cannot write file");
-            backUpFile.delete();
+            try
+            {
+                Files.delete(backUpFile);
+            }
+            catch (IOException _){}
             return;
         }
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file)))
+        try
         {
-            for (int i = 0;i < fileData.size();i++)
-            {
-                writer.write(fileData.get(i));
-                if (i == fileData.size()-1) continue;
-                writer.newLine();
-            }
-            backUpFile.delete();
+            Files.write(file.toPath(), fileData);
+            Files.delete(backUpFile);
         } catch (IOException e)
         {
             System.err.println("Got Error when writing file,copying backUp File to original File...");
             try
             {
-                Files.copy(backUpFile.toPath(), file.toPath());
-                backUpFile.delete();
+                Files.copy(backUpFile, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                Files.delete(backUpFile);
             } catch (IOException e2)
             {
                 System.err.println(e2.getMessage());
