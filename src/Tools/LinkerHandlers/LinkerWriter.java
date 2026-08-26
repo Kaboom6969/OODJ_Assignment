@@ -11,26 +11,23 @@ import java.nio.file.StandardOpenOption;
 
 public class LinkerWriter
 {
-    private LinkerManager linkerManager;
+    private final LinkerManager linkerManager;
     private Path directory;
     private String fileName;
 
     public LinkerWriter(LinkerManager linkerManager, Path directory, String fileName)
     {
         this.directory = directory;
+        this.linkerManager = linkerManager;
         if (linkerManager == null)
         {
             this.fileName = fileName;
             return;
         }
-        setLinkerManager(linkerManager);
-    }
-
-    public void setLinkerManager(LinkerManager linkerManager)
-    {
-        this.linkerManager = linkerManager;
         this.fileName = LinkerFileNameGetter.getFileName(linkerManager.linkers.getFirst());
     }
+
+
 
     public void saveLinker()
     {

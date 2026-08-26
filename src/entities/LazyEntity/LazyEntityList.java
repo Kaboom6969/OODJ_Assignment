@@ -20,11 +20,10 @@ public class LazyEntityList<T extends BaseEntity & ConvertToFileData> implements
 
     public LazyEntityList(List<String> entityIdList, FileDataHandler entityFile)
     {
-        lazyEntityList = new ArrayList<>(entityIdList.size());
-        this.entityHandler = new EntityHandler(entityFile);
-        for (int i = 0; i<entityIdList.size(); i++)
+        lazyEntityList = new ArrayList<LazyEntity<T>>();
+        for (String entityId : entityIdList)
         {
-            lazyEntityList.set(i, new LazyEntity<T>(entityIdList.get(i), entityHandler));
+            lazyEntityList.add(new LazyEntity<>(entityId, entityHandler));
         }
     }
 
@@ -91,7 +90,6 @@ class LazyEntityIterator<T extends BaseEntity & ConvertToFileData> implements It
         if (hasNext())
         {
             T entity = lazyEntityList.get(idListPointer++).getSelf();
-            idListPointer++;
             return entity;
         }
         throw new NoSuchElementException();

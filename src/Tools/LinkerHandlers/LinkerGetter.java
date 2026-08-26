@@ -35,22 +35,27 @@ public class LinkerGetter
     }
     public LinkerManager getAllLinkers()
     {
-        LinkerManager manager = new LinkerManager();
+        LinkerManager linkerManager = new LinkerManager();
+        updateLinker(linkerManager);
+        return linkerManager;
+    }
+
+    public void updateLinker(LinkerManager manager)
+    {
         try(Stream<String> stream = Files.lines(file))
         {
             stream.map(this::parseRow)
-                  .map(line -> new Linker(line[0],line[1]))
-                  .forEach(manager::addLinker);
+                    .map(line -> new Linker(line[0],line[1]))
+                    .forEach(manager::addLinker);
         }
         catch (NoSuchFileException e)
         {
-            return null;
+            return;
         }
         catch (IOException e)
         {
             throw new RuntimeException(e);
         }
-        return manager;
     }
 
     public LinkerManager getLinkersBasedOnFirst(String first)

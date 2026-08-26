@@ -11,6 +11,7 @@ import java.util.List;
 
 public class LinkerHandler
 {
+    private LinkerManager  linkerManager;
     private LinkerGetter linkerGetter;
     private LinkerWriter linkerWriter;
     private String fileName;
@@ -21,7 +22,8 @@ public class LinkerHandler
     {
         fileName = LinkerFileNameGetter.getFileName(linkClass1,linkClass2);
         linkerGetter = new LinkerGetter(directory,fileName);
-        linkerWriter = new LinkerWriter(null,directory,fileName);
+        linkerManagerInit();
+        linkerWriter = new LinkerWriter(linkerManager,directory,fileName);
     }
 
     public LinkerWriter getWriter() {return linkerWriter;}
@@ -33,9 +35,27 @@ public class LinkerHandler
 
     public LinkerManager getLinkers()
     {
-        if (linkerGetter.getAllLinkers() != null) return linkerGetter.getAllLinkers();
-        linkerWriter.saveLinker();
-        return null;
-
+        linkerGetter.updateLinker(linkerManager);
+        return linkerManager;
     }
+
+    public void linkerManagerInit()
+    {
+        if (linkerGetter.getAllLinkers() != null)
+        {
+            linkerManager = linkerGetter.getAllLinkers();
+        }
+        linkerManager = new LinkerManager();
+    }
+
+    public void saveLinkers()
+    {
+        linkerWriter.saveLinker();
+    }
+
+    public void addLinker(Linker linker)
+    {
+        linkerManager.addLinker(linker);
+    }
+
 }
