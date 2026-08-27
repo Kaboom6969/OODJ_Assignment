@@ -5,8 +5,11 @@ import Tools.FileHandler.FileDataHandler;
 import entities.BaseEntity.BaseEntity;
 import entities.Linker.Linker;
 
+import java.util.Arrays;
+
 public class LinkerFileNameGetter
 {
+    public record FileNamePack(String fileName,boolean orderChanged){}
     public static String getFileName(Linker linker)
     {
         String firstId = linker.first;
@@ -18,9 +21,13 @@ public class LinkerFileNameGetter
         return firstClassName + "_" + secondClassName + "_" + "linker.txt";
     }
 
-    public static String getFileName(Class<? extends BaseEntity> classOne,Class<? extends BaseEntity> classTwo)
+    public static FileNamePack getFileName(Class<? extends BaseEntity> classOne,Class<? extends BaseEntity> classTwo)
     {
-        return classOne.getSimpleName() + "_" + classTwo.getSimpleName() + "_" + "linker.txt";
+        String[] className = new String[2];
+        className[0] = classOne.getSimpleName();
+        className[1] = classTwo.getSimpleName();
+        Arrays.sort(className);
+        return new FileNamePack(className[0]+ "_" + className[1] + "_" + "linker.txt",!classOne.getSimpleName().equals(className[0]));
 
     }
 }
