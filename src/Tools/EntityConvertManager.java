@@ -14,6 +14,7 @@ public class EntityConvertManager
 {
     private static HashMap<String,Function<String[], BaseEntity>> convertMap;
     private static HashMap<String,Class<? extends BaseEntity>> entityMap;
+    private static HashMap<Class<? extends BaseEntity>,String> prefixMap;
 
     public EntityConvertManager()
     {
@@ -36,10 +37,16 @@ public class EntityConvertManager
         return entityMap;
     }
 
+    public static HashMap<Class<? extends BaseEntity>, String> getPrefixMap()
+    {
+        return prefixMap;
+    }
+
     public static void mapInit()
     {
-        convertMap = new HashMap<String,Function<String[],BaseEntity>>();
-        entityMap = new HashMap<String,Class<? extends BaseEntity>>();
+        convertMap = new HashMap<>();
+        entityMap = new HashMap<>();
+        prefixMap = new HashMap<>();
         try (ScanResult scanResult = new ClassGraph()
                 .enableClassInfo()
                 .acceptPackages("entities")
@@ -59,6 +66,7 @@ public class EntityConvertManager
                     };
                     convertMap.put(clazz.getField("PREFIX").get(null).toString(),constructEntity);
                     entityMap.put(clazz.getField("PREFIX").get(null).toString(), (Class<? extends BaseEntity>) clazz);
+                    prefixMap.put((Class<? extends BaseEntity>) clazz,clazz.getField("PREFIX").get(null).toString());
                 }
             }
         } catch (NoSuchFieldException | IllegalAccessException e)
