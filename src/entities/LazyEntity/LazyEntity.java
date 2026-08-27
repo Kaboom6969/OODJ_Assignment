@@ -19,6 +19,13 @@ public class LazyEntity<T extends BaseEntity & ConvertToFileData>
         this.entityHandler = entityHandler;
     }
 
+    public LazyEntity(T self, EntityHandler entityHandler)
+    {
+        this.self = self;
+        this.id = self.getId();
+        this.entityHandler = entityHandler;
+    }
+
     public T getSelf()
     {
         if (self == null) self = entityHandler.getEntity(id);
