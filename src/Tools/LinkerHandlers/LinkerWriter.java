@@ -19,7 +19,7 @@ public class LinkerWriter
     {
         this.directory = directory;
         this.linkerManager = linkerManager;
-        if (linkerManager == null)
+        if (linkerManager == null || linkerManager.linkers.isEmpty())
         {
             this.fileName = fileName;
             return;
@@ -27,14 +27,22 @@ public class LinkerWriter
         this.fileName = LinkerFileNameGetter.getFileName(linkerManager.linkers.getFirst());
     }
 
-
+    public void createFile()
+    {
+        try
+        {
+            Files.write(directory.resolve(fileName),new byte[0], StandardOpenOption.CREATE);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
 
     public void saveLinker()
     {
         try
         {
-            if (linkerManager == null) Files.write(directory.resolve(fileName),new byte[0], StandardOpenOption.CREATE);
-            else  Files.write(directory.resolve(fileName),linkerManager.toFileData().getBytes(), StandardOpenOption.CREATE);
+            Files.write(directory.resolve(fileName),linkerManager.toFileData().getBytes(), StandardOpenOption.CREATE);
         }
         catch (IOException e)
         {
