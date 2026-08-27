@@ -28,7 +28,14 @@ public class LazyEntity<T extends BaseEntity & ConvertToFileData>
 
     public T getSelf()
     {
-        if (self == null) self = entityHandler.getEntity(id);
+        try
+        {
+            if (self == null) self = entityHandler.getEntity(id);
+        }
+        catch (IdPrefixNotMatchException e)
+        {
+            throw new LazyEntityCantGetException(e);
+        }
         if (self == null) throw new LazyEntityCantGetException("Entity is not file in this file:"+entityHandler.getFileName());
         return self;
     }
