@@ -5,12 +5,15 @@ import entities.BaseEntity.BaseEntity;
 import entities.Linker.Linker;
 import entities.Linker.LinkerManager;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 public class LinkerHandler
 {
+    private Class<? extends BaseEntity> class1;
+    private Class<? extends BaseEntity> class2;
     private LinkerManager  linkerManager;
     private LinkerGetter linkerGetter;
     private LinkerWriter linkerWriter;
@@ -20,10 +23,14 @@ public class LinkerHandler
 
     public LinkerHandler(Path directory, Class<? extends BaseEntity> linkClass1,Class<? extends BaseEntity> linkClass2 )
     {
-        fileName = LinkerFileNameGetter.getFileName(linkClass1,linkClass2);
-        linkerGetter = new LinkerGetter(directory,fileName);
+        LinkerFileNameGetter.FileNamePack fileNamePack = LinkerFileNameGetter.getFileName(linkClass1,linkClass2);
+        fileName = fileNamePack.fileName();
+        if (fileNamePack.orderChanged()) {class1 = linkClass2; class2 = linkClass1;}
+        else {class1 = linkClass1; class2 = linkClass2;}
+        linkerGetter = new LinkerGetter(directory,fileName,class1,class2);
         linkerManagerInit();
         linkerWriter = new LinkerWriter(linkerManager,directory,fileName);
+        if (Files.notExists(directory.resolve(fileName))) linkerWriter.createFile();
     }
 
     public LinkerWriter getWriter() {return linkerWriter;}
@@ -45,7 +52,8 @@ public class LinkerHandler
         {
             linkerManager = linkerGetter.getAllLinkers();
         }
-        linkerManager = new LinkerManager();
+        linkerManager = new LinkerManager(class1,class2);
+
     }
 
     public void saveLinkers()

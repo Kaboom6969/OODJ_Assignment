@@ -1,6 +1,10 @@
 package Tools.LinkerHandlers;
 
+import Exceptions.ConvertMapExceptions.MapEmptyException;
+import Exceptions.IdPrefixExceptions.IdPrefixNotFoundException;
+import Tools.EntityConvertManager;
 import Tools.FileHandler.FileDataHandler;
+import entities.BaseEntity.BaseEntity;
 import entities.Linker.Linker;
 import entities.Linker.LinkerManager;
 
@@ -12,14 +16,19 @@ import java.util.stream.Stream;
 
 public class LinkerGetter
 {
+    private Class<? extends BaseEntity> class1;
+    private Class<? extends BaseEntity> class2;
     private final Path directory;
     private String fileName;
     private Path file;
-    public LinkerGetter(Path directory,String fileName)
+
+    public LinkerGetter(Path directory, String fileName, Class<? extends BaseEntity> class1, Class<? extends BaseEntity> class2)
     {
         this.directory = directory;
         this.fileName = fileName;
         this.file = directory.resolve(fileName);
+        this.class1 = class1;
+        this.class2 = class2;
     }
 
     private boolean isRowLegal(String[] data)
@@ -35,7 +44,7 @@ public class LinkerGetter
     }
     public LinkerManager getAllLinkers()
     {
-        LinkerManager linkerManager = new LinkerManager();
+        LinkerManager linkerManager = new LinkerManager(class1, class2);
         updateLinker(linkerManager);
         return linkerManager;
     }
@@ -57,10 +66,34 @@ public class LinkerGetter
             throw new RuntimeException(e);
         }
     }
-
+    public LinkerManager getLinkersBasedOnKey(String key)
+    {
+        LinkerManager manager = new LinkerManager(class1, class2);
+        String prefixFirst = EntityConvertManager.getPrefixMap().get(class1);
+        String prefixSecond = EntityConvertManager.getPrefixMap().get(class2);
+        String keyPrefix = FileDataHandler.prefixFinder(key);
+        int order;
+        if (prefixFirst == null || prefixSecond == null) throw new MapEmptyException("ConvertMap is Empty");
+        if (keyPrefix.equals(prefixFirst)) {order = 0;}
+        else if (keyPrefix.equals(prefixSecond)) {order = 1;}
+        else order = -1;
+        if (order == -1) throw new IdPrefixNotFoundException("key prefix is not matched in this linker!");
+        try(Stream<String> stream = Files.lines(file))
+        {
+            stream.map(this::parseRow)
+                    .filter(line -> line[order].equals(key))
+                    .map(line -> new Linker(line[0],line[1]))
+                    .forEach(manager::addLinker);
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+        return manager;
+    }
     public LinkerManager getLinkersBasedOnFirst(String first)
     {
-        LinkerManager manager = new LinkerManager();
+        LinkerManager manager = new LinkerManager(class1, class2);
         try(Stream<String> stream = Files.lines(file))
         {
             stream.map(this::parseRow)
@@ -77,7 +110,7 @@ public class LinkerGetter
 
     public LinkerManager getLinkersBasedOnSecond(String second)
     {
-        LinkerManager manager = new LinkerManager();
+        LinkerManager manager = new LinkerManager(class1, class2);
         try(Stream<String> stream = Files.lines(file))
         {
             stream.map(this::parseRow)
