@@ -21,6 +21,7 @@ public class LazyEntityList<T extends BaseEntity & ConvertToFileData> implements
     public LazyEntityList(List<String> entityIdList, FileDataHandler entityFile)
     {
         lazyEntityList = new ArrayList<LazyEntity<T>>();
+        this.entityHandler = new EntityHandler(entityFile);
         for (String entityId : entityIdList)
         {
             lazyEntityList.add(new LazyEntity<>(entityId, entityHandler));
@@ -41,6 +42,51 @@ public class LazyEntityList<T extends BaseEntity & ConvertToFileData> implements
             if (lazyEntityList.get(i).getId().equals(id)) return this.get(i);
         }
         throw new LazyEntityListEntityCantGetException("No such entity with id " + id);
+    }
+
+    public void add(String id)
+    {
+        if (id == null) throw new IllegalArgumentException("id cannot be null");
+        if (id.isEmpty()) throw new IllegalArgumentException("id cannot be empty");
+        lazyEntityList.add(new LazyEntity<>(id, entityHandler));
+    }
+
+    public void add(LazyEntity<T> entity)
+    {
+        lazyEntityList.add(entity);
+    }
+
+    public void add(T entity)
+    {
+        lazyEntityList.add(new LazyEntity<>(entity,entityHandler));
+    }
+    public void set(int index,String id)
+    {
+        lazyEntityList.set(index,new LazyEntity<>(id,entityHandler));
+    }
+    public void set(int index, LazyEntity<T> entity)
+    {
+        lazyEntityList.set(index, entity);
+    }
+
+    public void set(int index, T entity)
+    {
+        lazyEntityList.set(index,new LazyEntity<>(entity,entityHandler));
+    }
+
+    public void remove(LazyEntity<T> entity)
+    {
+        lazyEntityList.remove(entity);
+    }
+
+    public void remove(T entity)
+    {
+        lazyEntityList.remove(new LazyEntity<>(entity,entityHandler));
+    }
+
+    public void remove(int index)
+    {
+        lazyEntityList.remove(index);
     }
 
     @Override
