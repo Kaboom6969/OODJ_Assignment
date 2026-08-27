@@ -1,5 +1,6 @@
 package entities.LazyEntity;
 
+import Exceptions.IdPrefixExceptions.IdPrefixNotMatchException;
 import Exceptions.LazyEntityExceptions.LazyEntityCantGetException;
 import Interfaces.ConvertToFileData;
 import Tools.EntityHandler;
