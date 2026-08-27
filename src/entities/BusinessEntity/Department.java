@@ -21,6 +21,26 @@ public class Department extends BusinessEntity<DepartmentToFile> implements OwnE
         doctors = new LazyEntityList<DoctorToFile>(doctorIds, doctorDataHandler);
     }
 
+    public void addDoctor(String doctorId)
+    {
+        doctors.add(doctorId);
+    }
+
+    public void addDoctor(DoctorToFile doctor)
+    {
+        doctors.add(doctor);
+    }
+
+    public void setDoctor(int index, DoctorToFile doctor)
+    {
+        doctors.set(index, doctor);
+    }
+
+    public DoctorToFile getDoctor(int index)
+    {
+        return doctors.get(index);
+    }
+
 
 
 
