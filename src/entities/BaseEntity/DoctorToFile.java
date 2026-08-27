@@ -40,6 +40,6 @@ public class DoctorToFile extends UserWithDetails implements ConvertToFileData
                 this.getName() + "|" +
                 this.getPassword() + "|" +
                 this.getGender() + "|" +
-                this.getDateOfBirth() + "\n";
+                this.getDateOfBirth();
     }
 }

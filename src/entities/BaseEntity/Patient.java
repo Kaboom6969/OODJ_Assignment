@@ -29,7 +29,7 @@ public class Patient extends UserWithDetails implements ConvertToFileData
     @Override
     public String toFileData()
     {
-        return this.getId() + "|" + this.getName() + "|" + this.getPassword() + "|" + this.getGender() + "|" + this.getDateOfBirth() + "\n";
+        return this.getId() + "|" + this.getName() + "|" + this.getPassword() + "|" + this.getGender() + "|" + this.getDateOfBirth();
     }
     @Override
     public String toString()

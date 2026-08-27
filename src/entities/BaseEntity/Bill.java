@@ -38,7 +38,7 @@ public class Bill extends BaseEntity implements ConvertToFileData
     @Override
     public String toFileData()
     {
-        return this.getId() + "|" + this.getMoney() + "\n";
+        return this.getId() + "|" + this.getMoney();
     }
 
 
