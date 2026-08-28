@@ -61,6 +61,10 @@ public class LinkerManager implements ConvertToFileData
         linkers.set(index, linker);
     }
 
+    public void clear()
+    {
+        linkers.clear();
+    }
 
     public List<String> findBasedOnKey(String key)
     {
