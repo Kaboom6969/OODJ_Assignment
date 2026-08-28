@@ -52,7 +52,7 @@ public class EntityConvertManager
                 .acceptPackages("entities")
                 .scan())
         {
-            ClassInfoList subclasses = scanResult.getSubclasses("main.java.entities.BaseEntity.BaseEntity");
+            ClassInfoList subclasses = scanResult.getSubclasses("entities.BaseEntity.BaseEntity");
             for (Class<?> clazz : subclasses.loadClasses())
             {
                 if (!java.lang.reflect.Modifier.isAbstract(clazz.getModifiers()))

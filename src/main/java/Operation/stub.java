@@ -1,4 +1,4 @@
-package main.java.Operation;
+package Operation;
 
 public class stub
 {

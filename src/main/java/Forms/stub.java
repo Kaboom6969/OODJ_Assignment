@@ -1,4 +1,4 @@
-package main.java.Forms;
+package Forms;
 
 public class stub
 {
