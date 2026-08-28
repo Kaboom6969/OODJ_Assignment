@@ -17,12 +17,7 @@ public class LinkerWriter
     {
         this.directory = directory;
         this.linkerManager = linkerManager;
-        if (linkerManager == null || linkerManager.linkers.isEmpty())
-        {
-            this.fileName = fileName;
-            return;
-        }
-        this.fileName = LinkerFileNameGetter.getFileName(linkerManager.linkers.getFirst());
+        this.fileName = fileName;
     }
 
     public void createFile()
@@ -40,7 +35,8 @@ public class LinkerWriter
     {
         try
         {
-            Files.write(directory.resolve(fileName),linkerManager.toFileData().getBytes(), StandardOpenOption.CREATE);
+            Files.write(directory.resolve(fileName),linkerManager.toFileData().getBytes(),
+                    StandardOpenOption.CREATE,StandardOpenOption.TRUNCATE_EXISTING,StandardOpenOption.WRITE);
         }
         catch (IOException e)
         {
