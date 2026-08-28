@@ -49,7 +49,7 @@ public class LinkerHandler
         {
             linkerManager = linkerGetter.getAllLinkers();
         }
-        linkerManager = new LinkerManager(class1,class2);
+        else linkerManager = new LinkerManager(class1,class2);
 
     }
 
