@@ -219,7 +219,7 @@ public class FileDataHandler
                 String[] arrayData = dataToArray(data);
                 allData[index++] = arrayData;
             }
-            allData = Arrays.copyOf(allData, index-1);
+            allData = Arrays.copyOf(allData, index);
             return allData;
         } catch (IOException e)
         {
