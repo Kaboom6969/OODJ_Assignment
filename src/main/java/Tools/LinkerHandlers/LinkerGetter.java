@@ -51,6 +51,7 @@ public class LinkerGetter
 
     public void updateLinker(LinkerManager manager)
     {
+        manager.clear();
         try(Stream<String> stream = Files.lines(file))
         {
             stream.map(this::parseRow)
