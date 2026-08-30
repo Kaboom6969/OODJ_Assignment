@@ -2,6 +2,7 @@ package Tools.LinkerHandlers;
 
 import Tools.EntityConvertManager;
 import Tools.FileHandler.FileDataHandler;
+import Tools.PrefixHandler.PrefixFinder;
 import entities.BaseEntity.BaseEntity;
 import entities.Linker.Linker;
 
@@ -14,8 +15,8 @@ public class LinkerFileNameGetter
     {
         String firstId = linker.first;
         String SecondId = linker.second;
-        String firstPrefix = FileDataHandler.prefixFinder(firstId);
-        String secondPrefix = FileDataHandler.prefixFinder(SecondId);
+        String firstPrefix = PrefixFinder.findPrefix(firstId);
+        String secondPrefix = PrefixFinder.findPrefix(SecondId);
         String firstClassName = EntityConvertManager.getEntityMap().get(firstPrefix).getSimpleName();
         String secondClassName = EntityConvertManager.getEntityMap().get(secondPrefix).getSimpleName();
         return firstClassName + "_" + secondClassName + "_" + "linker.txt";
