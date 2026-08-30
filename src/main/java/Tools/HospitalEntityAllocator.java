@@ -1,15 +1,25 @@
 package Tools;
 
+import Exceptions.ConvertMapExceptions.MapEmptyException;
 import Exceptions.EntityExceptions.EntityNotFoundException;
 import Exceptions.EntityExceptions.EntityNotMatchException;
 import Exceptions.EntityExceptions.EntityRepeatedException;
 import Exceptions.IdPrefixExceptions.IdPrefixNotFoundException;
 import Exceptions.IdPrefixExceptions.IdPrefixNotMatchException;
+import Exceptions.LinkerExceptions.LinkerNotFoundException;
 import Interfaces.ConvertToFileData;
+import Interfaces.Linkable;
+import Interfaces.OwnEntities;
 import Tools.FileHandler.FileDataHandler;
 import Tools.LinkerHandlers.LinkerHandler;
+import Tools.PrefixHandler.PrefixFinder;
 import entities.BaseEntity.*;
+import entities.BusinessEntity.BusinessEntity;
 import entities.BusinessEntity.Department;
+import entities.BusinessEntity.Doctor;
+import entities.Linker.Linker;
+import entities.Linker.LinkerManager;
+import jdk.jshell.spi.ExecutionControl;
 
 import java.lang.reflect.Field;
 import java.nio.file.Path;
@@ -105,9 +115,38 @@ public class HospitalEntityAllocator
     {
         LinkerHandler linkerHandler = new LinkerHandler(linkerDirectory,DoctorToFile.class,DepartmentToFile.class);
         List<String> doctorIds = new ArrayList<>();
-        if (linkerHandler.getLinkers() != null) doctorIds = linkerHandler.getLinkers().findBasedOnFirst(id);
+        if (linkerHandler.getLinkers() != null) doctorIds = linkerHandler.getLinkers().findBasedOnKey(id);
         if(doctorIds == null) doctorIds = new ArrayList<>();
         return new Department(id,departmentEntityFile.mainFile,doctorIds,doctorEntityFile.mainFile);
+    }
+
+    public Doctor getDoctor(String id)
+    {
+        LinkerHandler linkerHandler = new LinkerHandler(linkerDirectory,DoctorToFile.class,DepartmentToFile.class);
+        List<String> departmentIds = new ArrayList<>();
+        if (linkerHandler.getLinkers() != null) departmentIds = linkerHandler.getLinkers().findBasedOnKey(id);
+        if(departmentIds == null) departmentIds = new ArrayList<>();
+        if(departmentIds.size() > 1) throw new RuntimeException("err stub");
+        return new Doctor(id,doctorEntityFile.mainFile,departmentIds.getFirst(),departmentEntityFile.mainFile);
+    }
+
+    public <T extends BusinessEntity<?> & OwnEntities & Linkable> void saveChanges(T businessEntity)
+    {
+        //linker first
+        List<LinkerManager> linkerManagerList = businessEntity.getLinkerManager();
+        String selfPrefix = businessEntity.getSelf().getIdPrefix();
+        Class<? extends BaseEntity> selfClass = EntityConvertManager.getEntityMap().get(selfPrefix);
+        Class<? extends BaseEntity> secondClass = null;
+        for (LinkerManager linkerManager : linkerManagerList)
+        {
+            List<Linker> linkerList = linkerManager.getLinkers();
+            LinkerManager.KeyLocation keyLocation = linkerManager.getKeyLocation(businessEntity.getSelf().getId());
+            secondClass = linkerManager.getClassBasedOnKeyLocation(LinkerManager.switchKeyLocation(keyLocation));
+            if (secondClass == null) throw new MapEmptyException("ConvertMap is Empty");
+            LinkerHandler linkerHandler = new LinkerHandler(linkerDirectory,selfClass,secondClass);
+            linkerHandler.updatePartialLinker(linkerManager,businessEntity.getSelf().getId());
+        }
+        throw new RuntimeException("Test");
     }
 
     public <T extends BaseEntity> T getEntity(String id)
@@ -141,7 +180,7 @@ public class HospitalEntityAllocator
     private EntityHandler getEntityHandler(String id)
     {
         if (id == null) return null;
-        String prefix = FileDataHandler.prefixFinder(id);
+        String prefix = PrefixFinder.findPrefix(id);
         return new EntityHandler(prefixFileMap.get(prefix));
     }
 
