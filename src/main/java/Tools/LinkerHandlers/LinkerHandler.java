@@ -1,11 +1,16 @@
 package Tools.LinkerHandlers;
 
+import Exceptions.LinkerExceptions.LinkerRepeatedException;
 import entities.BaseEntity.BaseEntity;
 import entities.Linker.Linker;
 import entities.Linker.LinkerManager;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class LinkerHandler
 {
@@ -58,9 +63,41 @@ public class LinkerHandler
         linkerWriter.saveLinker();
     }
 
-    public void addLinker(Linker linker)
+    public boolean addLinker(Linker linker)
     {
-        linkerManager.addLinker(linker);
+        return linkerManager.addLinker(linker);
+    }
+
+
+
+    public void updatePartialLinker(LinkerManager linkerManager, String mainKey)
+    {
+        LinkerManager.KeyLocation keyLocation = linkerManager.getKeyLocation(mainKey);
+        LinkerManager linkerManagerFiltered = linkerManager.filterBasedOnKey(mainKey);
+        List<Linker> linkersToUpdate = linkerManagerFiltered.getLinkers();
+        List<Linker> linkers = linkerManager.getLinkers();
+        List<Integer> indexToDelete = new ArrayList<>();
+        Set<Integer> indexForAll = new HashSet<>();
+        Set<Integer> indexForAlreadyExist = new HashSet<>();
+        Set<Integer> indexForNew = new HashSet<>();
+        for (Linker linker : linkers)
+        {
+            if (linker.getData(keyLocation).equals(mainKey))
+            {
+                if(!linkersToUpdate.contains(linker)) indexToDelete.add(linkers.indexOf(linker));
+                else indexForAlreadyExist.add(linkersToUpdate.indexOf(linker));
+            }
+        }
+        for(int index : indexToDelete)
+        {
+            linkerManager.removeLinker(linkers.get(index));
+        }
+        for(int i = 0; i < linkersToUpdate.size(); i++) {indexForAll.add(i);}
+        indexForAll.removeAll(indexForAlreadyExist); indexForNew = indexForAll;
+        for (int index : indexForNew)
+        {
+            linkerManager.addLinker(linkersToUpdate.get(index));
+        }
     }
 
 }
