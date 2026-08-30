@@ -2,22 +2,26 @@ package entities.BusinessEntity;
 
 import Interfaces.Linkable;
 import Interfaces.OwnEntities;
+import entities.BaseEntity.BaseEntity;
 import entities.LazyEntity.LazyEntityList;
 import Tools.FileHandler.FileDataHandler;
 import entities.BaseEntity.DepartmentToFile;
 import entities.BaseEntity.DoctorToFile;
+import entities.Linker.Linker;
+import entities.Linker.LinkerManager;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class Department extends BusinessEntity<DepartmentToFile> implements OwnEntities<DoctorToFile>, Linkable
+public class Department extends BusinessEntity<DepartmentToFile> implements OwnEntities, Linkable
 {
 
     public FileDataHandler linkFile;
     private LazyEntityList<DoctorToFile> doctors;
 
-    public Department(String selfId,FileDataHandler selfFile,List<String> doctorIds, FileDataHandler doctorDataHandler)
+    public Department(String selfId, FileDataHandler selfFile, List<String> doctorIds, FileDataHandler doctorDataHandler)
     {
-        super(selfId,selfFile);
+        super(selfId, selfFile);
         doctors = new LazyEntityList<DoctorToFile>(doctorIds, doctorDataHandler);
     }
 
@@ -43,33 +47,11 @@ public class Department extends BusinessEntity<DepartmentToFile> implements OwnE
 
 
     @Override
-    public LazyEntityList<DoctorToFile> getEntities()
+    public List<LazyEntityList<? extends BaseEntity>> getEntities()
     {
-        return doctors;
-    }
-
-    @Override
-    public void setEntities(LazyEntityList<DoctorToFile> entities)
-    {
-        this.doctors = entities;
-    }
-
-    @Override
-    public DoctorToFile getEntity(int index)
-    {
-        return getEntities().get(index);
-    }
-
-    @Override
-    public DoctorToFile getEntity(String id)
-    {
-        return getEntities().get(id);
-    }
-
-    @Override
-    public void setEntity(int index, DoctorToFile entity)
-    {
-        doctors.set(index, entity);
+        List<LazyEntityList<? extends BaseEntity>> list = new ArrayList<>();
+        list.add(doctors);
+        return list;
     }
 
     @Override
@@ -82,5 +64,17 @@ public class Department extends BusinessEntity<DepartmentToFile> implements OwnE
     public void setLinkFile(FileDataHandler linkFile)
     {
         this.linkFile = linkFile;
+    }
+
+    @Override
+    public List<LinkerManager> getLinkerManager()
+    {
+        LinkerManager manager = new LinkerManager(DepartmentToFile.class,DoctorToFile.class);
+        for (DoctorToFile doctor : doctors)
+        {
+            Linker linker = new Linker(this.self.getId(),doctor.getId());
+            manager.addLinker(linker);
+        }
+        return new ArrayList<>(List.of(manager));
     }
 }
