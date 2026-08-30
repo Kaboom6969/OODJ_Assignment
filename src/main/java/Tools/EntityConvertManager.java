@@ -2,6 +2,7 @@ package Tools;
 
 import Exceptions.IdPrefixExceptions.IdPrefixNotFoundException;
 import Tools.FileHandler.FileDataHandler;
+import Tools.PrefixHandler.PrefixFinder;
 import entities.BaseEntity.BaseEntity;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ClassInfoList;
@@ -22,7 +23,7 @@ public class EntityConvertManager
     }
     public <T extends BaseEntity> T convertEntity(String[] data)
     {
-        String prefix = FileDataHandler.prefixFinder(data[0]);
+        String prefix = PrefixFinder.findPrefix(data[0]);
         if (convertMap.get(prefix) == null) throw new IdPrefixNotFoundException("Convert Failed: No mapping found in this prefix %s".formatted(prefix));
         return (T)convertMap.get(prefix).apply(data);
     }
