@@ -15,11 +15,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import static Tools.PrefixHandler.PrefixFinder.findPrefix;
+
 public class FileDataHandler
 {
     public static final String DEFAULT_SEPARATOR_REGEX = "\\|";
     public static final String BACKUP_FILE_SUFFIX = "BACKUP";
-    private static final int MAXIMUM_PREFIX_LENGTH = 10;
+
     private final String separatorRegex;
     private final File file;
     public record DataInformation(String[] data,Integer row)
@@ -127,7 +129,7 @@ public class FileDataHandler
     {
         try
         {
-            return prefixFinder(Objects.requireNonNull(getDataFromSpecificRow(row))[0]);
+            return findPrefix(Objects.requireNonNull(getDataFromSpecificRow(row))[0]);
         }
         catch (IdPrefixException e)
         {
@@ -146,10 +148,10 @@ public class FileDataHandler
                 if (data == null) continue;
                 if (prefix == null)
                 {
-                    prefix = prefixFinder(dataToArray(data)[0]);
+                    prefix = findPrefix(dataToArray(data)[0]);
                     continue;
                 }
-                if (!prefix.equals( prefixFinder(dataToArray(data)[0])))
+                if (!prefix.equals( findPrefix(dataToArray(data)[0])))
                     throw new IdPrefixNotMatchException("Id prefix is not all matched in file:"+file.getName());
             }
             if (prefix == null) throw new IdPrefixNotFoundException("Id prefix not found! in file:"+file.getName());
@@ -162,28 +164,7 @@ public class FileDataHandler
         }
     }
 
-    public static String prefixFinder(String id)
-    {
-        if (id == null || id.isEmpty()) throw new IdPrefixNotFoundException("The id is empty!");
-        char[] prefix = new char[MAXIMUM_PREFIX_LENGTH];
-        int prefixPointer = 0;
-        for (int i = 0;i < id.length(); i ++)
-        {
-            if (Character.isLetter(id.charAt(i)))
-            {
-                if (prefixPointer >= MAXIMUM_PREFIX_LENGTH)
-                    throw new IllegalArgumentException
-                            ("prefix length is larger than maximum prefix length\n" +
-                            "Please check your file Or change the maximum prefix length");
-                prefix[prefixPointer] = id.charAt(i);
-                prefixPointer ++;
-                continue;
-            }
-            if (Character.isDigit(id.charAt(i))) {break;}
-        }
-        if (prefixPointer == 0) throw new IdPrefixNotFoundException("No Prefix Found in this id!");
-        return new String(prefix,0,prefixPointer);
-    }
+
 
 
 
