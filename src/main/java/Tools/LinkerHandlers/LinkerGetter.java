@@ -4,6 +4,7 @@ import Exceptions.ConvertMapExceptions.MapEmptyException;
 import Exceptions.IdPrefixExceptions.IdPrefixNotFoundException;
 import Tools.EntityConvertManager;
 import Tools.FileHandler.FileDataHandler;
+import Tools.PrefixHandler.PrefixFinder;
 import entities.BaseEntity.BaseEntity;
 import entities.Linker.Linker;
 import entities.Linker.LinkerManager;
@@ -72,7 +73,7 @@ public class LinkerGetter
         LinkerManager manager = new LinkerManager(class1, class2);
         String prefixFirst = EntityConvertManager.getPrefixMap().get(class1);
         String prefixSecond = EntityConvertManager.getPrefixMap().get(class2);
-        String keyPrefix = FileDataHandler.prefixFinder(key);
+        String keyPrefix = PrefixFinder.findPrefix(key);
         int order;
         if (prefixFirst == null || prefixSecond == null) throw new MapEmptyException("ConvertMap is Empty");
         if (keyPrefix.equals(prefixFirst)) {order = 0;}
