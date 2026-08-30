@@ -2,9 +2,10 @@ package Interfaces;
 
 import entities.BaseEntity.BaseEntity;
 
-public interface OwnEntity<T extends BaseEntity>
-{
-    public T getEntity();
+import java.util.List;
 
-    public void setEntity(T entity);
+public interface OwnEntity
+{
+    public List<? extends BaseEntity> getEntity();
+
 }

@@ -3,14 +3,10 @@ package Interfaces;
 import entities.LazyEntity.LazyEntityList;
 import entities.BaseEntity.BaseEntity;
 
-public interface OwnEntities<T extends BaseEntity & ConvertToFileData>
+import java.util.List;
+
+public interface OwnEntities
 {
-    public LazyEntityList<T> getEntities();
+    public List<LazyEntityList<? extends BaseEntity>> getEntities();
 
-    public void setEntities(LazyEntityList<T> entities);
-    public T getEntity(int index);
-
-    public T getEntity(String id);
-
-    public void setEntity(int index, T entity);
 }
