@@ -16,7 +16,15 @@ public class LazyEntityList<T extends BaseEntity & ConvertToFileData> implements
     private EntityHandler entityHandler;
 
 
+    public int size()
+    {
+        return lazyEntityList.size();
+    }
 
+    public LazyEntity<T> lazyGet(int index)
+    {
+        return lazyEntityList.get(index);
+    }
 
     public LazyEntityList(List<String> entityIdList, FileDataHandler entityFile)
     {
