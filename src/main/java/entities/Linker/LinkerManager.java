@@ -90,7 +90,7 @@ public class LinkerManager implements ConvertToFileData
     {
         String prefixFirst = EntityConvertManager.getPrefixMap().get(classFirst);
         String prefixSecond = EntityConvertManager.getPrefixMap().get(classSecond);
-        String keyPrefix = PrefixFinder.findPrefix(prefixFirst);
+        String keyPrefix = PrefixFinder.findPrefix(key);
         if (prefixFirst == null || prefixSecond == null) throw new MapEmptyException("ConvertMap is Empty");
         if (keyPrefix.equals(prefixFirst)) {return KeyLocation.FIRST;}
         else if (keyPrefix.equals(prefixSecond)) {return KeyLocation.SECOND;}
