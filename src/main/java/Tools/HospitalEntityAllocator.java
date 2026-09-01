@@ -17,6 +17,8 @@ import entities.BaseEntity.*;
 import entities.BusinessEntity.BusinessEntity;
 import entities.BusinessEntity.Department;
 import entities.BusinessEntity.Doctor;
+import entities.LazyEntity.LazyEntity;
+import entities.LazyEntity.LazyEntityList;
 import entities.Linker.Linker;
 import entities.Linker.LinkerManager;
 import jdk.jshell.spi.ExecutionControl;
@@ -145,8 +147,24 @@ public class HospitalEntityAllocator
             if (secondClass == null) throw new MapEmptyException("ConvertMap is Empty");
             LinkerHandler linkerHandler = new LinkerHandler(linkerDirectory,selfClass,secondClass);
             linkerHandler.updatePartialLinker(linkerManager,businessEntity.getSelf().getId());
+            linkerHandler.saveLinkers();
         }
-        throw new RuntimeException("Test");
+        //entity second
+        List<LazyEntityList<?>> lazyEntityLists = businessEntity.getEntities();
+        for (LazyEntityList<?> lazyEntityList : lazyEntityLists)
+        {
+            EntityHandler entityHandler = null;
+            for (int i = 0;i < lazyEntityList.size(); i++)
+            {
+                if(!lazyEntityList.lazyGet(i).isSelfAlrChanged()) continue;
+                if (entityHandler == null) entityHandler = getEntityHandler(lazyEntityList.get(i).getId());
+                entityHandler.upsertEntity(lazyEntityList.get(i));
+                lazyEntityList.lazyGet(i).updateBackup();
+            }
+        }
+        //self last
+        EntityHandler entityHandler = getEntityHandler(businessEntity.getSelf().getId());
+        entityHandler.upsertEntity(businessEntity.getSelf());
     }
 
     public <T extends BaseEntity> T getEntity(String id)
