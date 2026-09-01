@@ -2,6 +2,8 @@ package entities.BaseEntity;
 
 import Interfaces.ConvertToFileData;
 
+import java.util.Objects;
+
 public class DepartmentToFile extends BaseEntity implements ConvertToFileData
 {
     public static final String PREFIX = "DP";
@@ -39,5 +41,18 @@ public class DepartmentToFile extends BaseEntity implements ConvertToFileData
     public String toFileData()
     {
         return getId() + "|" + getName();
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (!super.equals(o)) return false;
+        if (!(Objects.equals(name, ((DepartmentToFile)o).name))) return false;
+        return true;
+    }
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(super.hashCode(),this.getName());
     }
 }

@@ -3,6 +3,7 @@ package entities.BaseEntity;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Objects;
 
 public abstract class UserWithDetails extends User
 {
@@ -41,6 +42,20 @@ public abstract class UserWithDetails extends User
         super(data);
         this.gender = Gender.valueOf(data[3].toUpperCase().trim());
         this.dateOfBirth = LocalDate.parse(data[4],LocalDateParser.getDateFormatterAuto(data[4]));
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (!super.equals(o)) return false;
+        if (!(this.dateOfBirth.equals(((UserWithDetails) o).dateOfBirth))) return false;
+        if (!(this.gender.equals(((UserWithDetails) o).gender))) return false;
+        return true;
+    }
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(super.hashCode(),this.dateOfBirth,this.gender);
     }
 
 }

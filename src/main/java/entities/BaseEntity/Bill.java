@@ -2,6 +2,8 @@ package entities.BaseEntity;
 
 import Interfaces.ConvertToFileData;
 
+import java.util.Objects;
+
 public class Bill extends BaseEntity implements ConvertToFileData
 {
     public static final String PREFIX = "BL";
@@ -39,6 +41,19 @@ public class Bill extends BaseEntity implements ConvertToFileData
     public String toFileData()
     {
         return this.getId() + "|" + this.getMoney();
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (!super.equals(o)) return false;
+        if (!(this.money == ((Bill)o).money)) return false;
+        return true;
+    }
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(super.hashCode(),this.getMoney());
     }
 
 

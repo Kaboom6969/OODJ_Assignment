@@ -7,7 +7,7 @@ import Tools.FileHandler.FileDataHandler;
 import entities.BaseEntity.DepartmentToFile;
 import entities.BaseEntity.DoctorToFile;
 
-public class Doctor extends BusinessEntity<DoctorToFile> implements OwnEntity<DepartmentToFile>
+public class Doctor extends BusinessEntity<DoctorToFile> implements OwnEntity
 {
     private LazyEntity<DepartmentToFile> belongsToDepartment;
 
