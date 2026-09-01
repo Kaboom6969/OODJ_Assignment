@@ -75,29 +75,27 @@ public class LinkerHandler
         LinkerManager.KeyLocation keyLocation = linkerManager.getKeyLocation(mainKey);
         LinkerManager linkerManagerFiltered = linkerManager.filterBasedOnKey(mainKey);
         List<Linker> linkersToUpdate = linkerManagerFiltered.getLinkers();
-        List<Linker> linkers = linkerManager.getLinkers();
-        List<Integer> indexToDelete = new ArrayList<>();
+        List<Linker> linkers = new ArrayList<>(this.getLinkers().getLinkers());
         Set<Integer> indexForAll = new HashSet<>();
         Set<Integer> indexForAlreadyExist = new HashSet<>();
-        Set<Integer> indexForNew = new HashSet<>();
+        Set<Integer> indexForNew;
         for (Linker linker : linkers)
         {
             if (linker.getData(keyLocation).equals(mainKey))
             {
-                if(!linkersToUpdate.contains(linker)) indexToDelete.add(linkers.indexOf(linker));
+                if(!linkersToUpdate.contains(linker)) this.linkerManager.removeLinker(linker);
                 else indexForAlreadyExist.add(linkersToUpdate.indexOf(linker));
             }
-        }
-        for(int index : indexToDelete)
-        {
-            linkerManager.removeLinker(linkers.get(index));
         }
         for(int i = 0; i < linkersToUpdate.size(); i++) {indexForAll.add(i);}
         indexForAll.removeAll(indexForAlreadyExist); indexForNew = indexForAll;
         for (int index : indexForNew)
         {
-            linkerManager.addLinker(linkersToUpdate.get(index));
+            this.linkerManager.addLinker(linkersToUpdate.get(index));
         }
     }
+
+
+
 
 }
