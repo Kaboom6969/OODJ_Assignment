@@ -60,10 +60,12 @@ public class LazyEntity<T extends BaseEntity & ConvertToFileData>
     }
 
     public String getId() {return id;}
-    public void setSelf(T entity)
+
+    public void changeSelf(T entity)
     {
         this.id = entity.getId();
         this.self = entity;
+        this.selfBackup = entity.toFileData();
     }
 
 
