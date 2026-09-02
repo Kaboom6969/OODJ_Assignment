@@ -65,7 +65,6 @@ public class LazyEntity<T extends BaseEntity & ConvertToFileData>
     {
         this.id = entity.getId();
         this.self = entity;
-        this.selfBackup = entity.toFileData();
     }
 
 
