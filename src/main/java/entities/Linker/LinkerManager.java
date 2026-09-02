@@ -2,10 +2,12 @@ package entities.Linker;
 
 import Exceptions.ConvertMapExceptions.MapEmptyException;
 import Exceptions.IdPrefixExceptions.IdPrefixNotFoundException;
+import Exceptions.IdPrefixExceptions.IdPrefixNotMatchException;
 import Exceptions.LinkerExceptions.LinkerNotFoundException;
 import Exceptions.LinkerExceptions.LinkerRepeatedException;
 import Interfaces.ConvertToFileData;
 import Tools.EntityConvertManager;
+import Tools.LinkerHandlers.LinkerFileNameGetter;
 import Tools.PrefixHandler.PrefixFinder;
 import entities.BaseEntity.BaseEntity;
 
@@ -35,20 +37,56 @@ public class LinkerManager implements ConvertToFileData
 
     public LinkerManager(Class<? extends BaseEntity> first, Class<? extends BaseEntity> second)
     {
-        classFirst = first;
-        classSecond = second;
         this();
+        classSort(first, second);
     }
 
     public LinkerManager(Class<? extends BaseEntity> first, Class<? extends BaseEntity> second,List<Linker> linkers)
     {
-        classFirst = first;
-        classSecond = second;
+        classSort(first, second);
         this.linkers = linkers;
+    }
+
+    private void classSort(Class<? extends BaseEntity> first, Class<? extends BaseEntity> second)
+    {
+        LinkerFileNameGetter.FileNamePack fileNamePack = LinkerFileNameGetter.getFileName(first, second);
+        if (fileNamePack.orderChanged())
+        {
+            classFirst = second;
+            classSecond = first;
+        }
+        else
+        {
+            classFirst = first;
+            classSecond = second;
+        }
+    }
+
+    private KeyLocation linkerPrefixCheck(Linker linker)
+    {
+        String classFirstPrefix = EntityConvertManager.getPrefixMap().get(classFirst);
+        String classSecondPrefix = EntityConvertManager.getPrefixMap().get(classSecond);
+        if (!PrefixFinder.findPrefix(linker.first).equals(PrefixFinder.findPrefix(classFirstPrefix))) return KeyLocation.FIRST;
+        if (!PrefixFinder.findPrefix(linker.second).equals(PrefixFinder.findPrefix(classSecondPrefix))) return KeyLocation.SECOND;
+        return KeyLocation.NOT_FOUND;
+    }
+
+    private Linker linkerAutoCheck(Linker linker)
+    {
+        if (linkerPrefixCheck(linker) != KeyLocation.NOT_FOUND)
+        {
+            linker = linker.swap();
+            if (linkerPrefixCheck(linker) != KeyLocation.NOT_FOUND)
+            {
+                throw new IdPrefixNotMatchException("Id prefix in linker is not match!");
+            }
+        }
+        return linker;
     }
 
     public boolean addLinker(Linker linker)
     {
+        linker = linkerAutoCheck(linker);
         for(Linker l : linkers)
         {
             if(l.equals(linker)) return false;
@@ -59,11 +97,13 @@ public class LinkerManager implements ConvertToFileData
 
     public void removeLinker(Linker linker)
     {
+        linker = linkerAutoCheck(linker);
         if (!linkers.remove(linker)) throw new LinkerNotFoundException("Linker not found");
     }
 
     public void setLinker(int index, Linker linker)
     {
+        linker = linkerAutoCheck(linker);
         for (int i = 0; i < linkers.size(); i++)
         {
             if (i == index) continue;
