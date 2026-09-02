@@ -7,9 +7,7 @@ import Exceptions.EntityExceptions.EntityRepeatedException;
 import Exceptions.IdPrefixExceptions.IdPrefixNotFoundException;
 import Exceptions.IdPrefixExceptions.IdPrefixNotMatchException;
 import Exceptions.LinkerExceptions.LinkerNotFoundException;
-import Interfaces.ConvertToFileData;
-import Interfaces.Linkable;
-import Interfaces.OwnEntities;
+import Interfaces.*;
 import Tools.FileHandler.FileDataHandler;
 import Tools.LinkerHandlers.LinkerHandler;
 import Tools.PrefixHandler.PrefixFinder;
@@ -131,10 +129,8 @@ public class HospitalEntityAllocator
         if(departmentIds.size() > 1) throw new RuntimeException("err stub");
         return new Doctor(id,doctorEntityFile.mainFile,departmentIds.getFirst(),departmentEntityFile.mainFile);
     }
-
-    public <T extends BusinessEntity<?> & OwnEntities & Linkable> void saveChanges(T businessEntity)
+    private <T extends BusinessEntity<?> & OwnerShip & Linkable> void saveLinkers(T businessEntity)
     {
-        //linker first
         List<LinkerManager> linkerManagerList = businessEntity.getLinkerManager();
         String selfPrefix = businessEntity.getSelf().getIdPrefix();
         Class<? extends BaseEntity> selfClass = EntityConvertManager.getEntityMap().get(selfPrefix);
@@ -145,27 +141,49 @@ public class HospitalEntityAllocator
             LinkerManager.KeyLocation keyLocation = linkerManager.getKeyLocation(businessEntity.getSelf().getId());
             secondClass = linkerManager.getClassBasedOnKeyLocation(LinkerManager.switchKeyLocation(keyLocation));
             if (secondClass == null) throw new MapEmptyException("ConvertMap is Empty");
-            LinkerHandler linkerHandler = new LinkerHandler(linkerDirectory,selfClass,secondClass);
-            linkerHandler.updatePartialLinker(linkerManager,businessEntity.getSelf().getId());
+            LinkerHandler linkerHandler = new LinkerHandler(linkerDirectory, selfClass, secondClass);
+            linkerHandler.updatePartialLinker(linkerManager, businessEntity.getSelf().getId());
             linkerHandler.saveLinkers();
         }
-        //entity second
-        List<LazyEntityList<?>> lazyEntityLists = businessEntity.getEntities();
-        for (LazyEntityList<?> lazyEntityList : lazyEntityLists)
+    }
+
+    public <T extends BusinessEntity<?> & OwnerShip & Linkable> void saveChanges(T businessEntity)
+    {
+        //linker first
+        saveLinkers(businessEntity);
+        if (businessEntity instanceof OwnEntities ownEntities)
         {
-            EntityHandler entityHandler = null;
-            for (int i = 0;i < lazyEntityList.size(); i++)
+            //entity second
+            List<LazyEntityList<? extends BaseEntity>> lazyEntityLists = ownEntities.getEntities();
+            for (LazyEntityList<? extends BaseEntity> lazyEntityList : lazyEntityLists)
             {
-                if(!lazyEntityList.lazyGet(i).isSelfAlrChanged()) continue;
-                if (entityHandler == null) entityHandler = getEntityHandler(lazyEntityList.get(i).getId());
-                entityHandler.upsertEntity(lazyEntityList.get(i));
-                lazyEntityList.lazyGet(i).updateBackup();
+                EntityHandler entityHandler = null;
+                for (int i = 0; i < lazyEntityList.size(); i++)
+                {
+                    if (!lazyEntityList.isChanged(i)) continue;
+                    if (entityHandler == null) entityHandler = getEntityHandler(lazyEntityList.get(i).getId());
+                    entityHandler.upsertEntity(lazyEntityList.get(i));
+                    lazyEntityList.markAsSaved(i);
+                }
+            }
+        }
+        if (businessEntity instanceof OwnEntity ownEntity)
+        {
+            List<LazyEntity<? extends BaseEntity>> lazyEntityList = ownEntity.getEntity();
+            EntityHandler entityHandler;
+            for (LazyEntity<? extends BaseEntity> lazyEntity : lazyEntityList)
+            {
+                if (!lazyEntity.isSelfAlrChanged()) continue;
+                entityHandler = getEntityHandler(lazyEntity.getId());
+                entityHandler.upsertEntity(lazyEntity.getSelf());
+                lazyEntity.updateBackup();
             }
         }
         //self last
         EntityHandler entityHandler = getEntityHandler(businessEntity.getSelf().getId());
         entityHandler.upsertEntity(businessEntity.getSelf());
     }
+
 
     public <T extends BaseEntity> T getEntity(String id)
     {
