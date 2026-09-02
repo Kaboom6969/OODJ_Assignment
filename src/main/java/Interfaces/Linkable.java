@@ -8,9 +8,5 @@ import java.util.List;
 
 public interface Linkable
 {
-    public FileDataHandler getLinkFile();
-
-    public void setLinkFile(FileDataHandler linkFile);
-
     public List<LinkerManager> getLinkerManager();
 }
