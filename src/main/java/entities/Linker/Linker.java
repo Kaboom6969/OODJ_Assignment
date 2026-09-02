@@ -35,6 +35,11 @@ public class Linker
         this.second = second;
     }
 
+    public Linker swap()
+    {
+        return new Linker(this.second, this.first);
+    }
+
     @Override
     public boolean equals(Object o)
     {
