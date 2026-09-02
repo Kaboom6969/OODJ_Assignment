@@ -21,11 +21,19 @@ public class LazyEntityList<T extends BaseEntity & ConvertToFileData> implements
         return lazyEntityList.size();
     }
 
-    public LazyEntity<T> lazyGet(int index)
+    public boolean isChanged(int index)
     {
-        return lazyEntityList.get(index);
+        return lazyEntityList
+                .get(index)
+                .isSelfAlrChanged();
     }
 
+    public void markAsSaved(int index)
+    {
+        lazyEntityList
+                .get(index)
+                .updateBackup();
+    }
     public LazyEntityList(List<String> entityIdList, FileDataHandler entityFile)
     {
         lazyEntityList = new ArrayList<LazyEntity<T>>();
