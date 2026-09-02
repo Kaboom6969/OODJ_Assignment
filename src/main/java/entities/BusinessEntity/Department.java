@@ -15,8 +15,6 @@ import java.util.List;
 
 public class Department extends BusinessEntity<DepartmentToFile> implements OwnEntities, Linkable
 {
-
-    public FileDataHandler linkFile;
     private LazyEntityList<DoctorToFile> doctors;
 
     public Department(String selfId, FileDataHandler selfFile, List<String> doctorIds, FileDataHandler doctorDataHandler)
@@ -54,17 +52,6 @@ public class Department extends BusinessEntity<DepartmentToFile> implements OwnE
         return list;
     }
 
-    @Override
-    public FileDataHandler getLinkFile()
-    {
-        return linkFile;
-    }
-
-    @Override
-    public void setLinkFile(FileDataHandler linkFile)
-    {
-        this.linkFile = linkFile;
-    }
 
     @Override
     public List<LinkerManager> getLinkerManager()
