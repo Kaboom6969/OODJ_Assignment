@@ -6,6 +6,7 @@ import Exceptions.IdPrefixExceptions.IdPrefixNotMatchException;
 import Exceptions.EntityExceptions.EntityRepeatedException;
 import Interfaces.ConvertToFileData;
 import Tools.FileHandler.FileDataHandler;
+import Tools.PrefixHandler.PrefixFinder;
 import entities.BaseEntity.BaseEntity;
 
 import java.util.ArrayList;
@@ -64,7 +65,7 @@ public class EntityHandler
     public BaseEntity getEntity(int rowInFile)
     {
         String[] data = fileDataHandler.getDataFromSpecificRow(rowInFile);
-        String prefix = FileDataHandler.prefixFinder(data[0]);
+        String prefix = PrefixFinder.findPrefix(data[0]);
 
         try
         {
