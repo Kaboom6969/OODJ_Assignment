@@ -3,7 +3,9 @@ import Exceptions.EntityExceptions.EntityNotMatchException;
 import Exceptions.EntityExceptions.EntityRepeatedException;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.BaseEntity;
+import entities.BaseEntity.DoctorToFile;
 import entities.BusinessEntity.Department;
+import entities.BusinessEntity.Doctor;
 
 //TIP 要<b>运行</b>代码，请按 <shortcut actionId="Run"/> 或
 
@@ -27,6 +29,14 @@ void main() throws EntityRepeatedException, EntityNotFoundException, EntityNotMa
                     Path.of("C:\\Users\\leezh\\IdeaProjects\\OODJ Assignment\\data\\Doctor.txt"),
                     Path.of("C:\\Users\\leezh\\IdeaProjects\\OODJ Assignment\\data\\Department.txt")
             );
-
     Department department = hea.getDepartment("DP0001");
+    System.out.println(department.getDoctor("DT0001").toFileData());
+    Doctor doctor = hea.getDoctor("DT0002");
+    department.addDoctor(doctor.getSelf());
+    for (DoctorToFile doctorToFile : department.getDoctors())
+    {
+        System.out.println(doctorToFile.toFileData());
+    }
+    hea.saveChanges(department);
+
 }
