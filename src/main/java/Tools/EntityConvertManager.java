@@ -19,7 +19,7 @@ public class EntityConvertManager
 
     public EntityConvertManager()
     {
-        if (convertMap == null) mapInit();
+        if (convertMap == null || entityMap == null || prefixMap == null) mapInit();
     }
     public <T extends BaseEntity> T convertEntity(String[] data)
     {
@@ -30,16 +30,19 @@ public class EntityConvertManager
 
     public static HashMap<String,Function<String[], BaseEntity>> getConvertMap()
     {
+        if  (convertMap == null) mapInit();
         return convertMap;
     }
 
     public static HashMap<String, Class<? extends BaseEntity>> getEntityMap()
     {
+        if (entityMap == null) mapInit();
         return entityMap;
     }
 
     public static HashMap<Class<? extends BaseEntity>, String> getPrefixMap()
     {
+        if (prefixMap == null) mapInit();
         return prefixMap;
     }
 
