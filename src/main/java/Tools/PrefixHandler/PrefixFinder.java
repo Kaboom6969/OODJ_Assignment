@@ -1,4 +1,4 @@
-﻿package Tools.PrefixHandler;
+package Tools.PrefixHandler;
 
 import Exceptions.IdPrefixExceptions.IdPrefixNotFoundException;
 
