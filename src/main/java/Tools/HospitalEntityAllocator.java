@@ -127,7 +127,7 @@ public class HospitalEntityAllocator
         if (linkerHandler.getLinkers() != null) departmentIds = linkerHandler.getLinkers().findBasedOnKey(id);
         if(departmentIds == null) departmentIds = new ArrayList<>();
         if(departmentIds.size() > 1) throw new RuntimeException("err stub");
-        return new Doctor(id,doctorEntityFile.mainFile,departmentIds.getFirst(),departmentEntityFile.mainFile);
+        return new Doctor(id,doctorEntityFile.mainFile,departmentIds.isEmpty() ? null : departmentIds.getFirst(),departmentEntityFile.mainFile);
     }
     private <T extends BusinessEntity<?> & OwnerShip & Linkable> void saveLinkers(T businessEntity)
     {
