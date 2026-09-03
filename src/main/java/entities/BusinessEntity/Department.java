@@ -43,6 +43,11 @@ public class Department extends BusinessEntity<DepartmentToFile> implements OwnE
         return doctors.get(index);
     }
 
+    public DoctorToFile getDoctor(String doctorId)
+    {
+        return doctors.get(doctorId);
+    }
+
 
     @Override
     public List<LazyEntityList<? extends BaseEntity>> getEntities()
