@@ -3,10 +3,12 @@ package Forms.MedicalManagerForm;
 import Operations.MedicalManagerOperation.MedicalManagerOperation;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
 public class MedicalManagerForm extends JFrame {
 
+    // --- Profile Form Components ---
     private JTextField nameField;
     private JComboBox<String> genderBox;
     private JTextField phoneField;
@@ -15,12 +17,47 @@ public class MedicalManagerForm extends JFrame {
     private JButton saveBtn;
     private JTextField dobField;
 
+    // --- Department Form Components ---
+    private JTable deptTable;
+    private DefaultTableModel deptTableModel;
+    private JTextField deptIdField;
+    private JTextField deptNameField;
+    private JButton addDeptBtn;
+    private JButton updateDeptBtn;
+    private JButton deleteDeptBtn;
+    private JButton clearDeptBtn;
+
+    // --- Business Logic Object ---
     private MedicalManagerOperation operation = new MedicalManagerOperation();
 
+    // Constructor: setup the main window and tabs
     public MedicalManagerForm() {
+        // Set window title, size, and close behavior
+        setTitle("Medical Management System");
+        setSize(850, 650);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLocationRelativeTo(null); // Center window on screen
+
+        // Create tabbed pane and add tabs
+        JTabbedPane jTabbedPane = new JTabbedPane();
+        jTabbedPane.addTab("Personal Profile", createProfilePanel());
+        jTabbedPane.addTab("Department Management", createDepartmentPanel());
+        //jTabbedPane.addTab("Shift Rosters", createRosterPanel());
+        //jTabbedPane.addTab("Metrics & Revenue", createReportPanel());
+
+        add(jTabbedPane);
+
+        // Bind event listeners
+        initEvents();
+    }
+
+    // Create the Personal Profile panel
+    private JPanel createProfilePanel() {
+        // Setup gender dropdown options
         String[] genders = {"Male", "Female"};
         genderBox = new JComboBox<>(genders);
 
+        // Initialize input fields and button
         nameField = new JTextField(15);
         phoneField = new JTextField(15);
         emailField = new JTextField(15);
@@ -29,9 +66,12 @@ public class MedicalManagerForm extends JFrame {
         dobField.setText("YYYY-MM-DD");
         dobField.setForeground(Color.GRAY);
         saveBtn = new JButton("Save Changes");
+
+        // Focus listener: manage placeholder text for DOB field
         dobField.addFocusListener(new java.awt.event.FocusAdapter() {
             @Override
             public void focusGained(java.awt.event.FocusEvent e) {
+                // Clear placeholder when user clicks inside
                 if (dobField.getText().equals("YYYY-MM-DD")) {
                     dobField.setText("");
                     dobField.setForeground(Color.BLACK);
@@ -40,6 +80,7 @@ public class MedicalManagerForm extends JFrame {
 
             @Override
             public void focusLost(java.awt.event.FocusEvent e) {
+                // Restore placeholder if field is empty
                 if (dobField.getText().trim().isEmpty()) {
                     dobField.setText("YYYY-MM-DD");
                     dobField.setForeground(Color.GRAY);
@@ -54,103 +95,90 @@ public class MedicalManagerForm extends JFrame {
         setLocationRelativeTo(null);
 
         JTabbedPane jTabbedPane = new JTabbedPane();
-        JPanel profilePanel = new JPanel();
-        profilePanel.setLayout(new GridBagLayout());
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8, 8, 8, 8);
+        gbc.insets = new Insets(8, 8, 8, 8); // Space between components
 
         // Row 0: Name
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.EAST;
-        profilePanel.add(new JLabel("Name:"), gbc);
+        panel.add(new JLabel("Name:"), gbc);
         gbc.gridx = 1;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.WEST;
-        profilePanel.add(nameField, gbc);
+        panel.add(nameField, gbc);
 
         // Row 1: Password
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.anchor = GridBagConstraints.EAST;
-        profilePanel.add(new JLabel("Password:"), gbc);
+        panel.add(new JLabel("Password:"), gbc);
         gbc.gridx = 1;
         gbc.gridy = 1;
         gbc.anchor = GridBagConstraints.WEST;
-        profilePanel.add(passwordField, gbc);
-
+        panel.add(passwordField, gbc);
 
         // Row 2: Gender
         gbc.gridx = 0;
         gbc.gridy = 2;
         gbc.anchor = GridBagConstraints.EAST;
-        profilePanel.add(new JLabel("Gender:"), gbc);
+        panel.add(new JLabel("Gender:"), gbc);
         gbc.gridx = 1;
         gbc.gridy = 2;
         gbc.anchor = GridBagConstraints.WEST;
-        profilePanel.add(genderBox, gbc);
+        panel.add(genderBox, gbc);
 
         // Row 3: DOB
         gbc.gridx = 0;
         gbc.gridy = 3;
         gbc.anchor = GridBagConstraints.EAST;
-        profilePanel.add(new JLabel("Day Of Birth:"), gbc);
+        panel.add(new JLabel("Day Of Birth:"), gbc);
         gbc.gridx = 1;
         gbc.gridy = 3;
         gbc.anchor = GridBagConstraints.WEST;
-        profilePanel.add(dobField, gbc);
+        panel.add(dobField, gbc);
 
         // Row 4: Email
         gbc.gridx = 0;
         gbc.gridy = 4;
         gbc.anchor = GridBagConstraints.EAST;
-        profilePanel.add(new JLabel("Email:"), gbc);
+        panel.add(new JLabel("Email:"), gbc);
         gbc.gridx = 1;
         gbc.gridy = 4;
         gbc.anchor = GridBagConstraints.WEST;
-        profilePanel.add(emailField, gbc);
+        panel.add(emailField, gbc);
 
         // Row 5: PhoneNumber
         gbc.gridx = 0;
         gbc.gridy = 5;
         gbc.anchor = GridBagConstraints.EAST;
-        profilePanel.add(new JLabel("Phone Number:"), gbc);
+        panel.add(new JLabel("Phone Number:"), gbc);
         gbc.gridx = 1;
         gbc.gridy = 5;
         gbc.anchor = GridBagConstraints.WEST;
-        profilePanel.add(phoneField, gbc);
+        panel.add(phoneField, gbc);
 
         // Row 6 : Button
         gbc.gridx = 1;
         gbc.gridy = 6;
         gbc.anchor = GridBagConstraints.CENTER;
-        profilePanel.add(saveBtn, gbc);
+        saveBtn.setFocusPainted(false);
+        panel.add(saveBtn, gbc);
 
+        // Background color
+        panel.setBackground(Color.decode("#4EBC97"));
 
-        JPanel deptPanel = new JPanel();
-
-
-        JPanel rosterPanel = new JPanel();
-        JPanel reportPanel = new JPanel();
-
-        jTabbedPane.addTab("Personal Profile", profilePanel);
-        jTabbedPane.addTab("Department Management", deptPanel);
-        jTabbedPane.addTab("Shift Rosters", rosterPanel);
-        jTabbedPane.addTab("Metrics & Revenue", reportPanel);
-
-        add(jTabbedPane);
-        profilePanel.setBackground(Color.decode("#4EBC97"));
-        deptPanel.setBackground(Color.decode("#6BBD9F"));
-        rosterPanel.setBackground(Color.decode("#88BEA7"));
-        reportPanel.setBackground(Color.decode("#A5BFAF"));
-
-        initEvents();
+        return panel;
     }
 
-
+    // Initialize all button click actions
     private void initEvents() {
+        // Save button action listener
         saveBtn.addActionListener(e -> {
 
+            // Get input values from text fields
             String name = nameField.getText();
             String gender = (String) genderBox.getSelectedItem();
             String phone = phoneField.getText();
@@ -159,14 +187,15 @@ public class MedicalManagerForm extends JFrame {
             String password = new String(passwordField.getPassword());
 
             try {
-                // 调用业务层：如果校验失败，下一行不会执行，直接跳到 catch
+                // Call operation to update profile and validate inputs
                 operation.updateProfile(name, password, gender, dob, email, phone);
 
-                // 走到这里说明没有任何异常，保存成功
+                // Show success popup message
                 JOptionPane.showMessageDialog(this, "Profile updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                clearFields(); // 清空输入框
+                clearFields(); // Clear all text fields
 
             } catch (IllegalArgumentException ex) {
+                // Show validation error message (e.g. invalid format)
                 JOptionPane.showMessageDialog(
                         this,
                         "Validation Error: " + ex.getMessage(),
@@ -174,6 +203,7 @@ public class MedicalManagerForm extends JFrame {
                         JOptionPane.WARNING_MESSAGE
                 );
             } catch (Exception ex) {
+                // Show unexpected system error message
                 JOptionPane.showMessageDialog(
                         this,
                         "System Error: " + ex.getMessage(),
@@ -185,7 +215,98 @@ public class MedicalManagerForm extends JFrame {
 
     }
 
+    // Create the Department Management panel
+    public JPanel createDepartmentPanel() {
+        // Main panel setup with border layout and padding
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBackground(Color.decode("#6BBD9F"));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
+        // Setup table headers and make cells non-editable
+        String[] columns = {"Department Id", "Department Name"};
+        deptTableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Prevent direct editing inside cells
+            }
+        };
+
+        // Create table and add scroll pane to center area
+        deptTable = new JTable(deptTableModel);
+        deptTable.setRowHeight(24);
+        panel.add(new JScrollPane(deptTable), BorderLayout.CENTER);
+
+        // Bottom form panel setup
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setOpaque(false); // Transparent background
+        formPanel.setBorder(BorderFactory.createTitledBorder("Department Operations"));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(6, 6, 6, 6);
+
+        // Initialize text fields
+        deptIdField = new JTextField(12);
+        deptNameField = new JTextField(16);
+
+        // Initialize and style buttons
+        addDeptBtn = new JButton("Add");
+        updateDeptBtn = new JButton("Update");
+        deleteDeptBtn = new JButton("Delete");
+        clearDeptBtn = new JButton("Clear");
+        JButton[] buttons = {addDeptBtn, updateDeptBtn, deleteDeptBtn, clearDeptBtn};
+        for (JButton btn : buttons) {
+            btn.setBackground(Color.decode("#4EBC97"));
+            btn.setForeground(Color.BLACK);
+            btn.setFocusPainted(false);
+        }
+
+        // Row 0: Dept ID
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.EAST;
+        formPanel.add(new JLabel("Dept ID:"), gbc);
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
+        formPanel.add(deptIdField, gbc);
+
+        // Row 1: Dept Name
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.EAST;
+        formPanel.add(new JLabel("Dept Name:"), gbc);
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        formPanel.add(deptNameField, gbc);
+
+        // Row 2: Button group placed in one line
+        JPanel btnGroup = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 0));
+        btnGroup.setOpaque(false);
+        btnGroup.add(addDeptBtn);
+        btnGroup.add(updateDeptBtn);
+        btnGroup.add(deleteDeptBtn);
+        btnGroup.add(clearDeptBtn);
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        formPanel.add(btnGroup, gbc);
+
+        // Add form panel to bottom area
+        panel.add(formPanel, BorderLayout.SOUTH);
+
+        return panel;
+    }
+
+    // Placeholder methods for future tabs
+    public void createRosterPanel() {
+    }
+
+    public void createReportPanel() {
+    }
+
+    // Clear personal profile form fields
     public void clearFields() {
         nameField.setText("");
         phoneField.setText("");
@@ -194,5 +315,12 @@ public class MedicalManagerForm extends JFrame {
         dobField.setText("YYYY-MM-DD");
         dobField.setForeground(Color.GRAY);
         genderBox.setSelectedIndex(0);
+    }
+
+    // Main entry point to launch the UI
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            new MedicalManagerForm().setVisible(true);
+        });
     }
 }
