@@ -22,7 +22,10 @@ public class LinkerHandler
     private String fileName;
 
 
-
+    public LinkerManager getLinkerManager()
+    {
+        return new LinkerManager(linkerManager);
+    }
     public LinkerHandler(Path directory, Class<? extends BaseEntity> linkClass1,Class<? extends BaseEntity> linkClass2 )
     {
         LinkerFileNameGetter.FileNamePack fileNamePack = LinkerFileNameGetter.getFileName(linkClass1,linkClass2);
