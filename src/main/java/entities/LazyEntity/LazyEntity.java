@@ -4,6 +4,7 @@ import Exceptions.IdPrefixExceptions.IdPrefixNotMatchException;
 import Exceptions.LazyEntityExceptions.LazyEntityCantGetException;
 import Interfaces.ConvertToFileData;
 import Tools.EntityHandler;
+import Tools.FileHandler.FileDataHandler;
 import entities.BaseEntity.BaseEntity;
 
 import javax.print.attribute.standard.Copies;
@@ -28,6 +29,20 @@ public class LazyEntity<T extends BaseEntity & ConvertToFileData>
         this.self = self;
         this.id = self.getId();
         this.entityHandler = entityHandler;
+    }
+
+    public LazyEntity(String id, FileDataHandler fileDataHandler)
+    {
+        this.self = null;
+        this.id = id;
+        this.entityHandler = new EntityHandler(fileDataHandler);
+    }
+
+    public LazyEntity(T self, FileDataHandler fileDataHandler)
+    {
+        this.self = self;
+        this.id = self.getId();
+        this.entityHandler = new EntityHandler(fileDataHandler);
     }
 
     public void updateBackup()
