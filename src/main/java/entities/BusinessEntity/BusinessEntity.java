@@ -5,16 +5,26 @@ import entities.LazyEntity.LazyEntity;
 import Tools.EntityHandler;
 import Tools.FileHandler.FileDataHandler;
 import entities.BaseEntity.BaseEntity;
+import entities.Linker.LinkerManager;
+
+import java.util.HashMap;
 
 public abstract class BusinessEntity<T extends BaseEntity & ConvertToFileData>
 {
     private FileDataHandler selfFile;
     protected LazyEntity<T> self;
 
-    public BusinessEntity(String id,FileDataHandler selfFile)
+    public BusinessEntity(String id, FileDataHandler selfFile)
     {
-        this.self = new LazyEntity<T>(id,new EntityHandler(selfFile));
+        this.self = new LazyEntity<T>(id, new EntityHandler(selfFile));
+    }
+    public T getSelf()
+    {
+        return self.getSelf();
     }
 
-    public T getSelf() {return self.getSelf();}
+    public String getId()
+    {
+        return self.getId();
+    }
 }
