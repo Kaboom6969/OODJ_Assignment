@@ -41,6 +41,13 @@ public class LinkerManager implements ConvertToFileData
         classSort(first, second);
     }
 
+    public LinkerManager(LinkerManager linkerManager)
+    {
+        this.classFirst = linkerManager.classFirst;
+        this.classSecond = linkerManager.classSecond;
+        this.linkers = linkerManager.linkers;
+    }
+
     public LinkerManager(Class<? extends BaseEntity> first, Class<? extends BaseEntity> second,List<Linker> linkers)
     {
         classSort(first, second);
