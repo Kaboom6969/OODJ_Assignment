@@ -6,9 +6,9 @@ import Interfaces.ConvertToFileData;
 public class AdminToFile extends User implements ConvertToFileData
 {
     public static final String PREFIX = "AD";
-    public AdminToFile(String id, String name, String password)
+    public AdminToFile(String id, String name, String password, String email)
     {
-        super(id, name, password);
+        super(id, name, password, email);
     }
 
     public AdminToFile(String[] fileData)
@@ -25,6 +25,6 @@ public class AdminToFile extends User implements ConvertToFileData
     @Override
     public String toFileData()
     {
-        return this.getId() + "|" + this.getName() + "|" + this.getPassword();
+        return this.getId() + "|" + this.getName() + "|" + this.getPassword() + "|" + this.getEmail();
     }
 }

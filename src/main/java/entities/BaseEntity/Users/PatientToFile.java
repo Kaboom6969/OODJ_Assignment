@@ -12,13 +12,13 @@ public class PatientToFile extends UserWithDetails implements ConvertToFileData
     {
         super(data);
     }
-    public PatientToFile(String id, String name, String password, Gender gender, LocalDate dateOfBirth)
+    public PatientToFile(String id, String name, String password,String email, Gender gender, LocalDate dateOfBirth, String phoneNumber)
     {
-        super(id,name,password,gender,dateOfBirth);
+        super(id,name,password,email,gender,dateOfBirth,phoneNumber);
     }
-    public PatientToFile(String id, String name, String password, Gender gender, String dateOfBirth)
+    public PatientToFile(String id, String name, String password,String email, Gender gender, String dateOfBirth, String phoneNumber)
     {
-        super(id,name,password,gender,dateOfBirth);
+        super(id,name,password,email,gender,dateOfBirth,phoneNumber);
     }
 
     @Override
@@ -29,7 +29,14 @@ public class PatientToFile extends UserWithDetails implements ConvertToFileData
     @Override
     public String toFileData()
     {
-        return this.getId() + "|" + this.getName() + "|" + this.getPassword() + "|" + this.getGender() + "|" + this.getDateOfBirth();
+        return
+                this.getId() + "|" +
+                this.getName() + "|" +
+                this.getPassword() + "|" +
+                this.getEmail() + "|" +
+                this.getGender() + "|" +
+                this.getDateOfBirth() + "|" +
+                this.getPhoneNumber();
     }
     @Override
     public String toString()

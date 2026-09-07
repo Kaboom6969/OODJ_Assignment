@@ -11,19 +11,14 @@ public class DoctorToFile extends UserWithDetails implements ConvertToFileData
 
     public DoctorToFile(String id) {super(id);}
 
-    public DoctorToFile(String id, String name, String password, Gender gender, LocalDate dateOfBirth)
+    public DoctorToFile(String id, String name, String password,String email, Gender gender, LocalDate dateOfBirth, String phoneNumber)
     {
-        super(id, name, password, gender, dateOfBirth);
+        super(id, name, password,email, gender, dateOfBirth, phoneNumber);
     }
 
     public DoctorToFile(String[] data)
     {
         super(data);
-    }
-
-    public DoctorToFile(String id, String name, String password, Gender gender, String dateOfBirth, String departmentId)
-    {
-        super(id, name, password, gender, dateOfBirth);
     }
 
     @Override
@@ -39,7 +34,9 @@ public class DoctorToFile extends UserWithDetails implements ConvertToFileData
                 this.getId() + "|" +
                 this.getName() + "|" +
                 this.getPassword() + "|" +
+                this.getEmail() + "|" +
                 this.getGender() + "|" +
-                this.getDateOfBirth();
+                this.getDateOfBirth() + "|" +
+                this.getPhoneNumber();
     }
 }

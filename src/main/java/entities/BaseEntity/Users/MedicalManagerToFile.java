@@ -14,14 +14,14 @@ public class MedicalManagerToFile extends UserWithDetails implements ConvertToFi
         super(id);
     }
 
-    public MedicalManagerToFile(String id, String name, String password, Gender gender, LocalDate dateOfBirth)
+    public MedicalManagerToFile(String id, String name, String password,String email, Gender gender, LocalDate dateOfBirth, String phoneNumber)
     {
-        super(id, name, password, gender, dateOfBirth);
+        super(id, name, password,email, gender, dateOfBirth, phoneNumber);
     }
 
-    public MedicalManagerToFile(String id, String name, String password, Gender gender, String dateOfBirth)
+    public MedicalManagerToFile(String id, String name, String password,String email, Gender gender, String dateOfBirth, String phoneNumber)
     {
-        super(id, name, password, gender, dateOfBirth);
+        super(id, name, password,email, gender, dateOfBirth,phoneNumber);
     }
 
     public MedicalManagerToFile(String[] data)
@@ -40,9 +40,11 @@ public class MedicalManagerToFile extends UserWithDetails implements ConvertToFi
     {
         return
                 this.getId() + "|" +
-                        this.getName() + "|" +
-                        this.getPassword() + "|" +
-                        this.getGender() + "|" +
-                        this.getDateOfBirth();
+                this.getName() + "|" +
+                this.getPassword() + "|" +
+                this.getEmail() + "|" +
+                this.getGender() + "|" +
+                this.getDateOfBirth() + "|" +
+                this.getPhoneNumber();
     }
 }

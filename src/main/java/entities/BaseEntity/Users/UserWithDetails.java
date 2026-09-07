@@ -21,27 +21,38 @@ public abstract class UserWithDetails extends User
     {
         MALE,FEMALE,UNKNOWN
     }
+
+    public String getPhoneNumber()
+    {
+        return phoneNumber;
+    }
+
+    private String phoneNumber;
     private LocalDate dateOfBirth;
     private Gender gender;
 
     public UserWithDetails(String id) {super(id);}
-    public UserWithDetails(String id,String name,String password,Gender gender,LocalDate dateOfBirth)
+    public UserWithDetails(String id,String name,String password,String email,Gender gender,LocalDate dateOfBirth,String phoneNumber)
     {
-        super(id,name,password);
+        super(id,name,password,email);
         this.gender = gender;
         this.dateOfBirth = dateOfBirth;
+        this.phoneNumber = phoneNumber;
     }
-    public UserWithDetails(String id,String name,String password,Gender gender,String dateOfBirth)
+
+    public UserWithDetails(String id, String name, String password,String email, Gender gender, String dateOfBirth,  String phoneNumber)
     {
-        super(id,name,password);
+        super(id, name, password, email);
         this.gender = gender;
-        this.dateOfBirth = LocalDate.parse(dateOfBirth,LocalDateParser.getDateFormatterAuto(dateOfBirth));
+        this.dateOfBirth = LocalDate.parse(dateOfBirth, LocalDateParser.getDateFormatterAuto(dateOfBirth));
+        this.phoneNumber = phoneNumber;
     }
     public UserWithDetails(String[] data)
     {
         super(data);
-        this.gender = Gender.valueOf(data[3].toUpperCase().trim());
-        this.dateOfBirth = LocalDate.parse(data[4],LocalDateParser.getDateFormatterAuto(data[4]));
+        this.gender = Gender.valueOf(data[4].toUpperCase().trim());
+        this.dateOfBirth = LocalDate.parse(data[5],LocalDateParser.getDateFormatterAuto(data[4]));
+        this.phoneNumber = data[6];
     }
 
     @Override
@@ -50,12 +61,13 @@ public abstract class UserWithDetails extends User
         if (!super.equals(o)) return false;
         if (!(this.dateOfBirth.equals(((UserWithDetails) o).dateOfBirth))) return false;
         if (!(this.gender.equals(((UserWithDetails) o).gender))) return false;
+        if  (!(this.phoneNumber.equals(((UserWithDetails) o).phoneNumber))) return false;
         return true;
     }
     @Override
     public int hashCode()
     {
-        return Objects.hash(super.hashCode(),this.dateOfBirth,this.gender);
+        return Objects.hash(super.hashCode(),this.dateOfBirth,this.gender,this.phoneNumber);
     }
 
 }
