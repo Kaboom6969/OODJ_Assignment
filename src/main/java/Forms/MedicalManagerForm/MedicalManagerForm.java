@@ -38,6 +38,13 @@ public class MedicalManagerForm extends JFrame {
     private JButton deleteShiftBtn;
     private JButton clearShiftBtn;
 
+    // --- Metrics & Revenue Form Components ---
+    private JTable metricsTable;
+    private DefaultTableModel metricsTableModel;
+    private JComboBox<String> monthFilterBox;
+    private JButton refreshMetricsBtn;
+    private JButton exportReportBtn;
+
     // --- Business Logic Object ---
     private MedicalManagerOperation operation = new MedicalManagerOperation();
 
@@ -54,7 +61,7 @@ public class MedicalManagerForm extends JFrame {
         jTabbedPane.addTab("Personal Profile", createProfilePanel());
         jTabbedPane.addTab("Department Management", createDepartmentPanel());
         jTabbedPane.addTab("Shift Rosters", createRosterPanel());
-        //jTabbedPane.addTab("Metrics & Revenue", createReportPanel());
+        jTabbedPane.addTab("Metrics & Revenue", createReportPanel());
 
         add(jTabbedPane);
 
@@ -99,13 +106,6 @@ public class MedicalManagerForm extends JFrame {
             }
         });
 
-        // Window settings
-        setTitle("Medical Manager Main.Java.Form");
-        setSize(800, 600);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
-
-        JTabbedPane jTabbedPane = new JTabbedPane();
         JPanel panel = new JPanel();
         panel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -419,7 +419,91 @@ public class MedicalManagerForm extends JFrame {
         return panel;
     }
 
-    public void createReportPanel() {
+    public JPanel createReportPanel() {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBackground(Color.decode("#A5BFAF"));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // ================= 1. Top Section: KPI Summary Cards =================
+        JPanel kpiPanel = new JPanel(new GridLayout(1, 4, 10, 10));
+        kpiPanel.setOpaque(false);
+
+        // Add 4 stat cards (Title + Number)
+        kpiPanel.add(createKpiCard("Total Revenue", "$128,450.00"));
+        kpiPanel.add(createKpiCard("Appointments", "1,240"));
+        kpiPanel.add(createKpiCard("Active Doctors", "32"));
+        kpiPanel.add(createKpiCard("Bed Occupancy", "87.5%"));
+
+        panel.add(kpiPanel, BorderLayout.NORTH);
+
+        // ================= 2. Center Section: Department Metrics Table =================
+        String[] columns = {"Dept ID", "Department Name", "Patients Served", "Revenue", "Avg Stay (Days)"};
+        metricsTableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Prevent manual editing in table
+            }
+        };
+
+        metricsTable = new JTable(metricsTableModel);
+        metricsTable.setRowHeight(24);
+        panel.add(new JScrollPane(metricsTable), BorderLayout.CENTER);
+
+        // ================= 3. Bottom Section: Filter and Action Buttons =================
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5));
+        bottomPanel.setOpaque(false);
+
+        // Month filter dropdown
+        String[] months = {
+                "All Months",
+                "January 2026", "February 2026", "March 2026", "April 2026",
+                "May 2026", "June 2026", "July 2026", "August 2026",
+                "September 2026", "October 2026", "November 2026", "December 2026"
+        };
+        monthFilterBox = new JComboBox<>(months);
+
+        // Action buttons
+        refreshMetricsBtn = new JButton("Refresh");
+        exportReportBtn = new JButton("Export Report");
+
+        JButton[] buttons = {refreshMetricsBtn, exportReportBtn};
+        for (JButton btn : buttons) {
+            btn.setBackground(Color.decode("#4EBC97"));
+            btn.setForeground(Color.BLACK);
+            btn.setFocusPainted(false);
+        }
+
+        bottomPanel.add(new JLabel("Period:"));
+        bottomPanel.add(monthFilterBox);
+        bottomPanel.add(refreshMetricsBtn);
+        bottomPanel.add(exportReportBtn);
+
+        panel.add(bottomPanel, BorderLayout.SOUTH);
+
+        return panel;
+    }
+
+    // Helper method: generate a styled metric card
+    private JPanel createKpiCard(String title, String value) {
+        JPanel card = new JPanel(new BorderLayout(5, 5));
+        card.setBackground(Color.WHITE);
+        card.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
+                BorderFactory.createEmptyBorder(8, 10, 8, 10)
+        ));
+
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setForeground(Color.DARK_GRAY);
+        titleLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
+
+        JLabel valueLabel = new JLabel(value);
+        valueLabel.setForeground(Color.decode("#2E7D5E")); // Deep green
+        valueLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+
+        card.add(titleLabel, BorderLayout.NORTH);
+        card.add(valueLabel, BorderLayout.CENTER);
+
+        return card;
     }
 
     // Clear personal profile form fields
