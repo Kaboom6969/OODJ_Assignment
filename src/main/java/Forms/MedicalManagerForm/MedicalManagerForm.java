@@ -27,6 +27,17 @@ public class MedicalManagerForm extends JFrame {
     private JButton deleteDeptBtn;
     private JButton clearDeptBtn;
 
+    // --- Shift Rosters Form Components ---
+    private JTable rosterTable;
+    private DefaultTableModel rosterTableModel;
+    private JTextField doctorNameField;
+    private JComboBox<String> departmentBox;
+    private JTextField rosterDateField;
+    private JComboBox<String> shiftTypeBox;
+    private JButton assignShiftBtn;
+    private JButton deleteShiftBtn;
+    private JButton clearShiftBtn;
+
     // --- Business Logic Object ---
     private MedicalManagerOperation operation = new MedicalManagerOperation();
 
@@ -42,7 +53,7 @@ public class MedicalManagerForm extends JFrame {
         JTabbedPane jTabbedPane = new JTabbedPane();
         jTabbedPane.addTab("Personal Profile", createProfilePanel());
         jTabbedPane.addTab("Department Management", createDepartmentPanel());
-        //jTabbedPane.addTab("Shift Rosters", createRosterPanel());
+        jTabbedPane.addTab("Shift Rosters", createRosterPanel());
         //jTabbedPane.addTab("Metrics & Revenue", createReportPanel());
 
         add(jTabbedPane);
@@ -299,8 +310,113 @@ public class MedicalManagerForm extends JFrame {
         return panel;
     }
 
-    // Placeholder methods for future tabs
-    public void createRosterPanel() {
+    public JPanel createRosterPanel() {
+        // Main panel setup with border layout and padding
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBackground(Color.decode("#88BEA7"));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Setup table headers and make cells non-editable
+        String[] columns = {"Roster ID", "Doctor Name", "Department", "Date", "Shift"};
+        rosterTableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Prevent direct editing inside cells
+            }
+        };
+
+        // Create table and add scroll pane to center area
+        rosterTable = new JTable(rosterTableModel);
+        rosterTable.setRowHeight(24);
+        panel.add(new JScrollPane(rosterTable), BorderLayout.CENTER);
+
+        // Bottom form panel setup
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setOpaque(false); // Transparent background
+        formPanel.setBorder(BorderFactory.createTitledBorder("Shift Assignment"));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+
+        // Initialize form fields
+        doctorNameField = new JTextField(14);
+        rosterDateField = new JTextField(14);
+        rosterDateField.setText("YYYY-MM-DD");
+        rosterDateField.setForeground(Color.GRAY);
+
+        // Placeholder logic for Date field
+        rosterDateField.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override
+            public void focusGained(java.awt.event.FocusEvent e) {
+                if (rosterDateField.getText().equals("YYYY-MM-DD")) {
+                    rosterDateField.setText("");
+                    rosterDateField.setForeground(Color.BLACK);
+                }
+            }
+
+            @Override
+            public void focusLost(java.awt.event.FocusEvent e) {
+                if (rosterDateField.getText().trim().isEmpty()) {
+                    rosterDateField.setText("YYYY-MM-DD");
+                    rosterDateField.setForeground(Color.GRAY);
+                }
+            }
+        });
+
+        // Dropdown boxes
+        String[] sampleDepts = {"Mental Health", "Emergency Surgery", "Pediatrics"};
+        departmentBox = new JComboBox<>(sampleDepts);
+
+        String[] shiftTypes = {"Morning (08:00 - 16:00)", "Evening (16:00 - 00:00)", "Night (00:00 - 08:00)"};
+        shiftTypeBox = new JComboBox<>(shiftTypes);
+
+        // Initialize and style buttons
+        assignShiftBtn = new JButton("Assign Shift");
+        deleteShiftBtn = new JButton("Delete Shift");
+        clearShiftBtn = new JButton("Clear");
+
+        JButton[] buttons = {assignShiftBtn, deleteShiftBtn, clearShiftBtn};
+        for (JButton btn : buttons) {
+            btn.setBackground(Color.decode("#4EBC97"));
+            btn.setForeground(Color.BLACK);
+            btn.setFocusPainted(false);
+        }
+
+        // Row 0: Doctor Name
+        gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.EAST;
+        formPanel.add(new JLabel("Doctor Name:"), gbc);
+        gbc.gridx = 1; gbc.gridy = 0; gbc.anchor = GridBagConstraints.WEST;
+        formPanel.add(doctorNameField, gbc);
+
+        // Row 1: Department
+        gbc.gridx = 0; gbc.gridy = 1; gbc.anchor = GridBagConstraints.EAST;
+        formPanel.add(new JLabel("Department:"), gbc);
+        gbc.gridx = 1; gbc.gridy = 1; gbc.anchor = GridBagConstraints.WEST;
+        formPanel.add(departmentBox, gbc);
+
+        // Row 2: Date
+        gbc.gridx = 0; gbc.gridy = 2; gbc.anchor = GridBagConstraints.EAST;
+        formPanel.add(new JLabel("Shift Date:"), gbc);
+        gbc.gridx = 1; gbc.gridy = 2; gbc.anchor = GridBagConstraints.WEST;
+        formPanel.add(rosterDateField, gbc);
+
+        // Row 3: Shift Type
+        gbc.gridx = 0; gbc.gridy = 3; gbc.anchor = GridBagConstraints.EAST;
+        formPanel.add(new JLabel("Shift Type:"), gbc);
+        gbc.gridx = 1; gbc.gridy = 3; gbc.anchor = GridBagConstraints.WEST;
+        formPanel.add(shiftTypeBox, gbc);
+
+        // Row 4: Buttons
+        JPanel btnGroup = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 0));
+        btnGroup.setOpaque(false);
+        btnGroup.add(assignShiftBtn);
+        btnGroup.add(deleteShiftBtn);
+        btnGroup.add(clearShiftBtn);
+
+        gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2; gbc.anchor = GridBagConstraints.CENTER;
+        formPanel.add(btnGroup, gbc);
+
+        panel.add(formPanel, BorderLayout.SOUTH);
+        return panel;
     }
 
     public void createReportPanel() {
