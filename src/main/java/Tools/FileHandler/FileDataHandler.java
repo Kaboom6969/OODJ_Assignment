@@ -123,6 +123,13 @@ public class FileDataHandler
     public FileDataHandler(String filePath)
     {
         this.file = new File(filePath);
+        try
+        {
+            if (!this.file.exists()) Files.createFile(this.file.toPath());
+        } catch (IOException e)
+        {
+            System.out.println("File:" + getFile().getName() + "cannot be created!");
+        }
         this.separatorRegex = DEFAULT_SEPARATOR_REGEX;
     }
     public String findPrefixInSpecificRow(int row)
