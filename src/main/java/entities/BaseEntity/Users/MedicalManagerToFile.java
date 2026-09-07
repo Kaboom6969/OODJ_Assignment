@@ -1,4 +1,4 @@
-﻿package entities.BaseEntity.Users;
+package entities.BaseEntity.Users;
 
 import Interfaces.ConvertToFileData;
 import entities.BaseEntity.Users.UserWithDetails;

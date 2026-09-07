@@ -20,6 +20,7 @@ import entities.Linker.Linker;
 import entities.Linker.LinkerManager;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -110,23 +111,51 @@ public class HospitalEntityAllocator
 //        return new FilePrefixMatchRecord(true, null);
 //    }
 
-    public Department getDepartment(String id)
-    {
-        LinkerHandler linkerHandler = new LinkerHandler(linkerDirectory,DoctorToFile.class,DepartmentToFile.class);
-        List<String> doctorIds = new ArrayList<>();
-        if (linkerHandler.getLinkers() != null) doctorIds = linkerHandler.getLinkers().findBasedOnKey(id);
-        if(doctorIds == null) doctorIds = new ArrayList<>();
-        return new Department(id,prefixFileMap.get(PrefixFinder.findPrefix(id)),doctorIds,prefixFileMap.get(PrefixFinder.findPrefix(DoctorToFile.PREFIX)));
-    }
+//    public Department getDepartment(String id)
+//    {
+//        LinkerHandler linkerHandler = new LinkerHandler(linkerDirectory,DoctorToFile.class,DepartmentToFile.class);
+//        List<String> doctorIds = new ArrayList<>();
+//        if (linkerHandler.getLinkers() != null) doctorIds = linkerHandler.getLinkers().findBasedOnKey(id);
+//        if(doctorIds == null) doctorIds = new ArrayList<>();
+//        return new Department(id,prefixFileMap.get(PrefixFinder.findPrefix(id)),doctorIds,prefixFileMap.get(PrefixFinder.findPrefix(DoctorToFile.PREFIX)));
+//    }
+//
+//    public Doctor getDoctor(String id)
+//    {
+//        LinkerHandler linkerHandler = new LinkerHandler(linkerDirectory,DoctorToFile.class,DepartmentToFile.class);
+//        List<String> departmentIds = new ArrayList<>();
+//        if (linkerHandler.getLinkers() != null) departmentIds = linkerHandler.getLinkers().findBasedOnKey(id);
+//        if(departmentIds == null) departmentIds = new ArrayList<>();
+//        if(departmentIds.size() > 1) throw new RuntimeException("err stub");
+//        return new Doctor(id,prefixFileMap.get(PrefixFinder.findPrefix(id)),departmentIds.isEmpty() ? null : departmentIds.getFirst(),prefixFileMap.get(DepartmentToFile.PREFIX));
+//    }
 
-    public Doctor getDoctor(String id)
+    public <T extends BusinessEntity<?>> T getBusinessEntity(String id)
     {
-        LinkerHandler linkerHandler = new LinkerHandler(linkerDirectory,DoctorToFile.class,DepartmentToFile.class);
-        List<String> departmentIds = new ArrayList<>();
-        if (linkerHandler.getLinkers() != null) departmentIds = linkerHandler.getLinkers().findBasedOnKey(id);
-        if(departmentIds == null) departmentIds = new ArrayList<>();
-        if(departmentIds.size() > 1) throw new RuntimeException("err stub");
-        return new Doctor(id,prefixFileMap.get(PrefixFinder.findPrefix(id)),departmentIds.isEmpty() ? null : departmentIds.getFirst(),prefixFileMap.get(DepartmentToFile.PREFIX));
+        HashMap<String,LinkerManager> linkerManagerHashMap = new HashMap<>();
+        HashMap<String,FileDataHandler> fileDataHandlerHashMap = new HashMap<>();
+        String prefix = PrefixFinder.findPrefix(id);
+        Class<? extends BusinessEntity<?>> businessEntityClass = EntityConvertManager.getBusinessEntityMap().get(prefix);
+        Class<? extends BaseEntity> baseEntityClass = EntityConvertManager.getEntityMap().get(prefix);
+        for (Field field : businessEntityClass.getDeclaredFields())
+        {
+            if (field.getType() != LazyEntity.class && field.getType() != LazyEntityList.class) continue;
+            Class<? extends BaseEntity> otherClass =
+                ((Class<?>) ((ParameterizedType)
+                field.getGenericType())
+                .getActualTypeArguments()[0])
+                .asSubclass(BaseEntity.class);
+            LinkerHandler linkerHandler = new LinkerHandler(linkerDirectory,baseEntityClass,otherClass);
+            FileDataHandler fileDataHandler = prefixFileMap.get(EntityConvertManager.getPrefixMap().get(otherClass));
+            linkerManagerHashMap.put(EntityConvertManager.getPrefixMap().get(otherClass),linkerHandler.getLinkerManager());
+            if (fileDataHandler == null)
+                throw new IllegalStateException("No entity file handler for " + otherClass.getName()); fileDataHandlerHashMap.put(EntityConvertManager.getPrefixMap().get(otherClass),fileDataHandler);
+        }
+        EntityConvertManager.BusinessEntityConstructor businessEntityConstructor = new EntityConvertManager.BusinessEntityConstructor
+        (
+          id,prefixFileMap.get(prefix), fileDataHandlerHashMap,linkerManagerHashMap
+        );
+        return (T) EntityConvertManager.getBusinessConvertMap().get(prefix).apply(businessEntityConstructor);
     }
     private <T extends BusinessEntity<?> & OwnerShip & Linkable> void saveLinkers(T businessEntity)
     {
