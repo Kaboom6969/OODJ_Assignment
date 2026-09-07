@@ -1,22 +1,22 @@
-package entities.BaseEntity;
+package entities.BaseEntity.Users;
 
 import Interfaces.ConvertToFileData;
 
 import java.time.LocalDate;
 
-public class Patient extends UserWithDetails implements ConvertToFileData
+public class PatientToFile extends UserWithDetails implements ConvertToFileData
 {
 
     public final static String PREFIX = "PT";
-    public Patient(String[] data)
+    public PatientToFile(String[] data)
     {
         super(data);
     }
-    public Patient(String id, String name, String password,Gender gender, LocalDate dateOfBirth)
+    public PatientToFile(String id, String name, String password, Gender gender, LocalDate dateOfBirth)
     {
         super(id,name,password,gender,dateOfBirth);
     }
-    public Patient(String id, String name, String password,Gender gender, String dateOfBirth)
+    public PatientToFile(String id, String name, String password, Gender gender, String dateOfBirth)
     {
         super(id,name,password,gender,dateOfBirth);
     }

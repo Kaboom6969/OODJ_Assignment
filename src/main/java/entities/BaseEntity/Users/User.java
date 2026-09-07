@@ -1,4 +1,6 @@
-package entities.BaseEntity;
+package entities.BaseEntity.Users;
+
+import entities.BaseEntity.BaseEntity;
 
 import java.util.Objects;
 

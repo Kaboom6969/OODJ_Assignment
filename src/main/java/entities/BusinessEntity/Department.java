@@ -6,7 +6,7 @@ import entities.BaseEntity.BaseEntity;
 import entities.LazyEntity.LazyEntityList;
 import Tools.FileHandler.FileDataHandler;
 import entities.BaseEntity.DepartmentToFile;
-import entities.BaseEntity.DoctorToFile;
+import entities.BaseEntity.Users.DoctorToFile;
 import entities.Linker.Linker;
 import entities.Linker.LinkerManager;
 

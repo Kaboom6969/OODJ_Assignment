@@ -1,17 +1,17 @@
-package entities.BaseEntity;
+package entities.BaseEntity.Users;
 
 
 import Interfaces.ConvertToFileData;
 
-public class Admin extends User implements ConvertToFileData
+public class AdminToFile extends User implements ConvertToFileData
 {
     public static final String PREFIX = "AD";
-    public Admin(String id, String name, String password)
+    public AdminToFile(String id, String name, String password)
     {
         super(id, name, password);
     }
 
-    public Admin(String[] fileData)
+    public AdminToFile(String[] fileData)
     {
         super(fileData);
     }

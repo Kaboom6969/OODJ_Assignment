@@ -1,4 +1,4 @@
-package entities.BaseEntity;
+package entities.BaseEntity.Users;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
