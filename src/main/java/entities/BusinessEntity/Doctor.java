@@ -1,29 +1,31 @@
 package entities.BusinessEntity;
 
 import Interfaces.Linkable;
+import Interfaces.OwnEntities;
 import Interfaces.OwnEntity;
+import entities.BaseEntity.AppointmentToFile;
 import entities.BaseEntity.BaseEntity;
+import entities.BaseEntity.DoctorShiftToFile;
+import entities.BaseEntity.Users.MedicalManagerToFile;
 import entities.LazyEntity.LazyEntity;
 import Tools.EntityHandler;
 import Tools.FileHandler.FileDataHandler;
 import entities.BaseEntity.DepartmentToFile;
 import entities.BaseEntity.Users.DoctorToFile;
+import entities.LazyEntity.LazyEntityList;
 import entities.Linker.Linker;
 import entities.Linker.LinkerManager;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
-public class Doctor extends BusinessEntity<DoctorToFile> implements OwnEntity, Linkable
+public class Doctor extends BusinessEntity<DoctorToFile> implements OwnEntity, OwnEntities,Linkable
 {
     private LazyEntity<DepartmentToFile> belongsToDepartment;
-
-    public Doctor(String selfId, FileDataHandler selfFile, String departmentId, FileDataHandler departmentFile)
-    {
-        super(selfId,selfFile);
-        belongsToDepartment = new LazyEntity<DepartmentToFile>(departmentId,new EntityHandler(departmentFile));
-    }
-
+    private LazyEntity<MedicalManagerToFile> belongsToMedicalManager;
+    private LazyEntityList<DoctorShiftToFile> doctorShifts;
+    private LazyEntityList<AppointmentToFile> appointments;
     public DepartmentToFile getBelongsToDepartment()
     {
         return belongsToDepartment.getSelf();
@@ -34,22 +36,49 @@ public class Doctor extends BusinessEntity<DoctorToFile> implements OwnEntity, L
         belongsToDepartment.changeSelf(departmentToFile);
     }
 
-    @Override
-    public List<LazyEntity<? extends BaseEntity>> getEntity()
+    public MedicalManagerToFile getBelongsToMedicalManager()
     {
-        List<LazyEntity<? extends BaseEntity>> list = new ArrayList<>();
-        list.add(belongsToDepartment);
-        return list;
+        return belongsToMedicalManager.getSelf();
+    }
+    public void setBelongsToMedicalManager(MedicalManagerToFile medicalManagerToFile)
+    {
+        belongsToMedicalManager.changeSelf(medicalManagerToFile);
     }
 
-
-    @Override
-    public List<LinkerManager> getLinkerManager()
+    public LazyEntityList<DoctorShiftToFile> getDoctorShifts()
     {
-       List<LinkerManager> list = new ArrayList<>();
-       LinkerManager linkerManager = new LinkerManager(DoctorToFile.class, DepartmentToFile.class);
-       linkerManager.addLinker(new Linker(this.self.getId(),this.belongsToDepartment.getId()));
-       list.add(linkerManager);
-       return list;
+        return doctorShifts;
     }
+
+    public LazyEntityList<AppointmentToFile> getAppointments()
+    {
+        return appointments;
+    }
+
+    public Doctor(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap,HashMap<String,LinkerManager> linkerManagerHashMap)
+    {
+        super(selfId,selfFile);
+
+        belongsToDepartment = new LazyEntity<DepartmentToFile>
+        (
+            linkerManagerHashMap.get(DepartmentToFile.PREFIX).findBasedOnKey(selfId).getFirst(),
+            new EntityHandler(fileDataHandlerHashMap.get(DepartmentToFile.PREFIX))
+        );
+        belongsToMedicalManager = new LazyEntity<MedicalManagerToFile>
+        (
+                linkerManagerHashMap.get(MedicalManagerToFile.PREFIX).findBasedOnKey(selfId).getFirst(),
+                new EntityHandler(fileDataHandlerHashMap.get(MedicalManagerToFile.PREFIX))
+        );
+        doctorShifts = new LazyEntityList<DoctorShiftToFile>
+        (
+                linkerManagerHashMap.get(DoctorShiftToFile.PREFIX).findBasedOnKey(selfId),
+                new EntityHandler(fileDataHandlerHashMap.get((DoctorShiftToFile.PREFIX)))
+        );
+        appointments = new LazyEntityList<AppointmentToFile>
+        (
+                linkerManagerHashMap.get(AppointmentToFile.PREFIX).findBasedOnKey(selfId),
+                new EntityHandler(fileDataHandlerHashMap.get(AppointmentToFile.PREFIX))
+        );
+    }
+
 }

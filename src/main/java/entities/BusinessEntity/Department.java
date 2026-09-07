@@ -2,7 +2,10 @@ package entities.BusinessEntity;
 
 import Interfaces.Linkable;
 import Interfaces.OwnEntities;
+import Tools.EntityHandler;
 import entities.BaseEntity.BaseEntity;
+import entities.BaseEntity.ConsultationRateToFile;
+import entities.BaseEntity.FacilityToFile;
 import entities.LazyEntity.LazyEntityList;
 import Tools.FileHandler.FileDataHandler;
 import entities.BaseEntity.DepartmentToFile;
@@ -11,67 +14,44 @@ import entities.Linker.Linker;
 import entities.Linker.LinkerManager;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
-public class Department extends BusinessEntity<DepartmentToFile> implements OwnEntities, Linkable
+public class Department extends BusinessEntity<DepartmentToFile> implements OwnEntities,Linkable
 {
     private LazyEntityList<DoctorToFile> doctors;
-
-    public Department(String selfId, FileDataHandler selfFile, List<String> doctorIds, FileDataHandler doctorDataHandler)
-    {
-        super(selfId, selfFile);
-        doctors = new LazyEntityList<DoctorToFile>(doctorIds, doctorDataHandler);
-    }
-
-    public void addDoctor(String doctorId)
-    {
-        doctors.add(doctorId);
-    }
-
-    public void addDoctor(DoctorToFile doctor)
-    {
-        doctors.add(doctor);
-    }
-
-    public void setDoctor(int index, DoctorToFile doctor)
-    {
-        doctors.set(index, doctor);
-    }
-
-    public DoctorToFile getDoctor(int index)
-    {
-        return doctors.get(index);
-    }
-
-    public DoctorToFile getDoctor(String doctorId)
-    {
-        return doctors.get(doctorId);
-    }
+    private LazyEntityList<FacilityToFile> facilities;
+    private LazyEntityList<ConsultationRateToFile> consultations;
 
     public LazyEntityList<DoctorToFile> getDoctors()
     {
         return doctors;
     }
-
-
-    @Override
-    public List<LazyEntityList<? extends BaseEntity>> getEntities()
+    public LazyEntityList<FacilityToFile> getFacilities()
     {
-        List<LazyEntityList<? extends BaseEntity>> list = new ArrayList<>();
-        list.add(doctors);
-        return list;
+        return facilities;
     }
-
-
-    @Override
-    public List<LinkerManager> getLinkerManager()
+    public LazyEntityList<ConsultationRateToFile> getConsultations()
     {
-        LinkerManager manager = new LinkerManager(DepartmentToFile.class,DoctorToFile.class);
-        for (DoctorToFile doctor : doctors)
-        {
-            Linker linker = new Linker(this.self.getId(),doctor.getId());
-            manager.addLinker(linker);
-        }
-        return new ArrayList<>(List.of(manager));
+        return consultations;
+    }
+    public Department(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String,LinkerManager> linkerManagerHashMap)
+    {
+        super(selfId,selfFile);
+        doctors = new LazyEntityList<DoctorToFile>
+        (
+                linkerManagerHashMap.get(DoctorToFile.PREFIX).findBasedOnKey(selfId),
+                new EntityHandler(fileDataHandlerHashMap.get(DoctorToFile.PREFIX))
+        );
+        facilities = new LazyEntityList<FacilityToFile>
+        (
+                linkerManagerHashMap.get(FacilityToFile.PREFIX).findBasedOnKey(selfId),
+                new EntityHandler(fileDataHandlerHashMap.get(FacilityToFile.PREFIX))
+        );
+        consultations = new LazyEntityList<ConsultationRateToFile>
+        (
+                linkerManagerHashMap.get(ConsultationRateToFile.PREFIX).findBasedOnKey(selfId),
+                new EntityHandler(fileDataHandlerHashMap.get(ConsultationRateToFile.PREFIX))
+        );
     }
 }
