@@ -3,6 +3,8 @@ package Forms.MedicalManagerForm;
 import Operations.MedicalManagerOperation.MedicalManagerOperation;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.BaseEntity;
+import entities.BaseEntity.Users.UserWithDetails;
+import entities.BusinessEntity.MedicalManager;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -57,9 +59,9 @@ public class MedicalManagerForm extends JFrame {
     private String currentManagerId = "MM0001";
 
     // Constructor: setup main window and tabs
-    public MedicalManagerForm(HospitalEntityAllocator allocator) throws IOException {
+    public MedicalManagerForm(HospitalEntityAllocator allocator, MedicalManager medicalManager) throws IOException {
         this.allocator = allocator;
-        this.operation = new MedicalManagerOperation(allocator);
+        this.operation = new MedicalManagerOperation(allocator,medicalManager);
 
         setTitle("Medical Management System");
         setSize(850, 650);
@@ -321,7 +323,7 @@ public class MedicalManagerForm extends JFrame {
             String password = new String(passwordField.getPassword());
 
             try {
-                operation.updateProfile(currentManagerId, name, password, gender, dob, email, phone);
+                operation.updateProfile(name, password, UserWithDetails.Gender.valueOf(gender), dob, email, phone);
                 JOptionPane.showMessageDialog(this, "Profile updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                 clearFields();
             } catch (IllegalArgumentException ex) {
