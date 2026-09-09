@@ -6,6 +6,8 @@ import Exceptions.EntityExceptions.EntityRepeatedException;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.DepartmentToFile;
 import entities.BaseEntity.Users.MedicalManagerToFile;
+import entities.BaseEntity.Users.UserWithDetails;
+import entities.BusinessEntity.MedicalManager;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -17,14 +19,16 @@ public class MedicalManagerOperation {
 
     // Store allocator reference instead of direct FileDataHandler
     private final HospitalEntityAllocator allocator;
+    private MedicalManager medicalManager;
 
     // Constructor to inject the allocator
-    public MedicalManagerOperation(HospitalEntityAllocator allocator) {
+    public MedicalManagerOperation(HospitalEntityAllocator allocator,MedicalManager medicalManager) {
+        this.medicalManager = medicalManager;
         this.allocator = allocator;
     }
 
     // Validate inputs and update profile via allocator
-    public void updateProfile(String id, String name, String password, String gender, String dob, String email, String phone) {
+    public void updateProfile(String name, String password, UserWithDetails.Gender gender, String dob, String email, String phone) {
         // Validate name
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("Name cannot be empty.");
@@ -68,18 +72,13 @@ public class MedicalManagerOperation {
         if (phone == null || !phone.matches("\\d+")) {
             throw new IllegalArgumentException("Phone number must contain digits only.");
         }
-
-        // Save updated profile to file through allocator
-        try {
-            MedicalManagerToFile manager = new MedicalManagerToFile(
-                    id, name, password, email,
-                    MedicalManagerToFile.Gender.valueOf(gender.toUpperCase()),
-                    dob, phone
-            );
-            allocator.updateEntity(manager);
-        } catch (EntityNotFoundException e) {
-            throw new IllegalArgumentException("Manager ID not found: " + id);
-        }
+        medicalManager.getSelf().setName(name);
+        medicalManager.getSelf().setPassword(password);
+        medicalManager.getSelf().setGender(gender);
+        medicalManager.getSelf().setDateOfBirth(birthDate);
+        medicalManager.getSelf().setPhoneNumber(phone);
+        medicalManager.getSelf().setEmail(email);
+        allocator.saveChanges(medicalManager);
     }
 
     // Load all department entities using allocator
