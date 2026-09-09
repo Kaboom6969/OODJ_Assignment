@@ -1,43 +1,41 @@
 package Operations.MedicalManagerOperation;
 
-import java.io.*;
+import Tools.FileHandler.FileDataHandler;
+import entities.BaseEntity.DepartmentToFile;
+
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MedicalManagerOperation {
+    // Data file path and framework handler
     private final String profileFilePath = "data/MedicalManager.txt";
     private final String deptFilePath = "data/Department.txt";
+    private final FileDataHandler deptFileHandler = new FileDataHandler(deptFilePath);
 
-    private static final String deptPrefix = "DP";
-    private static final String idFormat = deptPrefix + "%04d";
-
+    // Profile input validation
     public void updateProfile(String name, String password, String gender, String dob, String email, String phone) {
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("Name cannot be empty.");
         }
-
         if (!name.matches("^[a-zA-Z\\s]+$")) {
             throw new IllegalArgumentException("Name can only contain letters and spaces.");
         }
-
         if (password == null || password.length() < 6) {
-
             throw new IllegalArgumentException("Password must be at least 6 characters.");
         }
         if (!password.matches(".*[A-Z].*")) {
             throw new IllegalArgumentException("Password must contain at least one uppercase letter.");
         }
-
         if (!password.matches(".*[^a-zA-Z0-9].*")) {
             throw new IllegalArgumentException("Password must contain at least one special character (e.g., !@#$%^&*).");
         }
-
         if (dob == null || dob.trim().isEmpty()) {
             throw new IllegalArgumentException("Date of Birth cannot be empty.");
         }
-
         if (!dob.matches("^\\d{4}-\\d{2}-\\d{2}$")) {
             throw new IllegalArgumentException("DOB must follow the format YYYY-MM-DD (e.g., 2000-01-01).");
         }
@@ -52,40 +50,75 @@ public class MedicalManagerOperation {
         if (birthDate.isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("Date of Birth cannot be in the future.");
         }
-
         if (!email.contains("@")) {
             throw new IllegalArgumentException("Invalid email format (missing '@').");
         }
-
         if (!phone.matches("\\d+")) {
             throw new IllegalArgumentException("Phone number must contain digits only.");
         }
     }
 
-    public ArrayList<String[]> loadDepartment() throws IOException {
-        File file = new File(deptFilePath);
-        String line;
-        ArrayList<String[]> list = new ArrayList<>();
-        if (!file.exists()) {
-            return list;
-        }
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            line = br.readLine(); //skip header
-            while ((line = br.readLine()) != null) {
-                if (line.trim().isEmpty()) {
+    // Load departments with defensive validation against invalid rows
+    public List<DepartmentToFile> loadDepartmentEntities() {
+        List<DepartmentToFile> list = new ArrayList<>();
+        String[][] allData = deptFileHandler.getAllData();
+        if (allData == null) return list;
+
+        for (String[] row : allData) {
+            if (row != null && row.length >= 2) {
+                String id = row[0] != null ? row[0].trim() : "";
+                String name = row[1] != null ? row[1].trim() : "";
+
+                // Ignore empty rows, header rows, or rows not starting with "DP"
+                if (!id.startsWith(DepartmentToFile.PREFIX) || name.isEmpty()) {
                     continue;
                 }
-                String[] parts = line.split("\\|");
-                if (parts.length >= 2) {
-                    list.add(Arrays.stream(parts).map(String::trim).toArray(String[]::new));
+
+                try {
+                    list.add(new DepartmentToFile(id, name));
+                } catch (Exception e) {
+                    System.err.println("Skipping malformed row: " + String.join("|", row));
                 }
             }
         }
         return list;
     }
 
+    // Load departments for UI table display
+    public ArrayList<String[]> loadDepartment() throws IOException {
+        ArrayList<String[]> list = new ArrayList<>();
+        for (DepartmentToFile dept : loadDepartmentEntities()) {
+            list.add(new String[]{dept.getId(), dept.getName()});
+        }
+        return list;
+    }
+
+    // Generate the next department ID safely
+    public String generateNextDeptId() throws IOException {
+        List<DepartmentToFile> list = loadDepartmentEntities();
+        String prefix = DepartmentToFile.PREFIX;
+
+        if (list.isEmpty()) {
+            return String.format(prefix + "%04d", 1);
+        }
+
+        int maxNum = 0;
+        for (DepartmentToFile dept : list) {
+            try {
+                String idStr = dept.getId();
+                if (idStr.startsWith(prefix)) {
+                    int num = Integer.parseInt(idStr.substring(prefix.length()));
+                    if (num > maxNum) {
+                        maxNum = num;
+                    }
+                }
+            } catch (Exception ignored) {}
+        }
+        return String.format(prefix + "%04d", maxNum + 1);
+    }
+
+    // Add a new department
     public void addDepartment(String deptId, String deptName) throws IOException {
-        // 1. Validate empty inputs (prevent NullPointerException)
         if (deptId == null || deptId.trim().isEmpty()) {
             throw new IllegalArgumentException("Department ID cannot be empty.");
         }
@@ -93,143 +126,62 @@ public class MedicalManagerOperation {
             throw new IllegalArgumentException("Department Name cannot be empty.");
         }
 
-        // 2. Duplicate check: prevent writing an existing ID into the file
-        ArrayList<String[]> existingList = loadDepartment();
-        for (String[] row : existingList) {
-            if (row.length > 0 && row[0].equalsIgnoreCase(deptId.trim())) {
-                throw new IllegalArgumentException("Department ID '" + deptId + "' already exists.");
-            }
+        String cleanId = deptId.trim();
+        String cleanName = deptName.trim();
+
+        if (!cleanId.startsWith(DepartmentToFile.PREFIX)) {
+            throw new IllegalArgumentException("Department ID must start with '" + DepartmentToFile.PREFIX + "'.");
         }
 
-        // 3. Ensure parent directory exists
-        File file = new File(deptFilePath);
-        if (file.getParentFile() != null && !file.getParentFile().exists()) {
-            file.getParentFile().mkdirs();
+        // Prevent duplicate ID
+        FileDataHandler.DataInformation info = deptFileHandler.getDataInformationFromSpecificId(cleanId);
+        if (!info.isEmpty()) {
+            throw new IllegalArgumentException("Department ID '" + cleanId + "' already exists.");
         }
 
-        boolean needHeader = !file.exists() || file.length() <= 0;
-
-        // 4. Append record to file
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, true))) {
-            if (needHeader) {
-                bw.write("DepartmentId|DepartmentName");
-                bw.newLine();
-            }
-            bw.write(deptId.trim() + "|" + deptName.trim());
-            bw.newLine();
-        }
+        // Save entity to file
+        DepartmentToFile dept = new DepartmentToFile(cleanId, cleanName);
+        deptFileHandler.addData(dept.toFileData());
     }
 
-    public String generateNextDeptId() throws IOException {
-        ArrayList<String[]> list = loadDepartment();
-
-        if (list.isEmpty()) {
-            return String.format(idFormat, 1);
-        }
-        try {
-            String lastId = list.get(list.size() - 1)[0];
-            int lastNum = Integer.parseInt(lastId.substring(deptPrefix.length())) + 1;
-            return String.format(idFormat, lastNum);
-        } catch (Exception e) {
-            return String.format(idFormat, list.size() + 1);
-        }
-    }
-
+    // Update an existing department
     public void updateDepartment(String deptId, String newDeptName) throws IOException {
-        // 1. Validate inputs
         if (deptId == null || deptId.trim().isEmpty()) {
             throw new IllegalArgumentException("Department ID cannot be empty.");
         }
         if (newDeptName == null || newDeptName.trim().isEmpty()) {
             throw new IllegalArgumentException("Department Name cannot be empty.");
         }
-        File file = new File(deptFilePath);
-        if (!file.exists() || file.length() == 0) {
-            throw new IllegalArgumentException("Department file is empty or does not exist.");
+
+        String cleanId = deptId.trim();
+        String cleanName = newDeptName.trim();
+
+        // Find target row by ID
+        FileDataHandler.DataInformation info = deptFileHandler.getDataInformationFromSpecificId(cleanId);
+        if (info.isEmpty() || info.row() == null) {
+            throw new IllegalArgumentException("Department ID '" + cleanId + "' not found.");
         }
 
-        String headerLine;
-        try (BufferedReader br = new BufferedReader(new FileReader(deptFilePath))) {
-            headerLine = br.readLine();
-        }
-        int idCol = getColumnIndex(headerLine, "DepartmentId");
-        int nameCol = getColumnIndex(headerLine, "DepartmentName");
-
-        // 2. Load all records into memory
-        ArrayList<String[]> list = loadDepartment();
-        boolean found = false;
-
-        // 3. Find target ID and update the department name
-        int requiredLength = Math.max(idCol, nameCol);
-        for (String[] row : list) {
-            if (row.length > requiredLength && row[idCol].equalsIgnoreCase(deptId.trim())) {
-                row[nameCol] = newDeptName.trim();
-                found = true;
-                break;
-            }
-        }
-
-        // 4. If not found, abort
-        if (!found) {
-            throw new IllegalArgumentException("Department ID '" + deptId + "' not found.");
-        }
-
-        // 5. Rewrite entire file (false = Overwrite mode)
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, false))) {
-            bw.write(headerLine);
-            bw.newLine();
-            for (String[] row : list) {
-                bw.write(String.join("|", row));
-                bw.newLine();
-            }
-        }
+        // Overwrite row with updated entity
+        DepartmentToFile updatedDept = new DepartmentToFile(cleanId, cleanName);
+        deptFileHandler.updateData(updatedDept.toFileData(), info.row());
     }
 
+    // Delete a department by ID
     public void deleteDepartment(String deptId) throws IOException {
-        // 1. Guard check: validate non-empty ID input
-        if(deptId == null || deptId.trim().isEmpty()){
-            throw new IllegalArgumentException("Department ID cannot be empty");
-        }
-        File file = new File(deptFilePath);
-        if (!file.exists() || file.length() ==0){
-            throw  new IllegalArgumentException("Department file is empty or does not exist.");
+        if (deptId == null || deptId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Department ID cannot be empty.");
         }
 
-        // 2. Read the header line and dynamically resolve the ID column index
-        String headerLine;
-        try(BufferedReader br = new BufferedReader(new FileReader(file))){
-            headerLine = br.readLine();
+        String cleanId = deptId.trim();
+
+        // Locate target row by ID
+        FileDataHandler.DataInformation info = deptFileHandler.getDataInformationFromSpecificId(cleanId);
+        if (info.isEmpty() || info.row() == null) {
+            throw new IllegalArgumentException("Department ID '" + cleanId + "' not found.");
         }
 
-        int idCol = getColumnIndex(headerLine,"DepartmentId");
-
-        // 3. Load all records into memory
-        ArrayList<String[]> list = loadDepartment();
-
-        // 4. Safely remove the target record using removeIf to avoid ConcurrentModificationException
-        boolean remove = list.removeIf(row -> row.length > idCol && row[idCol].equalsIgnoreCase(deptId.trim()));
-
-        if(!remove){
-            throw new IllegalArgumentException("Department ID '" + deptId + "' not found.");
-        }
-
-        try(BufferedWriter bw = new BufferedWriter(new FileWriter(file,false))){
-            bw.write(headerLine);
-            bw.newLine();
-            for (String[] row : list){
-                bw.write(String.join("|",row));
-                bw.newLine();
-            }
-        }
-    }
-
-    private int getColumnIndex(String headerLine, String targetColumnName) {
-        String[] arrHeader = headerLine.trim().split("\\|");
-        for (int i = 0; i < arrHeader.length; i++) {
-            if (arrHeader[i].trim().equalsIgnoreCase(targetColumnName.trim())) {
-                return i;
-            }
-        }
-        throw new IllegalArgumentException("Column '" + targetColumnName + "' not found in header.");
+        // Remove row from file
+        deptFileHandler.deleteRow(info.row());
     }
 }
