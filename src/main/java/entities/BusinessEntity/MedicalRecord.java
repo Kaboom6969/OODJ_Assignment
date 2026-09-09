@@ -60,12 +60,12 @@ public class MedicalRecord extends BusinessEntity<MedicalRecordToFile> implement
         super(selfId,selfFile);
         appointment = new LazyEntity<AppointmentToFile>
         (
-            linkerManagerHashMap.get(AppointmentToFile.PREFIX).findBasedOnKey(selfId).getFirst(),
+            linkerManagerHashMap.get(AppointmentToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),
             new EntityHandler(fileDataHandlerHashMap.get(AppointmentToFile.PREFIX))
         );
         bill = new LazyEntity<BillToFile>
         (
-            linkerManagerHashMap.get(BillToFile.PREFIX).findBasedOnKey(selfId).getFirst(),
+            linkerManagerHashMap.get(BillToFile.PREFIX).findBasedOnKeyOneResult(selfId, false),
             new EntityHandler(fileDataHandlerHashMap.get(BillToFile.PREFIX))
         );
         prescriptions = new LazyEntityList<PrescriptionToFile>

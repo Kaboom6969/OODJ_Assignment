@@ -51,12 +51,12 @@ public class MedicalRequest extends BusinessEntity<MedicalRequestToFile> impleme
         super(selfId,selfFile);
         medicalRecord = new LazyEntity<MedicalRecordToFile>
         (
-            linkerManagerHashMap.get(MedicalRecordToFile.PREFIX).findBasedOnKey(selfId).getFirst(),
+            linkerManagerHashMap.get(MedicalRecordToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),
             new EntityHandler(fileDataHandlerHashMap.get(MedicalRecordToFile.PREFIX))
         );
         assessmentType = new LazyEntity<AssessmentTypeToFile>
         (
-            linkerManagerHashMap.get(AssessmentTypeToFile.PREFIX).findBasedOnKey(selfId).getFirst(),
+            linkerManagerHashMap.get(AssessmentTypeToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),
             new EntityHandler(fileDataHandlerHashMap.get(AssessmentTypeToFile.PREFIX))
         );
         assessmentResults = new LazyEntityList<AssessmentResultToFile>

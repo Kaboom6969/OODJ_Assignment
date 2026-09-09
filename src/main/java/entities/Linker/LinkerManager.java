@@ -19,8 +19,9 @@ public class LinkerManager implements ConvertToFileData
 {
     public enum KeyLocation
     {
-        FIRST,SECOND, NOT_FOUND
+        FIRST, SECOND, NOT_FOUND
     }
+
     private Class<? extends BaseEntity> classFirst;
     private Class<? extends BaseEntity> classSecond;
     private List<Linker> linkers;
@@ -48,7 +49,7 @@ public class LinkerManager implements ConvertToFileData
         this.linkers = linkerManager.linkers;
     }
 
-    public LinkerManager(Class<? extends BaseEntity> first, Class<? extends BaseEntity> second,List<Linker> linkers)
+    public LinkerManager(Class<? extends BaseEntity> first, Class<? extends BaseEntity> second, List<Linker> linkers)
     {
         classSort(first, second);
         this.linkers = linkers;
@@ -61,8 +62,7 @@ public class LinkerManager implements ConvertToFileData
         {
             classFirst = second;
             classSecond = first;
-        }
-        else
+        } else
         {
             classFirst = first;
             classSecond = second;
@@ -73,8 +73,10 @@ public class LinkerManager implements ConvertToFileData
     {
         String classFirstPrefix = EntityConvertManager.getPrefixMap().get(classFirst);
         String classSecondPrefix = EntityConvertManager.getPrefixMap().get(classSecond);
-        if (!PrefixFinder.findPrefix(linker.first).equals(PrefixFinder.findPrefix(classFirstPrefix))) return KeyLocation.FIRST;
-        if (!PrefixFinder.findPrefix(linker.second).equals(PrefixFinder.findPrefix(classSecondPrefix))) return KeyLocation.SECOND;
+        if (!PrefixFinder.findPrefix(linker.first).equals(PrefixFinder.findPrefix(classFirstPrefix)))
+            return KeyLocation.FIRST;
+        if (!PrefixFinder.findPrefix(linker.second).equals(PrefixFinder.findPrefix(classSecondPrefix)))
+            return KeyLocation.SECOND;
         return KeyLocation.NOT_FOUND;
     }
 
@@ -94,9 +96,9 @@ public class LinkerManager implements ConvertToFileData
     public boolean addLinker(Linker linker)
     {
         linker = linkerAutoCheck(linker);
-        for(Linker l : linkers)
+        for (Linker l : linkers)
         {
-            if(l.equals(linker)) return false;
+            if (l.equals(linker)) return false;
         }
         linkers.add(linker);
         return true;
@@ -123,6 +125,7 @@ public class LinkerManager implements ConvertToFileData
     {
         linkers.clear();
     }
+
     public LinkerManager filterBasedOnKey(String key)
     {
         KeyLocation keyLocation = getKeyLocation(key);
@@ -133,24 +136,50 @@ public class LinkerManager implements ConvertToFileData
         }
         return new LinkerManager(classFirst, classSecond, linkersAfterFiltered);
     }
+
     public KeyLocation getKeyLocation(String key)
     {
         String prefixFirst = EntityConvertManager.getPrefixMap().get(classFirst);
         String prefixSecond = EntityConvertManager.getPrefixMap().get(classSecond);
         String keyPrefix = PrefixFinder.findPrefix(key);
         if (prefixFirst == null || prefixSecond == null) throw new MapEmptyException("ConvertMap is Empty");
-        if (keyPrefix.equals(prefixFirst)) {return KeyLocation.FIRST;}
-        else if (keyPrefix.equals(prefixSecond)) {return KeyLocation.SECOND;}
-        else return KeyLocation.NOT_FOUND;
+        if (keyPrefix.equals(prefixFirst))
+        {
+            return KeyLocation.FIRST;
+        } else if (keyPrefix.equals(prefixSecond))
+        {
+            return KeyLocation.SECOND;
+        } else return KeyLocation.NOT_FOUND;
     }
+
     public List<String> findBasedOnKey(String key)
     {
+
         KeyLocation keyLocation = getKeyLocation(key);
-        if (keyLocation == KeyLocation.FIRST) {return findBasedOnFirst(key);}
-        else if (keyLocation == KeyLocation.SECOND) {return findBasedOnSecond(key);}
-        else if (keyLocation == KeyLocation.NOT_FOUND) throw new IdPrefixNotFoundException("key prefix is not matched in this linker!");
+        if (keyLocation == KeyLocation.FIRST)
+        {
+            return findBasedOnFirst(key);
+        } else if (keyLocation == KeyLocation.SECOND)
+        {
+            return findBasedOnSecond(key);
+        } else if (keyLocation == KeyLocation.NOT_FOUND)
+            throw new IdPrefixNotFoundException("key prefix is not matched in this linker!");
         else throw new RuntimeException("Unrecognized KeyLocation");
     }
+
+    public String findBasedOnKeyOneResult (String key,boolean requireOne)
+    {
+        List<String> ids = findBasedOnKey(key);
+
+        if (ids.size() > 1 || (requireOne && ids.isEmpty()))
+        {
+            throw new IllegalStateException(
+                    "Invalid number of links for " + key + ": " + ids.size()
+            );
+        }
+        return ids.isEmpty() ? null : ids.getFirst();
+    }
+
     public List<String> findBasedOnFirst(String first)
     {
         List<String> ans = new ArrayList<>();

@@ -31,7 +31,7 @@ public class Feedback extends BusinessEntity<FeedbackToFile> implements OwnEntit
 
         appointment = new LazyEntity<AppointmentToFile>
         (
-            linkerManagerHashMap.get(AppointmentToFile.PREFIX).findBasedOnKey(selfId).getFirst(),
+            linkerManagerHashMap.get(AppointmentToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),
             new EntityHandler(fileDataHandlerHashMap.get(AppointmentToFile.PREFIX))
         );
     }
