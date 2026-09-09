@@ -22,10 +22,7 @@ import entities.Linker.LinkerManager;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class HospitalEntityAllocator
 {
@@ -156,6 +153,65 @@ public class HospitalEntityAllocator
           id,prefixFileMap.get(prefix), fileDataHandlerHashMap,linkerManagerHashMap
         );
         return (T) EntityConvertManager.getBusinessConvertMap().get(prefix).apply(businessEntityConstructor);
+    }
+    public <T extends BusinessEntity<?>> List<T> getAllBusinessEntities(String prefix)
+    {
+        Class<? extends BusinessEntity<?>> businessEntityClass = EntityConvertManager.getBusinessEntityMap().get(prefix);
+        Class<? extends BaseEntity> baseEntityClass = EntityConvertManager.getEntityMap().get(prefix);
+        FileDataHandler selfFile = prefixFileMap.get(prefix);
+        var factory = EntityConvertManager.getBusinessConvertMap().get(prefix);
+        if (businessEntityClass == null || baseEntityClass == null
+                || selfFile == null || factory == null)
+            throw new IllegalArgumentException("Missing entity mapping or file handler for " + prefix);
+
+        List<BaseEntity> records = new EntityHandler(selfFile).getAllEntities();
+        List<T> result = new ArrayList<>(records.size());
+        if (records.isEmpty()) return result;
+        Set<String> ids = new java.util.HashSet<>();
+        for (BaseEntity record : records)
+        {
+            if (!baseEntityClass.isInstance(record))
+                throw new IllegalStateException("Wrong entity type in " + selfFile.getFile());
+            if (!ids.add(record.getId()))
+                throw new IllegalStateException("Duplicate entity ID: " + record.getId());
+        }
+
+        HashMap<String, FileDataHandler> relatedFiles = new HashMap<>();
+        HashMap<String, LinkerManager> allLinkerManagers = new HashMap<>();
+        for (Field field : businessEntityClass.getDeclaredFields())
+        {
+            if (field.getType() != LazyEntity.class && field.getType() != LazyEntityList.class)
+                continue;
+
+            Class<? extends BaseEntity> otherClass =
+                    ((Class<?>) ((ParameterizedType) field.getGenericType())
+                            .getActualTypeArguments()[0]).asSubclass(BaseEntity.class);
+            String otherPrefix = EntityConvertManager.getPrefixMap().get(otherClass);
+            FileDataHandler relatedFile = prefixFileMap.get(otherPrefix);
+            if (otherPrefix == null || relatedFile == null)
+                throw new IllegalStateException("Missing related type or file handler: " + otherClass.getName());
+            if (allLinkerManagers.containsKey(otherPrefix)) continue;
+
+            LinkerHandler linkerHandler = new LinkerHandler(linkerDirectory, baseEntityClass, otherClass);
+            relatedFiles.put(otherPrefix, relatedFile);
+            allLinkerManagers.put(otherPrefix, linkerHandler.getLinkerManager());
+        }
+
+        for (BaseEntity record : records)
+        {
+            HashMap<String, LinkerManager> ownLinkerManagers = new HashMap<>();
+            for (var entry : allLinkerManagers.entrySet())
+            {
+                ownLinkerManagers.put(entry.getKey(),
+                        entry.getValue().filterBasedOnKey(record.getId()));
+            }
+
+            EntityConvertManager.BusinessEntityConstructor context = new EntityConvertManager.BusinessEntityConstructor(
+                    record.getId(), selfFile, relatedFiles, ownLinkerManagers);
+            result.add((T) businessEntityClass.cast(factory.apply(context)));
+        }
+
+        return result;
     }
     private <T extends BusinessEntity<?> & OwnerShip & Linkable> void saveLinkers(T businessEntity)
     {
