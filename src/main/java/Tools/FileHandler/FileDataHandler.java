@@ -78,7 +78,7 @@ public class FileDataHandler
 
     private BufferedReader prepareReader()
     {
-        return _pr(true);
+        return _pr(false);
     }
     private BufferedReader prepareReader(boolean skipFirstRow)
     {
@@ -187,7 +187,7 @@ public class FileDataHandler
     private String[] dataToArray(String data)
     {
         if (data == null) throw new IllegalArgumentException("Data should not be null!");
-        return data.split(getSeparatorRegex());
+        return data.split(getSeparatorRegex(), -1);
     }
 
     private String ArrayToData (String[] array)
@@ -303,6 +303,14 @@ public class FileDataHandler
         }
 
     }
+    private int toIndex(int row, int size)
+    {
+        if (row < 1 || row > size)
+        {
+            throw new IllegalArgumentException("Invalid file row: " + row);
+        }
+        return row - 1;
+    }
     private int getFileRow()
     {
         try (BufferedReader fileReader = prepareReader())
@@ -321,7 +329,6 @@ public class FileDataHandler
     }
     public void deleteRow (int row)
     {
-        if (row > getFileRow()) throw new IllegalArgumentException("row should not be bigger than file row");
         List<String> originalFile = null;
         try
         {
@@ -332,7 +339,7 @@ public class FileDataHandler
             System.err.println("Error while delete row");
         }
         if (originalFile == null) return;
-        originalFile.remove(row);
+        originalFile.remove(toIndex(row,originalFile.size()));
         writeFile(originalFile);
     }
     public void updateData(String data,int row)
@@ -340,9 +347,7 @@ public class FileDataHandler
         try
         {
             List<String> dataToWrite = cacheFile();
-            if (row >= dataToWrite.size())
-                throw new IllegalArgumentException("updateData failed : row %d is bigger than file row %d".formatted(row,dataToWrite.size()));
-            dataToWrite.set(row,data);
+            dataToWrite.set(toIndex(row, dataToWrite.size()), Objects.requireNonNull(data));
             writeFile(dataToWrite);
         } catch(IOException e)
         {

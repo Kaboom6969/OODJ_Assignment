@@ -40,7 +40,7 @@ public class ConsultationRate extends BusinessEntity<ConsultationRateToFile> imp
 
         belongsToDepartment = new LazyEntity<DepartmentToFile>
         (
-            linkerManagerHashMap.get(DepartmentToFile.PREFIX).findBasedOnKey(selfId).getFirst(),
+            linkerManagerHashMap.get(DepartmentToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),
             new EntityHandler(fileDataHandlerHashMap.get(DepartmentToFile.PREFIX))
         );
 

@@ -234,7 +234,7 @@ public class HospitalEntityAllocator
         entityHandler.deleteEntity(entity, EntityHandler.MatchLogic.CODE_ONLY);
     }
 
-    public <T extends BaseEntity & ConvertToFileData> void updateEntity(T entity) throws EntityNotFoundException
+    private <T extends BaseEntity & ConvertToFileData> void updateEntity(T entity) throws EntityNotFoundException
     {
         EntityHandler entityHandler = getEntityHandler(entity.getId());
         if (entityHandler == null) throw new IdPrefixNotFoundException(entity.getId());

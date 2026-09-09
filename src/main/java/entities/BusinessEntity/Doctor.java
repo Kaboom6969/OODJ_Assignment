@@ -61,12 +61,12 @@ public class Doctor extends BusinessEntity<DoctorToFile> implements OwnEntity, O
 
         belongsToDepartment = new LazyEntity<DepartmentToFile>
         (
-            linkerManagerHashMap.get(DepartmentToFile.PREFIX).findBasedOnKey(selfId).getFirst(),
+            linkerManagerHashMap.get(DepartmentToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),
             new EntityHandler(fileDataHandlerHashMap.get(DepartmentToFile.PREFIX))
         );
         belongsToMedicalManager = new LazyEntity<MedicalManagerToFile>
         (
-                linkerManagerHashMap.get(MedicalManagerToFile.PREFIX).findBasedOnKey(selfId).getFirst(),
+                linkerManagerHashMap.get(MedicalManagerToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),
                 new EntityHandler(fileDataHandlerHashMap.get(MedicalManagerToFile.PREFIX))
         );
         doctorShifts = new LazyEntityList<DoctorShiftToFile>

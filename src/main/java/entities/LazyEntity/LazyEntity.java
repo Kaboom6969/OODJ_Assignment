@@ -47,7 +47,7 @@ public class LazyEntity<T extends BaseEntity & ConvertToFileData>
 
     public void updateBackup()
     {
-        this.selfBackup = self.toFileData();
+        this.selfBackup = self == null ? null : self.toFileData();
     }
 
     public boolean isSelfAlrChanged()
@@ -59,6 +59,7 @@ public class LazyEntity<T extends BaseEntity & ConvertToFileData>
     {
         try
         {
+            if (id == null) return null;
             if (self == null)
             {
                 self = entityHandler.getEntity(id);
@@ -78,8 +79,9 @@ public class LazyEntity<T extends BaseEntity & ConvertToFileData>
 
     public void changeSelf(T entity)
     {
-        this.id = entity.getId();
+        this.id = entity == null ? null : entity.getId();
         this.self = entity;
+        this.selfBackup = null;
     }
 
 

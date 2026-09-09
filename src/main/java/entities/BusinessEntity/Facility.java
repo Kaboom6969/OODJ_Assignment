@@ -39,7 +39,7 @@ public class Facility extends BusinessEntity<FacilityToFile> implements OwnEntit
         super(selfId,selfFile);
         belongsToDepartment = new LazyEntity<DepartmentToFile>
         (
-            linkerManagerHashMap.get(DepartmentToFile.PREFIX).findBasedOnKey(selfId).getFirst(),
+            linkerManagerHashMap.get(DepartmentToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),
             new EntityHandler(fileDataHandlerHashMap.get(DepartmentToFile.PREFIX))
         );
         appointments = new LazyEntityList<AppointmentToFile>

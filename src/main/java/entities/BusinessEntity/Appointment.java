@@ -14,6 +14,7 @@ import entities.LazyEntity.LazyEntity;
 import entities.Linker.LinkerManager;
 
 import java.util.HashMap;
+import java.util.List;
 
 public class Appointment extends BusinessEntity<AppointmentToFile> implements OwnEntity, Linkable
 {
@@ -78,27 +79,27 @@ public class Appointment extends BusinessEntity<AppointmentToFile> implements Ow
         super(selfId,selfFile);
         patient = new LazyEntity<PatientToFile>
         (
-            linkerManagerHashMap.get(PatientToFile.PREFIX).findBasedOnKey(selfId).getFirst(),
+            linkerManagerHashMap.get(PatientToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),
             new EntityHandler(fileDataHandlerHashMap.get(PatientToFile.PREFIX))
         );
         doctor = new LazyEntity<DoctorToFile>
         (
-            linkerManagerHashMap.get(DoctorToFile.PREFIX).findBasedOnKey(selfId).getFirst(),
+            linkerManagerHashMap.get(DoctorToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),
             new EntityHandler(fileDataHandlerHashMap.get(DoctorToFile.PREFIX))
         );
         facility = new LazyEntity<FacilityToFile>
         (
-            linkerManagerHashMap.get(FacilityToFile.PREFIX).findBasedOnKey(selfId).getFirst(),
+            linkerManagerHashMap.get(FacilityToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),
             new EntityHandler(fileDataHandlerHashMap.get(FacilityToFile.PREFIX))
         );
         medicalRecord = new LazyEntity<MedicalRecordToFile>
         (
-            linkerManagerHashMap.get(MedicalRecordToFile.PREFIX).findBasedOnKey(selfId).getFirst(),
+            linkerManagerHashMap.get(MedicalRecordToFile.PREFIX).findBasedOnKeyOneResult(selfId, false),
             new EntityHandler(fileDataHandlerHashMap.get(MedicalRecordToFile.PREFIX))
         );
         feedback = new LazyEntity<FeedbackToFile>
         (
-            linkerManagerHashMap.get(FeedbackToFile.PREFIX).findBasedOnKey(selfId).getFirst(),
+            linkerManagerHashMap.get(FeedbackToFile.PREFIX).findBasedOnKeyOneResult(selfId, false),
             new EntityHandler(fileDataHandlerHashMap.get(FeedbackToFile.PREFIX))
         );
     }

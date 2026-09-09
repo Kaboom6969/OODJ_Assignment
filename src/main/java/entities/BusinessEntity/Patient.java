@@ -39,7 +39,7 @@ public class Patient extends BusinessEntity<PatientToFile> implements OwnEntity,
         super(selfId,selfFile);
         insurance = new LazyEntity<InsuranceToFile>
         (
-            linkerManagerHashMap.get(InsuranceToFile.PREFIX).findBasedOnKey(selfId).getFirst(),
+            linkerManagerHashMap.get(InsuranceToFile.PREFIX).findBasedOnKeyOneResult(selfId, false),
             new EntityHandler(fileDataHandlerHashMap.get(InsuranceToFile.PREFIX))
         );
         appointments = new LazyEntityList<AppointmentToFile>

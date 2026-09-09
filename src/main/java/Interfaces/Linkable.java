@@ -47,7 +47,10 @@ public interface Linkable
                                     getActualTypeArguments()[0]).
                                     asSubclass(BaseEntity.class);
                     LinkerManager linkerManager = new LinkerManager(classBaseEntitySelf, classBaseEntityOther);
-                    if (lazyEntityOther != null) linkerManager.addLinker(new Linker(selfId, lazyEntityOther.getId()));
+                    if (lazyEntityOther != null && lazyEntityOther.getId() != null)
+                    {
+                        linkerManager.addLinker(new Linker(selfId, lazyEntityOther.getId()));
+                    }
                     list.add(linkerManager);
                 } catch (IllegalAccessException e)
                 {

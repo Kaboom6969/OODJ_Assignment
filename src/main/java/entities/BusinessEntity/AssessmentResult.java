@@ -55,19 +55,19 @@ public class AssessmentResult extends BusinessEntity<AssessmentResultToFile> imp
 
         medicalRecord = new LazyEntity<MedicalRecordToFile>
         (
-            linkerManagerHashMap.get(MedicalRecordToFile.PREFIX).findBasedOnKey(selfId).getFirst(),
+            linkerManagerHashMap.get(MedicalRecordToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),
             new EntityHandler(fileDataHandlerHashMap.get(MedicalRecordToFile.PREFIX))
         );
 
         assessmentType = new LazyEntity<AssessmentTypeToFile>
         (
-            linkerManagerHashMap.get(AssessmentTypeToFile.PREFIX).findBasedOnKey(selfId).getFirst(),
+            linkerManagerHashMap.get(AssessmentTypeToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),
             new EntityHandler(fileDataHandlerHashMap.get(AssessmentTypeToFile.PREFIX))
         );
 
         medicalRequest = new LazyEntity<MedicalRequestToFile>
         (
-            linkerManagerHashMap.get(MedicalRequestToFile.PREFIX).findBasedOnKey(selfId).getFirst(),
+            linkerManagerHashMap.get(MedicalRequestToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),
             new EntityHandler(fileDataHandlerHashMap.get(MedicalRequestToFile.PREFIX))
         );
     }

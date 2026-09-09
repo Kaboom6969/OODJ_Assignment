@@ -29,7 +29,7 @@ public class DoctorShift extends BusinessEntity<DoctorShiftToFile> implements Ow
         super(selfId,selfFile);
         belongsToDoctor = new LazyEntity<DoctorToFile>
         (
-            linkerManagerHashMap.get(DoctorToFile.PREFIX).findBasedOnKey(selfId).getFirst(),
+            linkerManagerHashMap.get(DoctorToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),
             new EntityHandler(fileDataHandlerHashMap.get(DoctorToFile.PREFIX))
         );
     }

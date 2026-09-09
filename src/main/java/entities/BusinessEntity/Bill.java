@@ -54,17 +54,17 @@ public class Bill extends BusinessEntity<BillToFile> implements OwnEntity, Linka
         super(selfId,selfFile);
         medicalRecord = new LazyEntity<MedicalRecordToFile>
         (
-            linkerManagerHashMap.get(MedicalRecordToFile.PREFIX).findBasedOnKey(selfId).getFirst(),
+            linkerManagerHashMap.get(MedicalRecordToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),
             new EntityHandler(fileDataHandlerHashMap.get(MedicalRecordToFile.PREFIX))
         );
         insurance = new LazyEntity<InsuranceToFile>
         (
-            linkerManagerHashMap.get(InsuranceToFile.PREFIX).findBasedOnKey(selfId).getFirst(),
+            linkerManagerHashMap.get(InsuranceToFile.PREFIX).findBasedOnKeyOneResult(selfId, false),
             new EntityHandler(fileDataHandlerHashMap.get(InsuranceToFile.PREFIX))
         );
         consultationRate = new LazyEntity<ConsultationRateToFile>
         (
-            linkerManagerHashMap.get(ConsultationRateToFile.PREFIX).findBasedOnKey(selfId).getFirst(),
+            linkerManagerHashMap.get(ConsultationRateToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),
             new EntityHandler(fileDataHandlerHashMap.get(ConsultationRateToFile.PREFIX))
         );
     }

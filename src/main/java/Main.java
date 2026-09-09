@@ -3,7 +3,7 @@ import Exceptions.EntityExceptions.EntityNotMatchException;
 import Exceptions.EntityExceptions.EntityRepeatedException;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.BaseEntity;
-import entities.BaseEntity.DoctorToFile;
+import entities.BaseEntity.Users.DoctorToFile;
 import entities.BusinessEntity.Department;
 import entities.BusinessEntity.Doctor;
 
@@ -24,19 +24,6 @@ void main() throws EntityRepeatedException, EntityNotFoundException, EntityNotMa
     //Test for LazyEntityList
     HospitalEntityAllocator hea = new HospitalEntityAllocator
             (Path.of("C:\\Users\\leezh\\IdeaProjects\\OODJ Assignment\\data\\Linker"),
-                    Path.of("C:\\Users\\leezh\\IdeaProjects\\OODJ Assignment\\data\\Admin.txt"),
-                    Path.of("C:\\Users\\leezh\\IdeaProjects\\OODJ Assignment\\data\\Patient.txt"),
-                    Path.of("C:\\Users\\leezh\\IdeaProjects\\OODJ Assignment\\data\\Doctor.txt"),
-                    Path.of("C:\\Users\\leezh\\IdeaProjects\\OODJ Assignment\\data\\Department.txt")
+                    Path.of("C:\\Users\\leezh\\IdeaProjects\\OODJ Assignment\\data\\Entity")
             );
-    Department department = hea.getDepartment("DP0001");
-    System.out.println(department.getDoctor("DT0001").toFileData());
-    Doctor doctor = hea.getDoctor("DT0002");
-    department.addDoctor(doctor.getSelf());
-    for (DoctorToFile doctorToFile : department.getDoctors())
-    {
-        System.out.println(doctorToFile.toFileData());
-    }
-    hea.saveChanges(department);
-
 }
