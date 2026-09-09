@@ -263,6 +263,7 @@ public class MedicalManagerForm extends JFrame {
         resetToNewDeptMode();
 
         // Auto-fill fields on row click, or reset to next ID when deselected
+        deptTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         deptTable.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 int selectedRow = deptTable.getSelectedRow();
@@ -367,16 +368,17 @@ public class MedicalManagerForm extends JFrame {
                 }
 
                 // Update text file
-                operation.updateDepartment(deptId,deptNewDeptName);
+                operation.updateDepartment(deptId, deptNewDeptName);
 
                 //Synchronize JTable cell
-                deptTable.setValueAt(deptNewDeptName,selectedRow,deptTable.getColumnModel().getColumnIndex("Department Name"));
+                deptTable.setValueAt(deptNewDeptName, selectedRow, deptTable.getColumnModel().getColumnIndex("Department Name"));
 
                 // Reset table selection and prepare next auto-incremented ID
                 deptTable.clearSelection();
 
                 // Success feedback popup
-                JOptionPane.showMessageDialog(this, "Department updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);;
+                JOptionPane.showMessageDialog(this, "Department updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                ;
 
             } catch (IllegalArgumentException | IOException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Input Error", JOptionPane.WARNING_MESSAGE);
@@ -384,7 +386,44 @@ public class MedicalManagerForm extends JFrame {
 
         });
 
+        // Delete Department Button
+        deleteDeptBtn.addActionListener(e -> {
+            int selectedRow = deptTable.getSelectedRow();
+            if (selectedRow == -1) {
+                JOptionPane.showMessageDialog(this, "Please select a department from the table to delete.", "Selection Required", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            String deptId = deptIdField.getText().trim();
+            String deptName = deptNameField.getText().trim();
+
+            int confirm = JOptionPane.showConfirmDialog(
+                    this,
+                    "Are you sure you want to delete department '" + deptId + " - " + deptName + "'?",
+                    "Confirm Deletion",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            if (confirm == JOptionPane.YES_OPTION){
+                try {
+                    operation.deleteDepartment(deptId);
+
+                    deptTableModel.removeRow(selectedRow);
+
+                    deptTable.clearSelection();
+
+                    JOptionPane.showMessageDialog(this, "Department deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                } catch (IllegalArgumentException ex) {
+                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Input Error", JOptionPane.WARNING_MESSAGE);
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(this, "File error: " + ex.getMessage(), "System Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
     }
+
 
     // Create the Department Management panel
     public JPanel createDepartmentPanel() {

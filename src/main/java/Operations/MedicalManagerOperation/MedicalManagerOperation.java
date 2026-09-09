@@ -185,6 +185,44 @@ public class MedicalManagerOperation {
         }
     }
 
+    public void deleteDepartment(String deptId) throws IOException {
+        // 1. Guard check: validate non-empty ID input
+        if(deptId == null || deptId.trim().isEmpty()){
+            throw new IllegalArgumentException("Department ID cannot be empty");
+        }
+        File file = new File(deptFilePath);
+        if (!file.exists() || file.length() ==0){
+            throw  new IllegalArgumentException("Department file is empty or does not exist.");
+        }
+
+        // 2. Read the header line and dynamically resolve the ID column index
+        String headerLine;
+        try(BufferedReader br = new BufferedReader(new FileReader(file))){
+            headerLine = br.readLine();
+        }
+
+        int idCol = getColumnIndex(headerLine,"DepartmentId");
+
+        // 3. Load all records into memory
+        ArrayList<String[]> list = loadDepartment();
+
+        // 4. Safely remove the target record using removeIf to avoid ConcurrentModificationException
+        boolean remove = list.removeIf(row -> row.length > idCol && row[idCol].equalsIgnoreCase(deptId.trim()));
+
+        if(!remove){
+            throw new IllegalArgumentException("Department ID '" + deptId + "' not found.");
+        }
+
+        try(BufferedWriter bw = new BufferedWriter(new FileWriter(file,false))){
+            bw.write(headerLine);
+            bw.newLine();
+            for (String[] row : list){
+                bw.write(String.join("|",row));
+                bw.newLine();
+            }
+        }
+    }
+
     private int getColumnIndex(String headerLine, String targetColumnName) {
         String[] arrHeader = headerLine.trim().split("\\|");
         for (int i = 0; i < arrHeader.length; i++) {
@@ -193,14 +231,5 @@ public class MedicalManagerOperation {
             }
         }
         throw new IllegalArgumentException("Column '" + targetColumnName + "' not found in header.");
-    }
-
-    public static void main(String[] args) throws IOException {
-        MedicalManagerOperation op = new MedicalManagerOperation();
-        ArrayList<String[]> list = op.loadDepartment();
-        for (String[] row : list) {
-            System.out.println(row[0]);
-        }
-        System.out.println(Arrays.toString(op.loadDepartment().get(0)));
     }
 }
