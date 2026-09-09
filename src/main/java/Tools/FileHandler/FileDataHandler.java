@@ -261,7 +261,7 @@ public class FileDataHandler
     {
         try (BufferedReader fileReader = prepareReader(false))
         {
-            return new ArrayList<>(fileReader.lines().toList());
+            return new ArrayList<>(fileReader.readAllLines());
         }
     }
     private  void writeFile(List<String> fileData)
