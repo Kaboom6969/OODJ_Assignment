@@ -14,6 +14,7 @@ import java.io.File;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.function.Function;
 
 public class EntityConvertManager
@@ -25,12 +26,30 @@ public class EntityConvertManager
     private static HashMap<String,Function<BusinessEntityConstructor,BusinessEntity<?>>> businessConvertMap;
 
     public record BusinessEntityConstructor
-            (
-                    String selfId,
-                    FileDataHandler selfFile,
-                    HashMap<String,FileDataHandler> fileDataHandlerHashMap,
-                    HashMap<String, LinkerManager> linkerManagerHashMap
-            ){}
+    (
+            String selfId,
+            FileDataHandler selfFile,
+            HashMap<String,FileDataHandler> fileDataHandlerHashMap,
+            HashMap<String, LinkerManager> linkerManagerHashMap,
+            BaseEntity self
+    )
+    {
+        public BusinessEntityConstructor
+        {
+            if (self != null && !Objects.equals(self.getId(), selfId))
+            {
+                throw new IllegalArgumentException
+                (
+                    "Self Ids are not equal"
+                );
+            }
+        }
+        public BusinessEntityConstructor(String selfId, FileDataHandler selfFile, HashMap<String, FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap)
+        {
+            this(selfId,selfFile,fileDataHandlerHashMap,linkerManagerHashMap,null);
+        }
+
+    }
 
     public EntityConvertManager()
     {
@@ -115,8 +134,8 @@ public class EntityConvertManager
                                     .asSubclass(BaseEntity.class);
                     Function<BusinessEntityConstructor,BusinessEntity<?>> constructEntity = data -> {
                         try {
-                            return (BusinessEntity<?>) clazz.getConstructor(String.class, FileDataHandler.class,HashMap.class,HashMap.class).
-                                    newInstance(data.selfId,data.selfFile,data.fileDataHandlerHashMap,data.linkerManagerHashMap);
+                            return (BusinessEntity<?>) clazz.getConstructor(String.class, FileDataHandler.class,HashMap.class,HashMap.class,BaseEntity.class).
+                                    newInstance(data.selfId,data.selfFile,data.fileDataHandlerHashMap,data.linkerManagerHashMap,data.self);
                         } catch (Exception e) {
                             throw new RuntimeException("Instance Fail", e);
                         }
