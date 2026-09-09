@@ -1,6 +1,7 @@
 package Forms.MedicalManagerForm;
 
 import Operations.MedicalManagerOperation.MedicalManagerOperation;
+import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.BaseEntity;
 
 import javax.swing.*;
@@ -48,11 +49,18 @@ public class MedicalManagerForm extends JFrame {
     private JButton refreshMetricsBtn;
     private JButton exportReportBtn;
 
-    // --- Business Logic Object ---
-    private final MedicalManagerOperation operation = new MedicalManagerOperation();
+    // Hold allocator and operation references
+    private final HospitalEntityAllocator allocator;
+    private final MedicalManagerOperation operation;
+
+    // Default manager ID for profile update
+    private String currentManagerId = "MM0001";
 
     // Constructor: setup main window and tabs
-    public MedicalManagerForm() throws IOException {
+    public MedicalManagerForm(HospitalEntityAllocator allocator) throws IOException {
+        this.allocator = allocator;
+        this.operation = new MedicalManagerOperation(allocator);
+
         setTitle("Medical Management System");
         setSize(850, 650);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -234,16 +242,12 @@ public class MedicalManagerForm extends JFrame {
     // Initialize event listeners and table selections
     private void initEvents() {
         // Load initial department records into table & dropdown
-        try {
-            deptTableModel.setRowCount(0);
-            ArrayList<String[]> dept = operation.loadDepartment();
-            for (String[] s : dept) {
-                deptTableModel.addRow(s);
-            }
-            refreshDepartmentComboBox();
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Failed to load departments: " + e.getMessage(), "File Error", JOptionPane.ERROR_MESSAGE);
+        deptTableModel.setRowCount(0);
+        ArrayList<String[]> dept = operation.loadDepartment();
+        for (String[] s : dept) {
+            deptTableModel.addRow(s);
         }
+        refreshDepartmentComboBox();
 
         // Set initial ID in Add Mode
         resetToNewDeptMode();
@@ -304,8 +308,6 @@ public class MedicalManagerForm extends JFrame {
 
             } catch (IllegalArgumentException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Input Error", JOptionPane.WARNING_MESSAGE);
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(this, "File error: " + ex.getMessage(), "System Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -319,7 +321,7 @@ public class MedicalManagerForm extends JFrame {
             String password = new String(passwordField.getPassword());
 
             try {
-                operation.updateProfile(name, password, gender, dob, email, phone);
+                operation.updateProfile(currentManagerId, name, password, gender, dob, email, phone);
                 JOptionPane.showMessageDialog(this, "Profile updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                 clearFields();
             } catch (IllegalArgumentException ex) {
@@ -355,7 +357,7 @@ public class MedicalManagerForm extends JFrame {
 
                 JOptionPane.showMessageDialog(this, "Department updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
 
-            } catch (IllegalArgumentException | IOException ex) {
+            } catch (IllegalArgumentException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Input Error", JOptionPane.WARNING_MESSAGE);
             }
         });
@@ -392,8 +394,6 @@ public class MedicalManagerForm extends JFrame {
                     JOptionPane.showMessageDialog(this, "Department deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                 } catch (IllegalArgumentException ex) {
                     JOptionPane.showMessageDialog(this, ex.getMessage(), "Input Error", JOptionPane.WARNING_MESSAGE);
-                } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(this, "File error: " + ex.getMessage(), "System Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
@@ -661,20 +661,25 @@ public class MedicalManagerForm extends JFrame {
 
     // Reset department fields to Add Mode
     private void resetToNewDeptMode() {
-        try {
-            deptIdField.setText(operation.generateNextDeptId());
-        } catch (IOException e) {
-            deptIdField.setText("DP0001");
-        }
+        deptIdField.setText(operation.generateNextDeptId());
         deptNameField.setText("");
     }
 
     // Application entry point
     public static void main(String[] args) {
+        // Set ID number width to 4 digits
         BaseEntity.setIdNumberWidth(4);
+
+        // Create allocator instance with data paths
+        HospitalEntityAllocator allocator = new HospitalEntityAllocator(
+                java.nio.file.Path.of("data/Linker"),
+                java.nio.file.Path.of("data/Entity")
+        );
+
+        // Launch UI
         SwingUtilities.invokeLater(() -> {
             try {
-                new MedicalManagerForm().setVisible(true);
+                new MedicalManagerForm(allocator).setVisible(true);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

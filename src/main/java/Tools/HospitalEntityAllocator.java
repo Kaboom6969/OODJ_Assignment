@@ -234,7 +234,7 @@ public class HospitalEntityAllocator
         entityHandler.deleteEntity(entity, EntityHandler.MatchLogic.CODE_ONLY);
     }
 
-    private <T extends BaseEntity & ConvertToFileData> void updateEntity(T entity) throws EntityNotFoundException
+    public  <T extends BaseEntity & ConvertToFileData> void updateEntity(T entity) throws EntityNotFoundException
     {
         EntityHandler entityHandler = getEntityHandler(entity.getId());
         if (entityHandler == null) throw new IdPrefixNotFoundException(entity.getId());
@@ -247,6 +247,15 @@ public class HospitalEntityAllocator
         String prefix = PrefixFinder.findPrefix(id);
         return new EntityHandler(prefixFileMap.get(prefix));
     }
+
+    public <T extends BaseEntity> List<T> getAllEntities(String prefix)
+    {
+        FileDataHandler handler = prefixFileMap.get(prefix);
+        if (handler == null) return new ArrayList<>();
+        return new EntityHandler(handler).getAllEntities();
+    }
+
+
 
 }
 class EntityFile
