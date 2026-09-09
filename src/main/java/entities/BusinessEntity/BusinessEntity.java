@@ -18,6 +18,11 @@ public abstract class BusinessEntity<T extends BaseEntity & ConvertToFileData>
     {
         this.self = new LazyEntity<T>(id, new EntityHandler(selfFile));
     }
+
+    public BusinessEntity(FileDataHandler selfFile, T self)
+    {
+        this.self = new LazyEntity<>(self, new EntityHandler(selfFile));
+    }
     public T getSelf()
     {
         return self.getSelf();
