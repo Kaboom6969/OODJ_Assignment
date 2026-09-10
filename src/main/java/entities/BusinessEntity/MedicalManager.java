@@ -22,7 +22,12 @@ public class MedicalManager extends BusinessEntity<MedicalManagerToFile> impleme
 
     public MedicalManager(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap)
     {
-        super(selfId,selfFile);
+        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null);
+    }
+
+    public MedicalManager(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, MedicalManagerToFile self)
+    {
+        super(selfId, selfFile, self);
         doctors = new LazyEntityList<DoctorToFile>
         (
             linkerManagerHashMap.get(DoctorToFile.PREFIX).findBasedOnKey(selfId),

@@ -36,7 +36,12 @@ public class Patient extends BusinessEntity<PatientToFile> implements OwnEntity,
 
     public Patient(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap)
     {
-        super(selfId,selfFile);
+        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null);
+    }
+
+    public Patient(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, PatientToFile self)
+    {
+        super(selfId, selfFile, self);
         insurance = new LazyEntity<InsuranceToFile>
         (
             linkerManagerHashMap.get(InsuranceToFile.PREFIX).findBasedOnKeyOneResult(selfId, false),

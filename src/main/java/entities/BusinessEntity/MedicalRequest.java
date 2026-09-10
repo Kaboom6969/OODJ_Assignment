@@ -48,7 +48,12 @@ public class MedicalRequest extends BusinessEntity<MedicalRequestToFile> impleme
 
     public MedicalRequest(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap)
     {
-        super(selfId,selfFile);
+        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null);
+    }
+
+    public MedicalRequest(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, MedicalRequestToFile self)
+    {
+        super(selfId, selfFile, self);
         medicalRecord = new LazyEntity<MedicalRecordToFile>
         (
             linkerManagerHashMap.get(MedicalRecordToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),

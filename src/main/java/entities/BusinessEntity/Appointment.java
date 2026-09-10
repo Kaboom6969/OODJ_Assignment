@@ -76,7 +76,12 @@ public class Appointment extends BusinessEntity<AppointmentToFile> implements Ow
 
     public Appointment(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap)
     {
-        super(selfId,selfFile);
+        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null);
+    }
+
+    public Appointment(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, AppointmentToFile self)
+    {
+        super(selfId, selfFile, self);
         patient = new LazyEntity<PatientToFile>
         (
             linkerManagerHashMap.get(PatientToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),

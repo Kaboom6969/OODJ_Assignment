@@ -29,7 +29,12 @@ public class AssessmentType extends BusinessEntity<AssessmentTypeToFile> impleme
 
     public AssessmentType(String selfId, FileDataHandler selfFile, HashMap<String, FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap)
     {
-        super(selfId,selfFile);
+        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null);
+    }
+
+    public AssessmentType(String selfId, FileDataHandler selfFile, HashMap<String, FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, AssessmentTypeToFile self)
+    {
+        super(selfId, selfFile, self);
 
         medicalRequests = new LazyEntityList<MedicalRequestToFile>
         (

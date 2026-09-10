@@ -12,6 +12,11 @@ public class Admin extends BusinessEntity<AdminToFile> implements OwnerShip, Lin
 {
     public Admin(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap)
     {
-        super(selfId,selfFile);
+        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null);
+    }
+
+    public Admin(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, AdminToFile self)
+    {
+        super(selfId, selfFile, self);
     }
 }

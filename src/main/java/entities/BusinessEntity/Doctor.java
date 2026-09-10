@@ -57,7 +57,12 @@ public class Doctor extends BusinessEntity<DoctorToFile> implements OwnEntity, O
 
     public Doctor(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap,HashMap<String,LinkerManager> linkerManagerHashMap)
     {
-        super(selfId,selfFile);
+        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null);
+    }
+
+    public Doctor(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap,HashMap<String,LinkerManager> linkerManagerHashMap, DoctorToFile self)
+    {
+        super(selfId, selfFile, self);
 
         belongsToDepartment = new LazyEntity<DepartmentToFile>
         (

@@ -51,7 +51,12 @@ public class AssessmentResult extends BusinessEntity<AssessmentResultToFile> imp
 
     public AssessmentResult(String selfId, FileDataHandler selfFile, HashMap<String, FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap)
     {
-        super(selfId,selfFile);
+        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null);
+    }
+
+    public AssessmentResult(String selfId, FileDataHandler selfFile, HashMap<String, FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, AssessmentResultToFile self)
+    {
+        super(selfId, selfFile, self);
 
         medicalRecord = new LazyEntity<MedicalRecordToFile>
         (

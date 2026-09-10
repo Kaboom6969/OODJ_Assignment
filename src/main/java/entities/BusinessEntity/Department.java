@@ -37,7 +37,12 @@ public class Department extends BusinessEntity<DepartmentToFile> implements OwnE
     }
     public Department(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String,LinkerManager> linkerManagerHashMap)
     {
-        super(selfId,selfFile);
+        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null);
+    }
+
+    public Department(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String,LinkerManager> linkerManagerHashMap, DepartmentToFile self)
+    {
+        super(selfId, selfFile, self);
         doctors = new LazyEntityList<DoctorToFile>
         (
                 linkerManagerHashMap.get(DoctorToFile.PREFIX).findBasedOnKey(selfId),

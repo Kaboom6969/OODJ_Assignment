@@ -26,7 +26,12 @@ public class DoctorShift extends BusinessEntity<DoctorShiftToFile> implements Ow
 
     public DoctorShift(String selfId, FileDataHandler selfFile, HashMap<String, FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap)
     {
-        super(selfId,selfFile);
+        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null);
+    }
+
+    public DoctorShift(String selfId, FileDataHandler selfFile, HashMap<String, FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, DoctorShiftToFile self)
+    {
+        super(selfId, selfFile, self);
         belongsToDoctor = new LazyEntity<DoctorToFile>
         (
             linkerManagerHashMap.get(DoctorToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),

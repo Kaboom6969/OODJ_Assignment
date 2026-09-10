@@ -27,7 +27,12 @@ public class Feedback extends BusinessEntity<FeedbackToFile> implements OwnEntit
 
     public Feedback(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap)
     {
-        super(selfId,selfFile);
+        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null);
+    }
+
+    public Feedback(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, FeedbackToFile self)
+    {
+        super(selfId, selfFile, self);
 
         appointment = new LazyEntity<AppointmentToFile>
         (

@@ -36,7 +36,12 @@ public class ConsultationRate extends BusinessEntity<ConsultationRateToFile> imp
 
     public ConsultationRate(String selfId, FileDataHandler selfFile, HashMap<String, FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap)
     {
-        super(selfId,selfFile);
+        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null);
+    }
+
+    public ConsultationRate(String selfId, FileDataHandler selfFile, HashMap<String, FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, ConsultationRateToFile self)
+    {
+        super(selfId, selfFile, self);
 
         belongsToDepartment = new LazyEntity<DepartmentToFile>
         (

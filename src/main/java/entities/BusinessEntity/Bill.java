@@ -51,7 +51,12 @@ public class Bill extends BusinessEntity<BillToFile> implements OwnEntity, Linka
 
     public Bill(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap)
     {
-        super(selfId,selfFile);
+        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null);
+    }
+
+    public Bill(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, BillToFile self)
+    {
+        super(selfId, selfFile, self);
         medicalRecord = new LazyEntity<MedicalRecordToFile>
         (
             linkerManagerHashMap.get(MedicalRecordToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),

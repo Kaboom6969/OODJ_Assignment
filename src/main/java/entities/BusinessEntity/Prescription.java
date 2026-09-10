@@ -27,7 +27,12 @@ public class Prescription extends BusinessEntity<PrescriptionToFile> implements 
 
     public Prescription(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap)
     {
-        super(selfId,selfFile);
+        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null);
+    }
+
+    public Prescription(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, PrescriptionToFile self)
+    {
+        super(selfId, selfFile, self);
         medicalRecord = new LazyEntity<MedicalRecordToFile>
         (
             linkerManagerHashMap.get(MedicalRecordToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),

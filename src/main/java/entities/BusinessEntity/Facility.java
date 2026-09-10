@@ -36,7 +36,12 @@ public class Facility extends BusinessEntity<FacilityToFile> implements OwnEntit
 
     public Facility(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap)
     {
-        super(selfId,selfFile);
+        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null);
+    }
+
+    public Facility(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, FacilityToFile self)
+    {
+        super(selfId, selfFile, self);
         belongsToDepartment = new LazyEntity<DepartmentToFile>
         (
             linkerManagerHashMap.get(DepartmentToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),

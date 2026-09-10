@@ -16,13 +16,32 @@ public abstract class BusinessEntity<T extends BaseEntity & ConvertToFileData>
 
     public BusinessEntity(String id, FileDataHandler selfFile)
     {
-        this.self = new LazyEntity<T>(id, new EntityHandler(selfFile));
+        this(id, selfFile, null);
     }
 
     public BusinessEntity(FileDataHandler selfFile, T self)
     {
-        this.self = new LazyEntity<>(self, new EntityHandler(selfFile));
+        this(java.util.Objects.requireNonNull(self, "Self is required").getId(), selfFile, self);
     }
+
+    public BusinessEntity(String id, FileDataHandler selfFile, T self)
+    {
+        java.util.Objects.requireNonNull(id, "ID is required");
+        java.util.Objects.requireNonNull(selfFile, "Self file handler is required");
+        EntityHandler handler = new EntityHandler(selfFile);
+        if (self == null)
+        {
+            this.self = new LazyEntity<T>(id, handler);
+        }
+        else
+        {
+            if (!id.equals(self.getId()))
+                throw new IllegalArgumentException("Self ID does not match: " + id);
+            this.self = new LazyEntity<T>(self, handler);
+            this.self.updateBackup();
+        }
+    }
+
     public T getSelf()
     {
         return self.getSelf();
