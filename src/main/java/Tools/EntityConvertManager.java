@@ -134,7 +134,7 @@ public class EntityConvertManager
                                     .asSubclass(BaseEntity.class);
                     Function<BusinessEntityConstructor,BusinessEntity<?>> constructEntity = data -> {
                         try {
-                            return (BusinessEntity<?>) clazz.getConstructor(String.class, FileDataHandler.class,HashMap.class,HashMap.class,BaseEntity.class).
+                            return (BusinessEntity<?>) clazz.getConstructor(String.class, FileDataHandler.class,HashMap.class,HashMap.class,baseEntityClass).
                                     newInstance(data.selfId,data.selfFile,data.fileDataHandlerHashMap,data.linkerManagerHashMap,data.self);
                         } catch (Exception e) {
                             throw new RuntimeException("Instance Fail", e);

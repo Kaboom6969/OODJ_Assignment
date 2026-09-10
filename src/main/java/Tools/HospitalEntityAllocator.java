@@ -207,7 +207,7 @@ public class HospitalEntityAllocator
             }
 
             EntityConvertManager.BusinessEntityConstructor context = new EntityConvertManager.BusinessEntityConstructor(
-                    record.getId(), selfFile, relatedFiles, ownLinkerManagers);
+                    record.getId(), selfFile, relatedFiles, ownLinkerManagers,record);
             result.add((T) businessEntityClass.cast(factory.apply(context)));
         }
 
