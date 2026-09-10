@@ -1,19 +1,18 @@
 package entities.BusinessEntity;
 
+import Exceptions.LinkerExceptions.LinkerRequireOneOnlyException;
 import Interfaces.Linkable;
 import Interfaces.OwnEntities;
 import Interfaces.OwnEntity;
 import Tools.EntityHandler;
 import Tools.FileHandler.FileDataHandler;
-import entities.BaseEntity.AssessmentResultToFile;
-import entities.BaseEntity.AssessmentTypeToFile;
-import entities.BaseEntity.MedicalRecordToFile;
-import entities.BaseEntity.MedicalRequestToFile;
+import entities.BaseEntity.*;
 import entities.LazyEntity.LazyEntity;
 import entities.LazyEntity.LazyEntityList;
 import entities.Linker.LinkerManager;
 
 import java.util.HashMap;
+import java.util.List;
 
 public class MedicalRequest extends BusinessEntity<MedicalRequestToFile> implements OwnEntity, OwnEntities, Linkable
 {
@@ -46,17 +45,23 @@ public class MedicalRequest extends BusinessEntity<MedicalRequestToFile> impleme
         return assessmentResults;
     }
 
-    public MedicalRequest(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap)
+    public MedicalRequest(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, boolean isJustConstruct)
     {
-        super(selfId,selfFile);
+        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null,isJustConstruct);
+    }
+
+    public MedicalRequest(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, MedicalRequestToFile self,boolean isJustConstruct)
+    {
+        super(selfId, selfFile, self);
+        boolean requireOne = !isJustConstruct;
         medicalRecord = new LazyEntity<MedicalRecordToFile>
         (
-            linkerManagerHashMap.get(MedicalRecordToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),
+            linkerManagerHashMap.get(MedicalRecordToFile.PREFIX).findBasedOnKeyOneResult(selfId, requireOne),
             new EntityHandler(fileDataHandlerHashMap.get(MedicalRecordToFile.PREFIX))
         );
         assessmentType = new LazyEntity<AssessmentTypeToFile>
         (
-            linkerManagerHashMap.get(AssessmentTypeToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),
+            linkerManagerHashMap.get(AssessmentTypeToFile.PREFIX).findBasedOnKeyOneResult(selfId, requireOne),
             new EntityHandler(fileDataHandlerHashMap.get(AssessmentTypeToFile.PREFIX))
         );
         assessmentResults = new LazyEntityList<AssessmentResultToFile>
@@ -64,5 +69,22 @@ public class MedicalRequest extends BusinessEntity<MedicalRequestToFile> impleme
             linkerManagerHashMap.get(AssessmentResultToFile.PREFIX).findBasedOnKey(selfId),
             new EntityHandler(fileDataHandlerHashMap.get(AssessmentResultToFile.PREFIX))
         );
+    }
+    @Override
+    public List<LinkerManager> getLinkerManager()
+    {
+        List<LinkerManager> linkerManagers = getLinkerManagerWithoutValidate();
+        for (LinkerManager linkerManager : linkerManagers)
+        {
+            if
+            (
+                linkerManager.includeClass(MedicalRecordToFile.class) ||
+                linkerManager.includeClass(AssessmentTypeToFile.class)
+            )
+            {
+                if (!linkerManager.isThisRequireOne()) throw new LinkerRequireOneOnlyException();
+            }
+        }
+        return linkerManagers;
     }
 }

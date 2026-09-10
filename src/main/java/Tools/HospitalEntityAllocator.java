@@ -19,13 +19,11 @@ import entities.LazyEntity.LazyEntityList;
 import entities.Linker.Linker;
 import entities.Linker.LinkerManager;
 
+import javax.naming.OperationNotSupportedException;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class HospitalEntityAllocator
 {
@@ -153,9 +151,203 @@ public class HospitalEntityAllocator
         }
         EntityConvertManager.BusinessEntityConstructor businessEntityConstructor = new EntityConvertManager.BusinessEntityConstructor
         (
-          id,prefixFileMap.get(prefix), fileDataHandlerHashMap,linkerManagerHashMap
+            id,prefixFileMap.get(prefix), fileDataHandlerHashMap,linkerManagerHashMap,null,false
         );
         return (T) EntityConvertManager.getBusinessConvertMap().get(prefix).apply(businessEntityConstructor);
+    }
+    public <T extends BusinessEntity<?>> void deleteBusinessEntity (T businessEntity)
+    {
+        deleteBusinessEntity(businessEntity.getId());
+    }
+
+    public void deleteBusinessEntity(String id)
+    {
+
+        String prefix = PrefixFinder.findPrefix(id);
+        Class<? extends BusinessEntity<?>> businessEntityClass = EntityConvertManager.getBusinessEntityMap().get(prefix);
+        Class<? extends BaseEntity> baseEntityClass = EntityConvertManager.getEntityMap().get(prefix);
+        if (businessEntityClass == null || baseEntityClass == null)
+        {
+            throw new IllegalArgumentException("Unknown business entity prefix: " + prefix);
+        }
+        BaseEntity entity = getEntity(id);
+        if (entity == null)
+        {
+            throw new IllegalArgumentException("Entity not found: " + id);
+        }
+        for (Field field : businessEntityClass.getDeclaredFields())
+        {
+            if (field.getType() != LazyEntity.class && field.getType() != LazyEntityList.class) continue;
+            Class<? extends BaseEntity> otherClass =
+                    ((Class<?>) ((ParameterizedType)
+                            field.getGenericType())
+                            .getActualTypeArguments()[0])
+                            .asSubclass(BaseEntity.class);
+            LinkerHandler linkerHandler = new LinkerHandler(linkerDirectory, baseEntityClass, otherClass);
+            linkerHandler.updatePartialLinker(new LinkerManager(baseEntityClass,otherClass),id);
+            linkerHandler.saveLinkers();
+        }
+        try
+        {
+            removeEntity(getEntity(id));
+        } catch (EntityNotMatchException | EntityNotFoundException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    public <Q extends BaseEntity & ConvertToFileData,T extends BusinessEntity<Q>> T convertToBusinessEntity(Q entity,boolean isEntityNew)
+    {
+        HashMap<String,LinkerManager> linkerManagerHashMap = new HashMap<>();
+        HashMap<String,FileDataHandler> fileDataHandlerHashMap = new HashMap<>();
+        String prefix = PrefixFinder.findPrefix(entity.getIdPrefix());
+        Class<? extends BusinessEntity<?>> businessEntityClass = EntityConvertManager.getBusinessEntityMap().get(prefix);
+        Class<? extends BaseEntity> baseEntityClass = entity.getClass();
+        for (Field field : businessEntityClass.getDeclaredFields())
+        {
+            if (field.getType() != LazyEntity.class && field.getType() != LazyEntityList.class) continue;
+            Class<? extends BaseEntity> otherClass =
+                    ((Class<?>) ((ParameterizedType)
+                            field.getGenericType())
+                            .getActualTypeArguments()[0])
+                            .asSubclass(BaseEntity.class);
+            LinkerHandler linkerHandler = new LinkerHandler(linkerDirectory,baseEntityClass,otherClass);
+            FileDataHandler fileDataHandler = prefixFileMap.get(EntityConvertManager.getPrefixMap().get(otherClass));
+            linkerManagerHashMap.put(EntityConvertManager.getPrefixMap().get(otherClass),linkerHandler.getLinkerManager());
+            if (fileDataHandler == null)
+                throw new IllegalStateException("No entity file handler for " + otherClass.getName()); fileDataHandlerHashMap.put(EntityConvertManager.getPrefixMap().get(otherClass),fileDataHandler);
+        }
+        EntityConvertManager.BusinessEntityConstructor businessEntityConstructor = new EntityConvertManager.BusinessEntityConstructor
+        (
+            entity.getId(),prefixFileMap.get(prefix), fileDataHandlerHashMap,linkerManagerHashMap,entity,isEntityNew
+        );
+        return (T) EntityConvertManager.getBusinessConvertMap().get(prefix).apply(businessEntityConstructor);
+
+    }
+    public <T extends BaseEntity & ConvertToFileData> void assignNewId (T entity)
+    {
+        List<BaseEntity> allEntity = getAllEntities(entity.getIdPrefix());
+        List<Integer> allNumbers = new ArrayList<>();
+        for (BaseEntity baseEntity : allEntity)
+        {
+            allNumbers.add(baseEntity.getIdNumber());
+        }
+        if (allNumbers.isEmpty())
+        {
+            try
+            {
+                entity.setIdNumber(1); return;
+            } catch (OperationNotSupportedException e)
+            {
+                throw new RuntimeException(e);
+            }
+
+        }
+        allNumbers.sort(Integer::compareTo);
+        for (int i = 0; i <= allNumbers.size() - 1; i++)
+        {
+            if (i == 0) continue;
+            if (allNumbers.get(i).equals(allNumbers.get(i-1))) throw new RuntimeException("Duplicate id");
+            if (allNumbers.get(i)-allNumbers.get(i-1) > 1)
+            {
+                try
+                {
+                    entity.setIdNumber(allNumbers.get(i-1) + 1);return;
+                } catch (OperationNotSupportedException e)
+                {
+                    throw new RuntimeException(e);
+                }
+            }
+            if(i == allNumbers.size()-1)
+            {
+                try
+                {
+                    entity.setIdNumber(allNumbers.get(i) + 1);
+                    return;
+                } catch (OperationNotSupportedException e)
+                {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        try
+        {
+            entity.setIdNumber(allNumbers.getFirst()+1);
+        } catch (OperationNotSupportedException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+    public <T extends BaseEntity & ConvertToFileData> void addEntityForceNewId(T entity)
+    {
+        assignNewId(entity);
+        try
+        {
+            addEntity(entity);
+        } catch (EntityRepeatedException e)
+        {
+            throw new RuntimeException(e);
+        }
+    }
+    public <T extends BusinessEntity<?>> List<T> getAllBusinessEntities(String prefix)
+    {
+        Class<? extends BusinessEntity<?>> businessEntityClass = EntityConvertManager.getBusinessEntityMap().get(prefix);
+        Class<? extends BaseEntity> baseEntityClass = EntityConvertManager.getEntityMap().get(prefix);
+        FileDataHandler selfFile = prefixFileMap.get(prefix);
+        var factory = EntityConvertManager.getBusinessConvertMap().get(prefix);
+        if (businessEntityClass == null || baseEntityClass == null
+                || selfFile == null || factory == null)
+            throw new IllegalArgumentException("Missing entity mapping or file handler for " + prefix);
+
+        List<BaseEntity> records = new EntityHandler(selfFile).getAllEntities();
+        List<T> result = new ArrayList<>(records.size());
+        if (records.isEmpty()) return result;
+        Set<String> ids = new java.util.HashSet<>();
+        for (BaseEntity record : records)
+        {
+            if (!baseEntityClass.isInstance(record))
+                throw new IllegalStateException("Wrong entity type in " + selfFile.getFile());
+            if (!ids.add(record.getId()))
+                throw new IllegalStateException("Duplicate entity ID: " + record.getId());
+        }
+
+        HashMap<String, FileDataHandler> relatedFiles = new HashMap<>();
+        HashMap<String, LinkerManager> allLinkerManagers = new HashMap<>();
+        for (Field field : businessEntityClass.getDeclaredFields())
+        {
+            if (field.getType() != LazyEntity.class && field.getType() != LazyEntityList.class)
+                continue;
+
+            Class<? extends BaseEntity> otherClass =
+                    ((Class<?>) ((ParameterizedType) field.getGenericType())
+                            .getActualTypeArguments()[0]).asSubclass(BaseEntity.class);
+            String otherPrefix = EntityConvertManager.getPrefixMap().get(otherClass);
+            FileDataHandler relatedFile = prefixFileMap.get(otherPrefix);
+            if (otherPrefix == null || relatedFile == null)
+                throw new IllegalStateException("Missing related type or file handler: " + otherClass.getName());
+            if (allLinkerManagers.containsKey(otherPrefix)) continue;
+
+            LinkerHandler linkerHandler = new LinkerHandler(linkerDirectory, baseEntityClass, otherClass);
+            relatedFiles.put(otherPrefix, relatedFile);
+            allLinkerManagers.put(otherPrefix, linkerHandler.getLinkerManager());
+        }
+
+        for (BaseEntity record : records)
+        {
+            HashMap<String, LinkerManager> ownLinkerManagers = new HashMap<>();
+            for (var entry : allLinkerManagers.entrySet())
+            {
+                ownLinkerManagers.put(entry.getKey(),
+                        entry.getValue().filterBasedOnKey(record.getId()));
+            }
+
+            EntityConvertManager.BusinessEntityConstructor context = new EntityConvertManager.BusinessEntityConstructor(
+                    record.getId(), selfFile, relatedFiles, ownLinkerManagers,record,false);
+            result.add((T) businessEntityClass.cast(factory.apply(context)));
+        }
+
+        return result;
     }
     private <T extends BusinessEntity<?> & OwnerShip & Linkable> void saveLinkers(T businessEntity)
     {
@@ -177,64 +369,92 @@ public class HospitalEntityAllocator
 
     public <T extends BusinessEntity<?> & OwnerShip & Linkable> void saveChanges(T businessEntity)
     {
-        //linker first
-        saveLinkers(businessEntity);
+        if (businessEntity.getId() == null) assignNewId(businessEntity.getSelf());
+        List<LazyEntityList<? extends BaseEntity>> lazyEntityLists = new ArrayList<>();
+        List<LazyEntity<? extends BaseEntity>> lazyEntitySingleList = new ArrayList<>();
         if (businessEntity instanceof OwnEntities ownEntities)
         {
-            //entity second
-            List<LazyEntityList<? extends BaseEntity>> lazyEntityLists = ownEntities.getEntities();
+            //entity
+            lazyEntityLists = ownEntities.getEntities();
             for (LazyEntityList<? extends BaseEntity> lazyEntityList : lazyEntityLists)
             {
-                EntityHandler entityHandler = null;
                 for (int i = 0; i < lazyEntityList.size(); i++)
                 {
                     if (!lazyEntityList.isChanged(i)) continue;
-                    if (entityHandler == null) entityHandler = getEntityHandler(lazyEntityList.get(i).getId());
-                    entityHandler.upsertEntity(lazyEntityList.get(i));
-                    lazyEntityList.markAsSaved(i);
+                    if (lazyEntityList.get(i).getId() == null) assignNewId(lazyEntityList.get(i));
                 }
             }
         }
         if (businessEntity instanceof OwnEntity ownEntity)
         {
-            List<LazyEntity<? extends BaseEntity>> lazyEntityList = ownEntity.getEntity();
-            EntityHandler entityHandler;
-            for (LazyEntity<? extends BaseEntity> lazyEntity : lazyEntityList)
+            lazyEntitySingleList = ownEntity.getEntity();
+            for (LazyEntity<? extends BaseEntity> lazyEntity : lazyEntitySingleList)
             {
                 if (!lazyEntity.isSelfAlrChanged()) continue;
-                entityHandler = getEntityHandler(lazyEntity.getId());
-                entityHandler.upsertEntity(lazyEntity.getSelf());
-                lazyEntity.updateBackup();
+                if (lazyEntity.getId() == null) assignNewId(lazyEntity.getSelf());
             }
         }
-        //self last
-        EntityHandler entityHandler = getEntityHandler(businessEntity.getSelf().getId());
-        entityHandler.upsertEntity(businessEntity.getSelf());
+        //linker
+        saveLinkers(businessEntity);
+        //entity
+        saveLazyEntityListList(lazyEntityLists);
+        saveLazyEntitySingleList(lazyEntitySingleList);
+        //self
+        upsertEntity(businessEntity.getSelf());
+
+    }
+
+    private void saveLazyEntityListList(List<LazyEntityList<? extends BaseEntity>> lazyEntityLists)
+    {
+        for(LazyEntityList<?> lazyEntityList : lazyEntityLists)
+        {
+            for (int i = 0; i < lazyEntityList.size(); i++)
+            {
+                if (!lazyEntityList.isChanged(i)) continue;
+                upsertEntity(lazyEntityList.get(i));
+                lazyEntityList.markAsSaved(i);
+            }
+        }
+    }
+
+    private void saveLazyEntitySingleList(List<LazyEntity<? extends BaseEntity>> lazyEntitySingleList)
+    {
+        for (LazyEntity<? extends BaseEntity> lazyEntity : lazyEntitySingleList)
+        {
+            if (!lazyEntity.isSelfAlrChanged()) continue;
+            upsertEntity(lazyEntity.getSelf());
+            lazyEntity.updateBackup();
+        }
     }
 
 
-    public <T extends BaseEntity> T getEntity(String id)
+    private <T extends BaseEntity> T getEntity(String id)
     {
         EntityHandler entityHandler = getEntityHandler(id);
         if (entityHandler == null) return null;
         return entityHandler.getEntity(id);
     }
 
-    public <T extends BaseEntity & ConvertToFileData> void addEntity (T entity) throws EntityRepeatedException
+    private <T extends BaseEntity & ConvertToFileData> void addEntity (T entity) throws EntityRepeatedException
     {
         EntityHandler entityHandler = getEntityHandler(entity.getId());
         if (entityHandler == null) throw new IdPrefixNotFoundException(entity.getId());
         entityHandler.addEntity(entity);
     }
-
-    public void removeEntity(BaseEntity entity) throws EntityNotMatchException, EntityNotFoundException
+    private <T extends BaseEntity & ConvertToFileData> void upsertEntity(T entity)
+    {
+        EntityHandler entityHandler = getEntityHandler(entity.getId());
+        if (entityHandler == null) throw new IdPrefixNotFoundException(entity.getId());
+        entityHandler.upsertEntity(entity);
+    }
+    private void removeEntity(BaseEntity entity) throws EntityNotMatchException, EntityNotFoundException
     {
         EntityHandler entityHandler = getEntityHandler(entity.getId());
         if (entityHandler == null) throw new IdPrefixNotFoundException(entity.getId());
         entityHandler.deleteEntity(entity, EntityHandler.MatchLogic.CODE_ONLY);
     }
 
-    private <T extends BaseEntity & ConvertToFileData> void updateEntity(T entity) throws EntityNotFoundException
+    private  <T extends BaseEntity & ConvertToFileData> void updateEntity(T entity) throws EntityNotFoundException
     {
         EntityHandler entityHandler = getEntityHandler(entity.getId());
         if (entityHandler == null) throw new IdPrefixNotFoundException(entity.getId());
@@ -247,6 +467,15 @@ public class HospitalEntityAllocator
         String prefix = PrefixFinder.findPrefix(id);
         return new EntityHandler(prefixFileMap.get(prefix));
     }
+
+    private  <T extends BaseEntity> List<T> getAllEntities(String prefix)
+    {
+        FileDataHandler handler = prefixFileMap.get(prefix);
+        if (handler == null) return new ArrayList<>();
+        return new EntityHandler(handler).getAllEntities();
+    }
+
+
 
 }
 class EntityFile

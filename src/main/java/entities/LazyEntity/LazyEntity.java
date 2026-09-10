@@ -59,7 +59,7 @@ public class LazyEntity<T extends BaseEntity & ConvertToFileData>
     {
         try
         {
-            if (id == null) return null;
+            if (id == null && self == null) return null;
             if (self == null)
             {
                 self = entityHandler.getEntity(id);
@@ -75,7 +75,7 @@ public class LazyEntity<T extends BaseEntity & ConvertToFileData>
         return self;
     }
 
-    public String getId() {return id;}
+    public String getId() {return self != null ? self.getId() : id;}
 
     public void changeSelf(T entity)
     {

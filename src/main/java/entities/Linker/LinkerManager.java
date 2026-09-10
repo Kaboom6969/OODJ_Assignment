@@ -48,11 +48,15 @@ public class LinkerManager implements ConvertToFileData
         this.classSecond = linkerManager.classSecond;
         this.linkers = linkerManager.linkers;
     }
-
     public LinkerManager(Class<? extends BaseEntity> first, Class<? extends BaseEntity> second, List<Linker> linkers)
     {
         classSort(first, second);
         this.linkers = linkers;
+    }
+
+    public boolean includeClass(Class<? extends BaseEntity> clazz)
+    {
+        return this.classFirst == clazz || this.classSecond == clazz;
     }
 
     private void classSort(Class<? extends BaseEntity> first, Class<? extends BaseEntity> second)
@@ -80,6 +84,10 @@ public class LinkerManager implements ConvertToFileData
         return KeyLocation.NOT_FOUND;
     }
 
+    public boolean isThisRequireOne()
+    {
+        return linkers.size() == 1;
+    }
     private Linker linkerAutoCheck(Linker linker)
     {
         if (linkerPrefixCheck(linker) != KeyLocation.NOT_FOUND)
@@ -154,7 +162,7 @@ public class LinkerManager implements ConvertToFileData
 
     public List<String> findBasedOnKey(String key)
     {
-
+        if (key == null) return new ArrayList<>();
         KeyLocation keyLocation = getKeyLocation(key);
         if (keyLocation == KeyLocation.FIRST)
         {

@@ -16,7 +16,7 @@ import java.util.List;
 
 public interface Linkable
 {
-    default List<LinkerManager> getLinkerManager()
+    default List<LinkerManager> getLinkerManagerWithoutValidate ()
     {
         List<LinkerManager> list = new ArrayList<>();
         Class<?> classThatCallRightNow = this.getClass();
@@ -85,6 +85,11 @@ public interface Linkable
 
         }
         return list;
+    }
+
+    default List<LinkerManager> getLinkerManager()
+    {
+        return getLinkerManagerWithoutValidate();
     }
 }
 

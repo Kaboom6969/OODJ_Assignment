@@ -1,17 +1,16 @@
 package entities.BusinessEntity;
 
+import Exceptions.LinkerExceptions.LinkerRequireOneOnlyException;
 import Interfaces.Linkable;
 import Interfaces.OwnEntity;
 import Tools.EntityHandler;
 import Tools.FileHandler.FileDataHandler;
-import entities.BaseEntity.BillToFile;
-import entities.BaseEntity.ConsultationRateToFile;
-import entities.BaseEntity.InsuranceToFile;
-import entities.BaseEntity.MedicalRecordToFile;
+import entities.BaseEntity.*;
 import entities.LazyEntity.LazyEntity;
 import entities.Linker.LinkerManager;
 
 import java.util.HashMap;
+import java.util.List;
 
 public class Bill extends BusinessEntity<BillToFile> implements OwnEntity, Linkable
 {
@@ -49,12 +48,18 @@ public class Bill extends BusinessEntity<BillToFile> implements OwnEntity, Linka
         consultationRate.changeSelf(consultationRateToFile);
     }
 
-    public Bill(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap)
+    public Bill(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap,boolean isJustConstruct)
     {
-        super(selfId,selfFile);
+        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null,isJustConstruct);
+    }
+
+    public Bill(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, BillToFile self,boolean isJustConstruct)
+    {
+        super(selfId, selfFile, self);
+        boolean requireOne = !isJustConstruct;
         medicalRecord = new LazyEntity<MedicalRecordToFile>
         (
-            linkerManagerHashMap.get(MedicalRecordToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),
+            linkerManagerHashMap.get(MedicalRecordToFile.PREFIX).findBasedOnKeyOneResult(selfId, requireOne),
             new EntityHandler(fileDataHandlerHashMap.get(MedicalRecordToFile.PREFIX))
         );
         insurance = new LazyEntity<InsuranceToFile>
@@ -64,8 +69,25 @@ public class Bill extends BusinessEntity<BillToFile> implements OwnEntity, Linka
         );
         consultationRate = new LazyEntity<ConsultationRateToFile>
         (
-            linkerManagerHashMap.get(ConsultationRateToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),
+            linkerManagerHashMap.get(ConsultationRateToFile.PREFIX).findBasedOnKeyOneResult(selfId, requireOne),
             new EntityHandler(fileDataHandlerHashMap.get(ConsultationRateToFile.PREFIX))
         );
+    }
+    @Override
+    public List<LinkerManager> getLinkerManager()
+    {
+        List<LinkerManager> linkerManagers = getLinkerManagerWithoutValidate();
+        for (LinkerManager linkerManager : linkerManagers)
+        {
+            if
+            (
+                linkerManager.includeClass(MedicalRecordToFile.class) ||
+                linkerManager.includeClass(ConsultationRateToFile.class)
+            )
+            {
+                if (!linkerManager.isThisRequireOne()) throw new LinkerRequireOneOnlyException();
+            }
+        }
+        return linkerManagers;
     }
 }
