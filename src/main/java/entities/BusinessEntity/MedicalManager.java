@@ -20,12 +20,12 @@ public class MedicalManager extends BusinessEntity<MedicalManagerToFile> impleme
         return doctors;
     }
 
-    public MedicalManager(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap)
+    public MedicalManager(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap,boolean isJustConstruct)
     {
-        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null);
+        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null, isJustConstruct);
     }
 
-    public MedicalManager(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, MedicalManagerToFile self)
+    public MedicalManager(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, MedicalManagerToFile self,boolean isJustConstruct)
     {
         super(selfId, selfFile, self);
         doctors = new LazyEntityList<DoctorToFile>

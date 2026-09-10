@@ -27,12 +27,12 @@ public class Insurance extends BusinessEntity<InsuranceToFile> implements OwnEnt
         return bills;
     }
 
-    public Insurance(String selfId, FileDataHandler selfFile, HashMap<String, FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap)
+    public Insurance(String selfId, FileDataHandler selfFile, HashMap<String, FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, boolean isJustConstruct)
     {
-        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null);
+        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null,isJustConstruct);
     }
 
-    public Insurance(String selfId, FileDataHandler selfFile, HashMap<String, FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, InsuranceToFile self)
+    public Insurance(String selfId, FileDataHandler selfFile, HashMap<String, FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, InsuranceToFile self,boolean isJustConstruct)
     {
         super(selfId, selfFile, self);
         patients = new LazyEntityList<PatientToFile>

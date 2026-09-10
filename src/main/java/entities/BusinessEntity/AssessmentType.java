@@ -27,15 +27,14 @@ public class AssessmentType extends BusinessEntity<AssessmentTypeToFile> impleme
         return assessmentResults;
     }
 
-    public AssessmentType(String selfId, FileDataHandler selfFile, HashMap<String, FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap)
+    public AssessmentType(String selfId, FileDataHandler selfFile, HashMap<String, FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap,boolean isJustConstruct)
     {
-        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null);
+        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null,isJustConstruct);
     }
 
-    public AssessmentType(String selfId, FileDataHandler selfFile, HashMap<String, FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, AssessmentTypeToFile self)
+    public AssessmentType(String selfId, FileDataHandler selfFile, HashMap<String, FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, AssessmentTypeToFile self,boolean isJustConstruct)
     {
         super(selfId, selfFile, self);
-
         medicalRequests = new LazyEntityList<MedicalRequestToFile>
         (
             linkerManagerHashMap.get(MedicalRequestToFile.PREFIX).findBasedOnKey(selfId),

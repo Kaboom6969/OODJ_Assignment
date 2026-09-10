@@ -34,12 +34,12 @@ public class Patient extends BusinessEntity<PatientToFile> implements OwnEntity,
         return appointments;
     }
 
-    public Patient(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap)
+    public Patient(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap,boolean isJustConstruct)
     {
-        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null);
+        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null,isJustConstruct);
     }
 
-    public Patient(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, PatientToFile self)
+    public Patient(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, PatientToFile self,boolean isJustConstruct)
     {
         super(selfId, selfFile, self);
         insurance = new LazyEntity<InsuranceToFile>

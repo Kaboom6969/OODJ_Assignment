@@ -35,12 +35,12 @@ public class Department extends BusinessEntity<DepartmentToFile> implements OwnE
     {
         return consultations;
     }
-    public Department(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String,LinkerManager> linkerManagerHashMap)
+    public Department(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String,LinkerManager> linkerManagerHashMap,boolean isJustConstruct)
     {
-        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null);
+        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null,isJustConstruct);
     }
 
-    public Department(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String,LinkerManager> linkerManagerHashMap, DepartmentToFile self)
+    public Department(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String,LinkerManager> linkerManagerHashMap, DepartmentToFile self, boolean isJustConstruct)
     {
         super(selfId, selfFile, self);
         doctors = new LazyEntityList<DoctorToFile>

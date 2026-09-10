@@ -26,8 +26,8 @@ public abstract class BusinessEntity<T extends BaseEntity & ConvertToFileData>
 
     public BusinessEntity(String id, FileDataHandler selfFile, T self)
     {
-        java.util.Objects.requireNonNull(id, "ID is required");
         java.util.Objects.requireNonNull(selfFile, "Self file handler is required");
+        if (self == null && id == null)throw new NullPointerException("Self or Id is required");
         EntityHandler handler = new EntityHandler(selfFile);
         if (self == null)
         {
@@ -35,7 +35,7 @@ public abstract class BusinessEntity<T extends BaseEntity & ConvertToFileData>
         }
         else
         {
-            if (!id.equals(self.getId()))
+            if (id != null && !id.equals(self.getId()))
                 throw new IllegalArgumentException("Self ID does not match: " + id);
             this.self = new LazyEntity<T>(self, handler);
             this.self.updateBackup();

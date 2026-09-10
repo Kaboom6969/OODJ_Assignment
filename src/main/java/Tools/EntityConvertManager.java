@@ -31,7 +31,8 @@ public class EntityConvertManager
             FileDataHandler selfFile,
             HashMap<String,FileDataHandler> fileDataHandlerHashMap,
             HashMap<String, LinkerManager> linkerManagerHashMap,
-            BaseEntity self
+            BaseEntity self,
+            boolean isJustConstruct
     )
     {
         public BusinessEntityConstructor
@@ -44,9 +45,9 @@ public class EntityConvertManager
                 );
             }
         }
-        public BusinessEntityConstructor(String selfId, FileDataHandler selfFile, HashMap<String, FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap)
+        public BusinessEntityConstructor(String selfId, FileDataHandler selfFile, HashMap<String, FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap,boolean isJustConstruct)
         {
-            this(selfId,selfFile,fileDataHandlerHashMap,linkerManagerHashMap,null);
+            this(selfId,selfFile,fileDataHandlerHashMap,linkerManagerHashMap,null,isJustConstruct);
         }
 
     }
@@ -134,8 +135,8 @@ public class EntityConvertManager
                                     .asSubclass(BaseEntity.class);
                     Function<BusinessEntityConstructor,BusinessEntity<?>> constructEntity = data -> {
                         try {
-                            return (BusinessEntity<?>) clazz.getConstructor(String.class, FileDataHandler.class,HashMap.class,HashMap.class,baseEntityClass).
-                                    newInstance(data.selfId,data.selfFile,data.fileDataHandlerHashMap,data.linkerManagerHashMap,data.self);
+                            return (BusinessEntity<?>) clazz.getConstructor(String.class, FileDataHandler.class,HashMap.class,HashMap.class,baseEntityClass,boolean.class).
+                                    newInstance(data.selfId,data.selfFile,data.fileDataHandlerHashMap,data.linkerManagerHashMap,data.self,data.isJustConstruct);
                         } catch (Exception e) {
                             throw new RuntimeException("Instance Fail", e);
                         }
