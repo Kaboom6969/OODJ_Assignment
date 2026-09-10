@@ -297,7 +297,7 @@ public class MedicalManagerForm extends JFrame {
                     return;
                 }
 
-                operation.addDepartment(id, name);
+                operation.addDepartment(name);
                 deptTableModel.addRow(new Object[]{id, name});
 
                 // Sync department dropdown

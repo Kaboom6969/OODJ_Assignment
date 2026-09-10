@@ -7,8 +7,11 @@ import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.DepartmentToFile;
 import entities.BaseEntity.Users.MedicalManagerToFile;
 import entities.BaseEntity.Users.UserWithDetails;
+import entities.BusinessEntity.BusinessEntity;
+import entities.BusinessEntity.Department;
 import entities.BusinessEntity.MedicalManager;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -82,46 +85,50 @@ public class MedicalManagerOperation {
     }
 
     // Load all department entities using allocator
-    public List<DepartmentToFile> loadDepartmentEntities() {
-        return allocator.getAllEntities(DepartmentToFile.PREFIX);
+    public List<Department> loadDepartmentEntities() {
+        return allocator.getAllBusinessEntities(DepartmentToFile.PREFIX);
     }
 
     // Load departments formatted for UI table
     public ArrayList<String[]> loadDepartment() {
         ArrayList<String[]> list = new ArrayList<>();
-        for (DepartmentToFile dept : loadDepartmentEntities()) {
-            list.add(new String[]{dept.getId(), dept.getName()});
+        for (Department department : loadDepartmentEntities()) {
+            list.add(new String[]{department.getId(),department.getSelf().getName()});
         }
         return list;
     }
 
-    // Generate next department ID (e.g., DP0003)
-    public String generateNextDeptId() {
-        List<DepartmentToFile> list = loadDepartmentEntities();
+    public String generateNextDeptId()
+    {
+        List<Department> list = loadDepartmentEntities();
         String prefix = DepartmentToFile.PREFIX;
+
+        if (list.isEmpty()) {
+            return String.format(prefix + "%04d", 1);
+        }
+
         int maxNum = 0;
-        for (DepartmentToFile dept : list) {
-            if (dept.getIdNumber() != null && dept.getIdNumber() > maxNum) {
-                maxNum = dept.getIdNumber();
-            }
+        for (Department dept : list) {
+            try {
+                String idStr = dept.getId();
+                if (idStr.startsWith(prefix)) {
+                    int num = Integer.parseInt(idStr.substring(prefix.length()));
+                    if (num > maxNum) {
+                        maxNum = num;
+                    }
+                }
+            } catch (Exception ignored) {}
         }
         return String.format(prefix + "%04d", maxNum + 1);
     }
-
     // Add new department using allocator.addEntity
-    public void addDepartment(String deptId, String deptName) {
-        if (deptId == null || deptId.trim().isEmpty()) {
-            throw new IllegalArgumentException("Department ID cannot be empty.");
-        }
+    public void addDepartment(String deptName) {
         if (deptName == null || deptName.trim().isEmpty()) {
             throw new IllegalArgumentException("Department Name cannot be empty.");
         }
-        DepartmentToFile dept = new DepartmentToFile(deptId.trim(), deptName.trim());
-        try {
-            allocator.addEntity(dept);
-        } catch (EntityRepeatedException e) {
-            throw new IllegalArgumentException("Department ID '" + deptId + "' already exists.");
-        }
+        DepartmentToFile dept = new DepartmentToFile(null, deptName.trim());
+        Department department = allocator.convertToBusinessEntity(dept,true);
+        allocator.saveChanges(department);
     }
 
     // Update existing department using allocator.updateEntity
@@ -133,11 +140,8 @@ public class MedicalManagerOperation {
             throw new IllegalArgumentException("Department Name cannot be empty.");
         }
         DepartmentToFile dept = new DepartmentToFile(deptId.trim(), newDeptName.trim());
-        try {
-            allocator.updateEntity(dept);
-        } catch (EntityNotFoundException e) {
-            throw new IllegalArgumentException("Department ID '" + deptId + "' not found.");
-        }
+        Department department = allocator.convertToBusinessEntity(dept,false);
+        allocator.saveChanges(department);
     }
 
     // Delete department using allocator.removeEntity
@@ -149,10 +153,6 @@ public class MedicalManagerOperation {
         if (dept == null) {
             throw new IllegalArgumentException("Department ID '" + deptId + "' not found.");
         }
-        try {
-            allocator.removeEntity(dept);
-        } catch (EntityNotFoundException | EntityNotMatchException e) {
-            throw new IllegalArgumentException("Delete failed: " + e.getMessage());
-        }
+        allocator.deleteBusinessEntity(deptId);
     }
 }
