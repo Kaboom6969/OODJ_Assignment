@@ -428,7 +428,7 @@ public class HospitalEntityAllocator
     }
 
 
-    private <T extends BaseEntity> T getEntity(String id)
+    public <T extends BaseEntity> T getEntity(String id)
     {
         EntityHandler entityHandler = getEntityHandler(id);
         if (entityHandler == null) return null;
