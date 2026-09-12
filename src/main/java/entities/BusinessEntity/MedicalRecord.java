@@ -1,5 +1,6 @@
 package entities.BusinessEntity;
 
+import Exceptions.LinkerExceptions.LinkerRequireOneOnlyException;
 import Interfaces.Linkable;
 import Interfaces.OwnEntities;
 import Interfaces.OwnEntity;
@@ -11,6 +12,7 @@ import entities.LazyEntity.LazyEntityList;
 import entities.Linker.LinkerManager;
 
 import java.util.HashMap;
+import java.util.List;
 
 public class MedicalRecord extends BusinessEntity<MedicalRecordToFile> implements OwnEntity, OwnEntities, Linkable
 {
@@ -55,12 +57,18 @@ public class MedicalRecord extends BusinessEntity<MedicalRecordToFile> implement
         return assessmentResults;
     }
 
-    public MedicalRecord(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap)
+    public MedicalRecord(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, boolean isJustConstruct)
     {
-        super(selfId,selfFile);
+        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null,isJustConstruct);
+    }
+
+    public MedicalRecord(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, MedicalRecordToFile self,boolean isJustConstruct)
+    {
+        super(selfId, selfFile, self);
+        boolean requireOne = !isJustConstruct;
         appointment = new LazyEntity<AppointmentToFile>
         (
-            linkerManagerHashMap.get(AppointmentToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),
+            linkerManagerHashMap.get(AppointmentToFile.PREFIX).findBasedOnKeyOneResult(selfId, requireOne),
             new EntityHandler(fileDataHandlerHashMap.get(AppointmentToFile.PREFIX))
         );
         bill = new LazyEntity<BillToFile>
@@ -83,5 +91,21 @@ public class MedicalRecord extends BusinessEntity<MedicalRecordToFile> implement
             linkerManagerHashMap.get(AssessmentResultToFile.PREFIX).findBasedOnKey(selfId),
             new EntityHandler(fileDataHandlerHashMap.get(AssessmentResultToFile.PREFIX))
         );
+    }
+    @Override
+    public List<LinkerManager> getLinkerManager()
+    {
+        List<LinkerManager> linkerManagers = getLinkerManagerWithoutValidate();
+        for (LinkerManager linkerManager : linkerManagers)
+        {
+            if
+            (
+                linkerManager.includeClass(AppointmentToFile.class)
+            )
+            {
+                if (!linkerManager.isThisRequireOne()) throw new LinkerRequireOneOnlyException();
+            }
+        }
+        return linkerManagers;
     }
 }

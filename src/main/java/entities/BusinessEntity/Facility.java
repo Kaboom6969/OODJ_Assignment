@@ -1,5 +1,6 @@
 package entities.BusinessEntity;
 
+import Exceptions.LinkerExceptions.LinkerRequireOneOnlyException;
 import Interfaces.Linkable;
 import Interfaces.OwnEntities;
 import Interfaces.OwnEntity;
@@ -8,11 +9,13 @@ import Tools.FileHandler.FileDataHandler;
 import entities.BaseEntity.AppointmentToFile;
 import entities.BaseEntity.DepartmentToFile;
 import entities.BaseEntity.FacilityToFile;
+import entities.BaseEntity.Users.DoctorToFile;
 import entities.LazyEntity.LazyEntity;
 import entities.LazyEntity.LazyEntityList;
 import entities.Linker.LinkerManager;
 
 import java.util.HashMap;
+import java.util.List;
 
 public class Facility extends BusinessEntity<FacilityToFile> implements OwnEntity, OwnEntities, Linkable
 {
@@ -34,12 +37,18 @@ public class Facility extends BusinessEntity<FacilityToFile> implements OwnEntit
         return appointments;
     }
 
-    public Facility(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap)
+    public Facility(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, boolean isJustConstruct)
     {
-        super(selfId,selfFile);
+        this(selfId, selfFile, fileDataHandlerHashMap, linkerManagerHashMap, null,isJustConstruct);
+    }
+
+    public Facility(String selfId, FileDataHandler selfFile, HashMap<String,FileDataHandler> fileDataHandlerHashMap, HashMap<String, LinkerManager> linkerManagerHashMap, FacilityToFile self, boolean isJustConstruct)
+    {
+        super(selfId, selfFile, self);
+        boolean requireOne = !isJustConstruct;
         belongsToDepartment = new LazyEntity<DepartmentToFile>
         (
-            linkerManagerHashMap.get(DepartmentToFile.PREFIX).findBasedOnKeyOneResult(selfId, true),
+            linkerManagerHashMap.get(DepartmentToFile.PREFIX).findBasedOnKeyOneResult(selfId, requireOne),
             new EntityHandler(fileDataHandlerHashMap.get(DepartmentToFile.PREFIX))
         );
         appointments = new LazyEntityList<AppointmentToFile>
@@ -47,5 +56,21 @@ public class Facility extends BusinessEntity<FacilityToFile> implements OwnEntit
             linkerManagerHashMap.get(AppointmentToFile.PREFIX).findBasedOnKey(selfId),
             new EntityHandler(fileDataHandlerHashMap.get(AppointmentToFile.PREFIX))
         );
+    }
+    @Override
+    public List<LinkerManager> getLinkerManager()
+    {
+        List<LinkerManager> linkerManagers = getLinkerManagerWithoutValidate();
+        for (LinkerManager linkerManager : linkerManagers)
+        {
+            if
+            (
+                linkerManager.includeClass(DepartmentToFile.class)
+            )
+            {
+                if (!linkerManager.isThisRequireOne()) throw new LinkerRequireOneOnlyException();
+            }
+        }
+        return linkerManagers;
     }
 }

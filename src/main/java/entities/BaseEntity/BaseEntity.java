@@ -4,13 +4,19 @@ package entities.BaseEntity;
 import Exceptions.IdPrefixExceptions.IdPrefixNotMatchException;
 import Exceptions.IdPrefixExceptions.IdPrefixOversizeException;
 
+import javax.naming.OperationNotSupportedException;
 import java.util.Objects;
 
 public abstract class BaseEntity
 {
     private static int idNumberWidth = 0;
-    private final Integer idNumber;
+    private Integer idNumber;
 
+    public void setIdNumber(int idNumber) throws OperationNotSupportedException
+    {
+        if (this.idNumber != null)throw new OperationNotSupportedException("When idNumber is set,cannot change anymore!");
+        this.idNumber = idNumber;
+    }
 
     public abstract String getIdPrefix();
 
@@ -37,6 +43,10 @@ public abstract class BaseEntity
 
     public BaseEntity(String id)
     {
+        if (id == null)
+        {
+            this.idNumber = null; return;
+        }
         int prefixNumber = getIdPrefix().length();
         if (id.length() <= prefixNumber) throw new IllegalArgumentException("Id is broken!");
         if (!id.substring(0, prefixNumber).equals(getIdPrefix()))

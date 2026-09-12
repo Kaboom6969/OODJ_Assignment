@@ -29,6 +29,9 @@ public abstract class UserWithDetails extends User
 
     private String phoneNumber;
     private LocalDate dateOfBirth;
+
+
+
     private Gender gender;
 
     public UserWithDetails(String id) {super(id);}
@@ -55,6 +58,20 @@ public abstract class UserWithDetails extends User
         this.phoneNumber = data[6];
     }
 
+    public void setPhoneNumber(String phoneNumber)
+    {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public void setDateOfBirth(LocalDate dateOfBirth)
+    {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    public void setGender(Gender gender)
+    {
+        this.gender = gender;
+    }
     @Override
     public boolean equals(Object o)
     {
