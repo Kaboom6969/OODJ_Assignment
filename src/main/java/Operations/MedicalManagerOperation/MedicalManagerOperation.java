@@ -4,21 +4,25 @@ import Exceptions.EntityExceptions.EntityNotFoundException;
 import Exceptions.EntityExceptions.EntityNotMatchException;
 import Exceptions.EntityExceptions.EntityRepeatedException;
 import Tools.HospitalEntityAllocator;
-import entities.BaseEntity.DepartmentToFile;
-import entities.BaseEntity.DoctorShiftToFile;
+import entities.BaseEntity.*;
 import entities.BaseEntity.Users.DoctorToFile;
 import entities.BaseEntity.Users.MedicalManagerToFile;
 import entities.BaseEntity.Users.UserWithDetails;
 import entities.BusinessEntity.*;
 
 import javax.print.Doc;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MedicalManagerOperation {
 
@@ -258,6 +262,17 @@ public class MedicalManagerOperation {
             throw new IllegalArgumentException("Invalid date format. Please use YYYY-MM-DD.");
         }
 
+        // Fetch target doctor entity
+        Doctor doctor = allocator.getBusinessEntity(doctorId);
+        if (doctor == null || doctor.getSelf() == null) {
+            throw new IllegalArgumentException("Doctor not found: " + doctorId);
+        }
+
+        // Check for shift conflicts (now both doctor and shiftDate are valid and available)
+        if (hasShiftConflict(doctorId, shiftDate)) {
+            throw new IllegalArgumentException("Dr. " + doctor.getSelf().getName() + " already has a shift scheduled on " + dateStr + ".");
+        }
+
         // Determine start and end time based on selected shift
         LocalTime startTime;
         LocalTime endTime;
@@ -270,12 +285,6 @@ public class MedicalManagerOperation {
         } else { // Night
             startTime = LocalTime.of(0, 0);
             endTime = LocalTime.of(8, 0);
-        }
-
-        // Fetch target doctor business entity
-        Doctor doctor = allocator.getBusinessEntity(doctorId);
-        if (doctor == null || doctor.getSelf() == null) {
-            throw new IllegalArgumentException("Doctor not found: " + doctorId);
         }
 
         // Create new DoctorShift entity (ID is null for auto-generation)
@@ -295,5 +304,179 @@ public class MedicalManagerOperation {
         allocator.deleteBusinessEntity(shiftId.trim());
     }
 
-    ;
+    // Data container for aggregated hospital KPIs and tabular department metrics
+    public static class HospitalMetrics {
+        public double totalRevenue = 0.0;
+        public int totalAppointments = 0;
+        public int activeDoctors = 0;
+        public double bedOccupancyRate = 0.0;
+        public List<String[]> tableRows = new ArrayList<>();
+    }
+
+    public HospitalMetrics calculateMetrics(String selectedMonth) {
+        HospitalMetrics metrics = new HospitalMetrics();
+
+        // 1. Parse target year and month if a specific period is selected
+        Integer targetYear = null;
+        Integer targetMonth = null;
+        if (selectedMonth != null && !selectedMonth.equalsIgnoreCase("All Months")) {
+            String[] parts = selectedMonth.split(" ");
+            if (parts.length == 2) {
+                try {
+                    targetMonth = Month.valueOf(parts[0].toUpperCase()).getValue();
+                    targetYear = Integer.parseInt(parts[1]);
+                } catch (Exception ignored) {
+                    // Fall back to all months if parsing fails
+                }
+            }
+        }
+
+        // 2. Fetch all necessary business entities from allocator
+        List<Department> departments = allocator.getAllBusinessEntities(DepartmentToFile.PREFIX);
+        List<Doctor> doctors = allocator.getAllBusinessEntities(DoctorToFile.PREFIX);
+        List<Appointment> appointments = allocator.getAllBusinessEntities(AppointmentToFile.PREFIX);
+        List<Bill> bills = allocator.getAllBusinessEntities(BillToFile.PREFIX);
+        List<Facility> facilities = allocator.getAllBusinessEntities(FacilityToFile.PREFIX);
+
+        // Map department IDs to patient count and revenue counters
+        Map<String, Integer> deptPatientCount = new HashMap<>();
+        Map<String, Double> deptRevenue = new HashMap<>();
+        for (Department dept : departments) {
+            deptPatientCount.put(dept.getId(), 0);
+            deptRevenue.put(dept.getId(), 0.0);
+        }
+
+        // 3. Calculate appointment counts and patients served per department
+        for (Appointment appt : appointments) {
+            AppointmentToFile self = appt.getSelf();
+            if (self == null || self.getAppointmentTime() == null) continue;
+
+            // Apply date filtering
+            if (targetYear != null && targetMonth != null) {
+                if (self.getAppointmentTime().getYear() != targetYear ||
+                        self.getAppointmentTime().getMonthValue() != targetMonth) {
+                    continue;
+                }
+            }
+
+            metrics.totalAppointments++;
+
+            // Map appointment to department via doctor linkage
+            DoctorToFile docToFile = appt.getDoctor();
+            if (docToFile != null) {
+                try {
+                    Doctor docBiz = allocator.getBusinessEntity(docToFile.getId());
+                    DepartmentToFile deptToFile = docBiz.getBelongsToDepartment();
+                    if (deptToFile != null && deptPatientCount.containsKey(deptToFile.getId())) {
+                        deptPatientCount.put(deptToFile.getId(), deptPatientCount.get(deptToFile.getId()) + 1);
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+        }
+
+        // 4. Calculate total revenue and department-specific earnings from bills
+        for (Bill bill : bills) {
+            BillToFile self = bill.getSelf();
+            if (self == null || self.getIssuedAt() == null) continue;
+
+            // Apply date filtering on bill issuance date
+            if (targetYear != null && targetMonth != null) {
+                if (self.getIssuedAt().getYear() != targetYear ||
+                        self.getIssuedAt().getMonthValue() != targetMonth) {
+                    continue;
+                }
+            }
+
+            double amount = self.getMoney();
+            metrics.totalRevenue += amount;
+
+            // Map bill to department via consultation rate linkage
+            ConsultationRateToFile rateToFile = bill.getConsultationRate();
+            if (rateToFile != null) {
+                try {
+                    ConsultationRate rateBiz = allocator.getBusinessEntity(rateToFile.getId());
+                    DepartmentToFile deptToFile = rateBiz.getBelongsToDepartment();
+                    if (deptToFile != null && deptRevenue.containsKey(deptToFile.getId())) {
+                        deptRevenue.put(deptToFile.getId(), deptRevenue.get(deptToFile.getId()) + amount);
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+        }
+
+        // 5. Total active doctors on system
+        metrics.activeDoctors = doctors.size();
+
+        // 6. Calculate bed occupancy rate from ward facilities
+        int totalWardCapacity = 0;
+        int occupiedWardBeds = 0;
+        for (Facility fac : facilities) {
+            FacilityToFile self = fac.getSelf();
+            if (self != null && self.getFacilityType() == FacilityToFile.FacilityType.WARD) {
+                totalWardCapacity += self.getCapacity();
+                if (!self.isAvailable()) {
+                    occupiedWardBeds += self.getCapacity();
+                }
+            }
+        }
+        if (totalWardCapacity > 0) {
+            metrics.bedOccupancyRate = ((double) occupiedWardBeds / totalWardCapacity) * 100.0;
+        }
+
+        // 7. Format rows for the Metrics & Revenue UI table
+        for (Department dept : departments) {
+            String deptId = dept.getId();
+            String deptName = (dept.getSelf() != null) ? dept.getSelf().getName() : "Unknown";
+            int patientsServed = deptPatientCount.getOrDefault(deptId, 0);
+            double revenue = deptRevenue.getOrDefault(deptId, 0.0);
+            String avgStay = "N/A"; // Outpatient departments typically default to N/A
+
+            metrics.tableRows.add(new String[]{
+                    deptId,
+                    deptName,
+                    String.valueOf(patientsServed),
+                    String.format("$%,.2f", revenue),
+                    avgStay
+            });
+        }
+
+        return metrics;
+    }
+
+    // Checks if the doctor already has an active shift on the given date.
+    private boolean hasShiftConflict(String doctorId, LocalDate targetDate) {
+        List<DoctorShift> allShifts = allocator.getAllBusinessEntities(DoctorShiftToFile.PREFIX);
+        for (DoctorShift shift : allShifts) {
+            DoctorToFile assignedDoc = shift.getBelongsToDoctor();
+            if (assignedDoc != null && assignedDoc.getId().equals(doctorId)) {
+                if (shift.getSelf() != null && targetDate.equals(shift.getSelf().getShiftDate())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public void exportMetricsReport(String filePath, String selectedMonth) throws IOException {
+        HospitalMetrics metrics = calculateMetrics(selectedMonth);
+        try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
+            // Write executive summary
+            writer.println("=== Hospital Revenue and Metrics Report ===");
+            writer.println("Period," + (selectedMonth != null ? selectedMonth : "All Months"));
+            writer.println(String.format("Total Revenue,$%,.2f", metrics.totalRevenue));
+            writer.println("Total Appointments," + metrics.totalAppointments);
+            writer.println("Active Doctors," + metrics.activeDoctors);
+            writer.println(String.format("Bed Occupancy Rate,%.1f%%", metrics.bedOccupancyRate));
+            writer.println();
+
+            // Write tabular department breakdown
+            writer.println("Dept ID,Department Name,Patients Served,Revenue,Avg Stay (Days)");
+            for (String[] row : metrics.tableRows) {
+                // Remove commas and dollar signs from numeric values to preserve CSV column integrity
+                String cleanedRevenue = row[3].replace("$", "").replace(",", "");
+                writer.println(String.format("%s,%s,%s,%s,%s", row[0], row, row, cleanedRevenue, row[4]));
+            }
+        }
+    }
 }

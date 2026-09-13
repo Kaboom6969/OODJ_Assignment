@@ -53,19 +53,29 @@ public class MedicalManagerForm extends JFrame {
     private JButton refreshMetricsBtn;
     private JButton exportReportBtn;
 
+    // KPI Value Labels for dynamic display update
+    private JLabel totalRevenueVal;
+    private JLabel appointmentsVal;
+    private JLabel activeDoctorsVal;
+    private JLabel bedOccupancyVal;
+
     // Hold medicalManager, allocator and operation references
     private final MedicalManager medicalManager;
     private final HospitalEntityAllocator allocator;
     private final MedicalManagerOperation operation;
 
-    // Default manager ID for profile update
+    // Default manager IDfor profile update
     private String currentManagerId = "MM0001";
-
     // Constructor: setup main window and tabs
     public MedicalManagerForm(HospitalEntityAllocator allocator, MedicalManager medicalManager) throws IOException {
         this.allocator = allocator;
         this.medicalManager = medicalManager;
         this.operation = new MedicalManagerOperation(allocator, medicalManager);
+
+        // Initialize current manager ID dynamically from the passed entity
+        if (medicalManager != null && medicalManager.getId() != null) {
+            this.currentManagerId = medicalManager.getId();
+        }
 
         setTitle("Medical Management System");
         setSize(850, 650);
@@ -86,20 +96,43 @@ public class MedicalManagerForm extends JFrame {
         refreshDoctorComboBox();
         refreshRosterTable();
 
-        // Load mock data for Metrics Table
-        metricsTableModel.addRow(new Object[]{"DP0001", "Mental Health", "310", "34,100.00", "4.2"});
-        metricsTableModel.addRow(new Object[]{"DP0002", "Emergency Surgery", "520", "68,750.00", "2.8"});
-        metricsTableModel.addRow(new Object[]{"DP0003", "Pediatrics", "410", "25,600.00", "1.5"});
+        // Load initial real metrics data on startup
+        refreshMetrics();
+
+        // Trigger refresh automatically when month selection changes
+        monthFilterBox.addActionListener(e -> refreshMetrics());
 
         // Refresh Metrics Button action
         refreshMetricsBtn.addActionListener(e -> {
-            String selectedMonth = (String) monthFilterBox.getSelectedItem();
-            JOptionPane.showMessageDialog(this, "Metrics refreshed for " + selectedMonth + ".", "Updated", JOptionPane.INFORMATION_MESSAGE);
+            refreshMetrics();
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Metrics refreshed for " + monthFilterBox.getSelectedItem() + ".",
+                    "Updated",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
         });
 
         // Export Report Button action
         exportReportBtn.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Report exported to 'Revenue_Report.csv' successfully.", "Export Complete", JOptionPane.INFORMATION_MESSAGE);
+            String selectedMonth = (String) monthFilterBox.getSelectedItem();
+            String exportFileName = "Revenue_Report.csv";
+            try {
+                operation.exportMetricsReport(exportFileName, selectedMonth);
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Report exported to '" + exportFileName + "' successfully.",
+                        "Export Complete",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Failed to export report: " + ex.getMessage(),
+                        "Export Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
         });
     }
 
@@ -157,43 +190,69 @@ public class MedicalManagerForm extends JFrame {
         gbc.insets = new Insets(8, 8, 8, 8);
 
         // Row 0: Name
-        gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.EAST;
         panel.add(new JLabel("Name:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 0; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
         panel.add(nameField, gbc);
 
         // Row 1: Password
-        gbc.gridx = 0; gbc.gridy = 1; gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.EAST;
         panel.add(new JLabel("Password:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 1; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.WEST;
         panel.add(passwordField, gbc);
 
         // Row 2: Gender
-        gbc.gridx = 0; gbc.gridy = 2; gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.EAST;
         panel.add(new JLabel("Gender:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 2; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.WEST;
         panel.add(genderBox, gbc);
 
         // Row 3: DOB
-        gbc.gridx = 0; gbc.gridy = 3; gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.anchor = GridBagConstraints.EAST;
         panel.add(new JLabel("Day Of Birth:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 3; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        gbc.anchor = GridBagConstraints.WEST;
         panel.add(dobField, gbc);
 
         // Row 4: Email
-        gbc.gridx = 0; gbc.gridy = 4; gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.anchor = GridBagConstraints.EAST;
         panel.add(new JLabel("Email:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 4; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.gridy = 4;
+        gbc.anchor = GridBagConstraints.WEST;
         panel.add(emailField, gbc);
 
         // Row 5: Phone Number
-        gbc.gridx = 0; gbc.gridy = 5; gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        gbc.anchor = GridBagConstraints.EAST;
         panel.add(new JLabel("Phone Number:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 5; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.gridy = 5;
+        gbc.anchor = GridBagConstraints.WEST;
         panel.add(phoneField, gbc);
 
         // Row 6: Save Button
-        gbc.gridx = 1; gbc.gridy = 6; gbc.anchor = GridBagConstraints.CENTER;
+        gbc.gridx = 1;
+        gbc.gridy = 6;
+        gbc.anchor = GridBagConstraints.CENTER;
         saveBtn.setFocusPainted(false);
         panel.add(saveBtn, gbc);
 
@@ -401,6 +460,23 @@ public class MedicalManagerForm extends JFrame {
                 doctorBox.setSelectedIndex(0);
             }
         });
+
+        // Automatically sync department display when doctor selection changes
+        doctorBox.addActionListener(e -> {
+            String selectedDoc = (String) doctorBox.getSelectedItem();
+            if (selectedDoc != null && selectedDoc.contains(" - ")) {
+                String docId = selectedDoc.split(" - ")[0].trim();
+                try {
+                    Doctor docBiz = allocator.getBusinessEntity(docId);
+                    if (docBiz != null && docBiz.getBelongsToDepartment() != null) {
+                        departmentBox.setSelectedItem(docBiz.getBelongsToDepartment().getName());
+                    } else {
+                        departmentBox.setSelectedIndex(-1);
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+        });
     }
 
     // Create the Department Management panel
@@ -445,15 +521,23 @@ public class MedicalManagerForm extends JFrame {
         }
 
         // Row 0: Dept ID
-        gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(new JLabel("Dept ID:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 0; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
         formPanel.add(deptIdField, gbc);
 
         // Row 1: Dept Name
-        gbc.gridx = 0; gbc.gridy = 1; gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(new JLabel("Dept Name:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 1; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.WEST;
         formPanel.add(deptNameField, gbc);
 
         // Row 2: Buttons
@@ -464,7 +548,10 @@ public class MedicalManagerForm extends JFrame {
         btnGroup.add(deleteDeptBtn);
         btnGroup.add(clearDeptBtn);
 
-        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2; gbc.anchor = GridBagConstraints.CENTER;
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
         formPanel.add(btnGroup, gbc);
 
         panel.add(formPanel, BorderLayout.SOUTH);
@@ -537,27 +624,43 @@ public class MedicalManagerForm extends JFrame {
         }
 
         // Row 0: Doctor Dropdown
-        gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(new JLabel("Doctor:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 0; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
         formPanel.add(doctorBox, gbc);
 
         // Row 1: Department Dropdown
-        gbc.gridx = 0; gbc.gridy = 1; gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(new JLabel("Department:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 1; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.WEST;
         formPanel.add(departmentBox, gbc);
 
         // Row 2: Date
-        gbc.gridx = 0; gbc.gridy = 2; gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(new JLabel("Shift Date:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 2; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.WEST;
         formPanel.add(rosterDateField, gbc);
 
         // Row 3: Shift Type
-        gbc.gridx = 0; gbc.gridy = 3; gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(new JLabel("Shift Type:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 3; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        gbc.anchor = GridBagConstraints.WEST;
         formPanel.add(shiftTypeBox, gbc);
 
         // Row 4: Buttons
@@ -567,7 +670,10 @@ public class MedicalManagerForm extends JFrame {
         btnGroup.add(deleteShiftBtn);
         btnGroup.add(clearShiftBtn);
 
-        gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2; gbc.anchor = GridBagConstraints.CENTER;
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
         formPanel.add(btnGroup, gbc);
 
         panel.add(formPanel, BorderLayout.SOUTH);
@@ -647,9 +753,47 @@ public class MedicalManagerForm extends JFrame {
         valueLabel.setForeground(Color.decode("#2E7D5E"));
         valueLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
 
+        // Retain reference according to card title
+        if ("Total Revenue".equalsIgnoreCase(title)) {
+            totalRevenueVal = valueLabel;
+        } else if ("Appointments".equalsIgnoreCase(title)) {
+            appointmentsVal = valueLabel;
+        } else if ("Active Doctors".equalsIgnoreCase(title)) {
+            activeDoctorsVal = valueLabel;
+        } else if ("Bed Occupancy".equalsIgnoreCase(title)) {
+            bedOccupancyVal = valueLabel;
+        }
+
         card.add(titleLabel, BorderLayout.NORTH);
         card.add(valueLabel, BorderLayout.CENTER);
         return card;
+    }
+
+    // Fetch live data via Operation and refresh both KPI cards and table rows
+    private void refreshMetrics() {
+        if (metricsTableModel == null) return;
+        String selectedMonth = (String) monthFilterBox.getSelectedItem();
+        MedicalManagerOperation.HospitalMetrics metrics = operation.calculateMetrics(selectedMonth);
+
+        // 1. Update KPI value labels
+        if (totalRevenueVal != null) {
+            totalRevenueVal.setText(String.format("$%,.2f", metrics.totalRevenue));
+        }
+        if (appointmentsVal != null) {
+            appointmentsVal.setText(String.format("%,d", metrics.totalAppointments));
+        }
+        if (activeDoctorsVal != null) {
+            activeDoctorsVal.setText(String.valueOf(metrics.activeDoctors));
+        }
+        if (bedOccupancyVal != null) {
+            bedOccupancyVal.setText(String.format("%.1f%%", metrics.bedOccupancyRate));
+        }
+
+        // 2. Refresh metrics table data
+        metricsTableModel.setRowCount(0);
+        for (String[] row : metrics.tableRows) {
+            metricsTableModel.addRow(row);
+        }
     }
 
     // Reset personal profile input fields
