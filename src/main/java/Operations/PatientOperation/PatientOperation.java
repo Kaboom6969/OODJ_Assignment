@@ -253,13 +253,26 @@ public class PatientOperation
     /** 10. Loads the patient's medical history. Patient -> Appointment -> MedicalRecord. */
     public List<MedicalRecord> loadMedicalHistory()
     {
-        throw new UnsupportedOperationException("not yet implemented");
+        List<MedicalRecord> medicalHistory = new ArrayList<>();
+        for (AppointmentToFile appointmentData : patient.getAppointments())
+        {
+            Appointment appointment = allocator.getBusinessEntity(appointmentData.getId());
+            MedicalRecordToFile medicalRecordData = appointment.getMedicalRecord();
+            if (medicalRecordData == null) continue;
+            medicalHistory.add(allocator.getBusinessEntity(medicalRecordData.getId()));
+        }
+        return medicalHistory;
     }
 
     /** 11. Loads prescriptions belonging to a medical record. Patient -> MedicalRecord -> Prescription. */
     public List<PrescriptionToFile> loadPrescriptions(MedicalRecord record)
     {
-        throw new UnsupportedOperationException("not yet implemented");
+        List<PrescriptionToFile> prescriptions = new ArrayList<>();
+        for (PrescriptionToFile prescription : record.getPrescriptions())
+        {
+            prescriptions.add(prescription);
+        }
+        return prescriptions;
     }
 
     /** 12. Submits one feedback record for a completed appointment that has no feedback yet. Appointment -> Feedback. */
