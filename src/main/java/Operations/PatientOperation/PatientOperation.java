@@ -1,11 +1,14 @@
 package Operations.PatientOperation;
 
 import Tools.HospitalEntityAllocator;
+import entities.BaseEntity.AppointmentToFile;
+import entities.BaseEntity.AppointmentToFile.AppointmentStatus;
 import entities.BaseEntity.DoctorShiftToFile;
 import entities.BaseEntity.FeedbackToFile;
 import entities.BaseEntity.InsuranceToFile;
 import entities.BaseEntity.MedicalRecordToFile;
 import entities.BaseEntity.PrescriptionToFile;
+import entities.BaseEntity.Users.DoctorToFile;
 import entities.BaseEntity.Users.UserWithDetails;
 import entities.BusinessEntity.Appointment;
 import entities.BusinessEntity.Doctor;
@@ -17,6 +20,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -97,7 +101,7 @@ public class PatientOperation
     /** 3. Loads all doctors available to the patient. Doctor records. */
     public List<Doctor> loadAllDoctors()
     {
-        throw new UnsupportedOperationException("not yet implemented");
+        return allocator.getAllBusinessEntities(DoctorToFile.PREFIX);
     }
 
     /** 4.  Aggregates ratings from the doctor's completed appointments. Doctor -> Appointment -> Feedback. */
@@ -109,7 +113,31 @@ public class PatientOperation
     /** 5. Loads shifts that do not clash with booked or rescheduled appointments. Doctor -> DoctorShift -> Appointment. */
     public List<DoctorShiftToFile> loadAvailableShifts(Doctor doctor)
     {
-        throw new UnsupportedOperationException("not yet implemented");
+        List<DoctorShiftToFile> availableShifts = new ArrayList<>();
+        for (DoctorShiftToFile shift : doctor.getDoctorShifts())
+        {
+            LocalDateTime shiftStart = LocalDateTime.of(shift.getShiftDate(), shift.getStartTime());
+            LocalDateTime shiftEnd = LocalDateTime.of(shift.getShiftDate(), shift.getEndTime());
+            boolean unavailable = false;
+
+            // A shift overlaps a blocking appointment when appointmentTime is in [shiftStart, shiftEnd).
+            for (AppointmentToFile appointment : doctor.getAppointments())
+            {
+                AppointmentToFile.AppointmentStatus status = appointment.getStatus();
+                LocalDateTime appointmentTime = appointment.getAppointmentTime();
+                boolean blocksShift = status == AppointmentToFile.AppointmentStatus.BOOKED
+                        || status == AppointmentToFile.AppointmentStatus.RESCHEDULED;
+                if (blocksShift
+                        && !appointmentTime.isBefore(shiftStart)
+                        && appointmentTime.isBefore(shiftEnd))
+                {
+                    unavailable = true;
+                    break;
+                }
+            }
+            if (!unavailable) availableShifts.add(shift);
+        }
+        return availableShifts;
     }
 
     /** 6. Books an appointment for the patient with the selected doctor and facility. Patient -> Appointment -> Doctor/Facility. */
