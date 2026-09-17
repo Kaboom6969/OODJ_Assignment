@@ -125,6 +125,11 @@ public class PatientOperation
     /** 5. Loads shifts that do not clash with booked or rescheduled appointments. Doctor -> DoctorShift -> Appointment. */
     public List<DoctorShiftToFile> loadAvailableShifts(Doctor doctor)
     {
+        return loadAvailableShifts(doctor, null);
+    }
+
+    private List<DoctorShiftToFile> loadAvailableShifts(Doctor doctor, String ignoredAppointmentId)
+    {
         List<DoctorShiftToFile> availableShifts = new ArrayList<>();
         for (DoctorShiftToFile shift : doctor.getDoctorShifts())
         {
@@ -135,6 +140,7 @@ public class PatientOperation
             // A shift overlaps a blocking appointment when appointmentTime is in [shiftStart, shiftEnd).
             for (AppointmentToFile appointment : doctor.getAppointments())
             {
+                if (appointment.getId().equals(ignoredAppointmentId)) continue;
                 AppointmentToFile.AppointmentStatus status = appointment.getStatus();
                 LocalDateTime appointmentTime = appointment.getAppointmentTime();
                 boolean blocksShift = status == AppointmentToFile.AppointmentStatus.BOOKED
@@ -190,13 +196,44 @@ public class PatientOperation
     /** 7.  Reschedules an existing appointment to a new time. Appointment -> AppointmentToFile. */
     public void rescheduleAppointment(Appointment appointment, LocalDateTime newTime)
     {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (appointment == null) {
+            throw new IllegalArgumentException("Appointment cannot be null.");
+        }
+        if (newTime == null) {
+            throw new IllegalArgumentException("New appointment time cannot be null.");
+        }
+        if (newTime.isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Appointment time cannot be in the past.");
+        }
+
+        Doctor doctor = allocator.getBusinessEntity(appointment.getDoctor().getId());
+        boolean withinAvailableShift = false;
+        for (DoctorShiftToFile shift : loadAvailableShifts(doctor, appointment.getId()))
+        {
+            LocalDateTime shiftStart = LocalDateTime.of(shift.getShiftDate(), shift.getStartTime());
+            LocalDateTime shiftEnd = LocalDateTime.of(shift.getShiftDate(), shift.getEndTime());
+            if (!newTime.isBefore(shiftStart) && newTime.isBefore(shiftEnd))
+            {
+                withinAvailableShift = true;
+                break;
+            }
+        }
+        if (!withinAvailableShift) {
+            throw new IllegalArgumentException("New appointment time is not within an available doctor shift.");
+        }
+
+        appointment.getSelf().setAppointmentTime(newTime);
+        allocator.saveChanges(appointment);
     }
 
     /** 8. Cancels an appointment while preserving its linked medical record and feedback. Appointment -> AppointmentToFile. */
     public void cancelAppointment(Appointment appointment)
     {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (appointment == null) {
+            throw new IllegalArgumentException("Appointment cannot be null.");
+        }
+        appointment.getSelf().setStatus(AppointmentStatus.CANCELLED);
+        allocator.saveChanges(appointment);
     }
 
     /** 9. Loads the patient's upcoming and past appointments, including their statuses. Patient -> Appointment. */
