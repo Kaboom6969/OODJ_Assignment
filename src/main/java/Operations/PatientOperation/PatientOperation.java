@@ -202,7 +202,15 @@ public class PatientOperation
     /** 9. Loads the patient's upcoming and past appointments, including their statuses. Patient -> Appointment. */
     public List<Appointment> loadMyAppointments()
     {
-        throw new UnsupportedOperationException("not yet implemented");
+        List<Appointment> appointments = new ArrayList<>();
+        // Straight read of all linked appointments; no validation or status filtering is needed.
+        for (AppointmentToFile appointmentData : patient.getAppointments())
+        {
+            appointments.add(allocator.getBusinessEntity(appointmentData.getId()));
+        }
+        appointments.sort((first, second) ->
+                first.getSelf().getAppointmentTime().compareTo(second.getSelf().getAppointmentTime()));
+        return appointments;
     }
 
     /** 10. Loads the patient's medical history. Patient -> Appointment -> MedicalRecord. */
