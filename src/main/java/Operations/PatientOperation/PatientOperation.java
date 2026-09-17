@@ -107,7 +107,19 @@ public class PatientOperation
     /** 4.  Aggregates ratings from the doctor's completed appointments. Doctor -> Appointment -> Feedback. */
     public double loadDoctorAverageRating(Doctor doctor)
     {
-        throw new UnsupportedOperationException("not yet implemented");
+        int totalRating = 0;
+        int ratedAppointmentCount = 0;
+        for (AppointmentToFile appointmentData : doctor.getAppointments())
+        {
+            if (appointmentData.getStatus() != AppointmentStatus.COMPLETED) continue;
+            Appointment appointment = allocator.getBusinessEntity(appointmentData.getId());
+            FeedbackToFile feedback = appointment.getFeedback();
+            if (feedback == null) continue;
+            totalRating += feedback.getRating();
+            ratedAppointmentCount++;
+        }
+        if (ratedAppointmentCount == 0) return 0.0;
+        return (double) totalRating / ratedAppointmentCount;
     }
 
     /** 5. Loads shifts that do not clash with booked or rescheduled appointments. Doctor -> DoctorShift -> Appointment. */
@@ -143,7 +155,36 @@ public class PatientOperation
     /** 6. Books an appointment for the patient with the selected doctor and facility. Patient -> Appointment -> Doctor/Facility. */
     public void bookAppointment(Doctor doctor, Facility facility, LocalDateTime time, String reason)
     {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (time == null) {
+            throw new IllegalArgumentException("Appointment time cannot be null.");
+        }
+        if (time.isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Appointment time cannot be in the past.");
+        }
+
+        boolean withinAvailableShift = false;
+        for (DoctorShiftToFile shift : loadAvailableShifts(doctor))
+        {
+            LocalDateTime shiftStart = LocalDateTime.of(shift.getShiftDate(), shift.getStartTime());
+            LocalDateTime shiftEnd = LocalDateTime.of(shift.getShiftDate(), shift.getEndTime());
+            if (!time.isBefore(shiftStart) && time.isBefore(shiftEnd))
+            {
+                withinAvailableShift = true;
+                break;
+            }
+        }
+        if (!withinAvailableShift) {
+            throw new IllegalArgumentException("Appointment time is not within an available doctor shift.");
+        }
+
+        AppointmentToFile appointmentData = new AppointmentToFile(
+                null, time, reason, AppointmentStatus.BOOKED
+        );
+        Appointment appointment = allocator.convertToBusinessEntity(appointmentData, true);
+        appointment.setPatient(patient.getSelf());
+        appointment.setDoctor(doctor.getSelf());
+        appointment.setFacility(facility.getSelf());
+        allocator.saveChanges(appointment);
     }
 
     /** 7.  Reschedules an existing appointment to a new time. Appointment -> AppointmentToFile. */
