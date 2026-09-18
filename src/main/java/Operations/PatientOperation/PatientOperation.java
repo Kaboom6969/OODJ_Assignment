@@ -3,7 +3,6 @@ package Operations.PatientOperation;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.AppointmentToFile;
 import entities.BaseEntity.AppointmentToFile.AppointmentStatus;
-import entities.BaseEntity.DoctorShiftToFile;
 import entities.BaseEntity.FeedbackToFile;
 import entities.BaseEntity.InsuranceToFile;
 import entities.BaseEntity.MedicalRecordToFile;
@@ -29,6 +28,8 @@ import java.util.List;
  */
 public class PatientOperation
 {
+    // Assumed slot length because DoctorShiftToFile and ConsultationRateToFile have no duration field.
+    private static final long SLOT_DURATION_MINUTES = 30;
     private final HospitalEntityAllocator allocator;
     private Patient patient;
 
@@ -122,39 +123,41 @@ public class PatientOperation
         return (double) totalRating / ratedAppointmentCount;
     }
 
-    /** 5. Loads shifts that do not clash with booked or rescheduled appointments. Doctor -> DoctorShift -> Appointment. */
-    public List<DoctorShiftToFile> loadAvailableShifts(Doctor doctor)
+    /** 5. Loads available appointment slots from doctor shifts. Doctor -> DoctorShift -> Appointment. */
+    public List<LocalDateTime> loadAvailableSlots(Doctor doctor)
     {
-        return loadAvailableShifts(doctor, null);
+        return loadAvailableSlots(doctor, null);
     }
 
-    public List<DoctorShiftToFile> loadAvailableShifts(Doctor doctor, String excludeAppointmentId)
+    public List<LocalDateTime> loadAvailableSlots(Doctor doctor, String excludeAppointmentId)
     {
-        List<DoctorShiftToFile> availableShifts = new ArrayList<>();
-        for (DoctorShiftToFile shift : doctor.getDoctorShifts())
+        List<LocalDateTime> availableSlots = new ArrayList<>();
+        for (var shift : doctor.getDoctorShifts())
         {
             LocalDateTime shiftStart = LocalDateTime.of(shift.getShiftDate(), shift.getStartTime());
             LocalDateTime shiftEnd = LocalDateTime.of(shift.getShiftDate(), shift.getEndTime());
-            boolean unavailable = false;
-
-            for (AppointmentToFile appointment : doctor.getAppointments())
+            LocalDateTime lastSlotStart = shiftEnd.minusMinutes(SLOT_DURATION_MINUTES);
+            for (LocalDateTime slotStart = shiftStart;
+                 !slotStart.isAfter(lastSlotStart);
+                 slotStart = slotStart.plusMinutes(SLOT_DURATION_MINUTES))
             {
-                if (appointment.getId().equals(excludeAppointmentId)) continue; // don't let a booking block its own reschedule
-                AppointmentStatus status = appointment.getStatus();
-                LocalDateTime appointmentTime = appointment.getAppointmentTime();
-                boolean blocksShift = status == AppointmentStatus.BOOKED
-                        || status == AppointmentStatus.RESCHEDULED;
-                if (blocksShift
-                        && !appointmentTime.isBefore(shiftStart)
-                        && appointmentTime.isBefore(shiftEnd))
+                boolean unavailable = false;
+                for (AppointmentToFile appointment : doctor.getAppointments())
                 {
-                    unavailable = true;
-                    break;
+                    if (appointment.getId().equals(excludeAppointmentId)) continue;
+                    AppointmentStatus status = appointment.getStatus();
+                    boolean blocksSlot = status == AppointmentStatus.BOOKED
+                            || status == AppointmentStatus.RESCHEDULED;
+                    if (blocksSlot && slotStart.equals(appointment.getAppointmentTime()))
+                    {
+                        unavailable = true;
+                        break;
+                    }
                 }
+                if (!unavailable) availableSlots.add(slotStart);
             }
-            if (!unavailable) availableShifts.add(shift);
         }
-        return availableShifts;
+        return availableSlots;
     }
     
     /** 6. Books an appointment for the patient with the selected doctor and facility. Patient -> Appointment -> Doctor/Facility. */
@@ -167,18 +170,7 @@ public class PatientOperation
             throw new IllegalArgumentException("Appointment time cannot be in the past.");
         }
 
-        boolean withinAvailableShift = false;
-        for (DoctorShiftToFile shift : loadAvailableShifts(doctor))
-        {
-            LocalDateTime shiftStart = LocalDateTime.of(shift.getShiftDate(), shift.getStartTime());
-            LocalDateTime shiftEnd = LocalDateTime.of(shift.getShiftDate(), shift.getEndTime());
-            if (!time.isBefore(shiftStart) && time.isBefore(shiftEnd))
-            {
-                withinAvailableShift = true;
-                break;
-            }
-        }
-        if (!withinAvailableShift) {
+        if (!loadAvailableSlots(doctor).contains(time)) {
             throw new IllegalArgumentException("Appointment time is not within an available doctor shift.");
         }
 
@@ -206,18 +198,7 @@ public class PatientOperation
         }
 
         Doctor doctor = allocator.getBusinessEntity(appointment.getDoctor().getId());
-        boolean withinAvailableShift = false;
-        for (DoctorShiftToFile shift : loadAvailableShifts(doctor, appointment.getId()))
-        {
-            LocalDateTime shiftStart = LocalDateTime.of(shift.getShiftDate(), shift.getStartTime());
-            LocalDateTime shiftEnd = LocalDateTime.of(shift.getShiftDate(), shift.getEndTime());
-            if (!newTime.isBefore(shiftStart) && newTime.isBefore(shiftEnd))
-            {
-                withinAvailableShift = true;
-                break;
-            }
-        }
-        if (!withinAvailableShift) {
+        if (!loadAvailableSlots(doctor, appointment.getId()).contains(newTime)) {
             throw new IllegalArgumentException("New appointment time is not within an available doctor shift.");
         }
 
