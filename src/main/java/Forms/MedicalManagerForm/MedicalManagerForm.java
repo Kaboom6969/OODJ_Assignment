@@ -4,6 +4,7 @@ import Operations.MedicalManagerOperation.MedicalManagerOperation;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.BaseEntity;
 import entities.BaseEntity.Users.UserWithDetails;
+import entities.BusinessEntity.Doctor;
 import entities.BusinessEntity.MedicalManager;
 
 import javax.swing.*;
@@ -11,6 +12,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MedicalManagerForm extends JFrame {
 
@@ -36,7 +38,7 @@ public class MedicalManagerForm extends JFrame {
     // --- Shift Rosters Form Components ---
     private JTable rosterTable;
     private DefaultTableModel rosterTableModel;
-    private JTextField doctorNameField;
+    private JComboBox<String> doctorBox;
     private JComboBox<String> departmentBox;
     private JTextField rosterDateField;
     private JComboBox<String> shiftTypeBox;
@@ -51,17 +53,29 @@ public class MedicalManagerForm extends JFrame {
     private JButton refreshMetricsBtn;
     private JButton exportReportBtn;
 
-    // Hold allocator and operation references
+    // KPI Value Labels for dynamic display update
+    private JLabel totalRevenueVal;
+    private JLabel appointmentsVal;
+    private JLabel activeDoctorsVal;
+    private JLabel bedOccupancyVal;
+
+    // Hold medicalManager, allocator and operation references
+    private final MedicalManager medicalManager;
     private final HospitalEntityAllocator allocator;
     private final MedicalManagerOperation operation;
 
-    // Default manager ID for profile update
+    // Default manager IDfor profile update
     private String currentManagerId = "MM0001";
-
     // Constructor: setup main window and tabs
     public MedicalManagerForm(HospitalEntityAllocator allocator, MedicalManager medicalManager) throws IOException {
         this.allocator = allocator;
-        this.operation = new MedicalManagerOperation(allocator,medicalManager);
+        this.medicalManager = medicalManager;
+        this.operation = new MedicalManagerOperation(allocator, medicalManager);
+
+        // Initialize current manager ID dynamically from the passed entity
+        if (medicalManager != null && medicalManager.getId() != null) {
+            this.currentManagerId = medicalManager.getId();
+        }
 
         setTitle("Medical Management System");
         setSize(850, 650);
@@ -78,68 +92,47 @@ public class MedicalManagerForm extends JFrame {
 
         // Bind events and load initial data
         initEvents();
+        loadProfileData();
+        refreshDoctorComboBox();
+        refreshRosterTable();
 
-        // 1. Preload sample roster records
-        rosterTableModel.addRow(new Object[]{"RS1001", "Dr. Tan", "Emergency Surgery", "2026-09-10", "Morning"});
-        rosterTableModel.addRow(new Object[]{"RS1002", "Dr. Lee", "Mental Health", "2026-09-11", "Evening"});
+        // Load initial real metrics data on startup
+        refreshMetrics();
 
-        // 2. Assign Shift Button action
-        assignShiftBtn.addActionListener(e -> {
-            String doc = doctorNameField.getText().trim();
-            String dept = (String) departmentBox.getSelectedItem();
-            String date = rosterDateField.getText().trim();
-            String shift = (String) shiftTypeBox.getSelectedItem();
+        // Trigger refresh automatically when month selection changes
+        monthFilterBox.addActionListener(e -> refreshMetrics());
 
-            if (doc.isEmpty() || date.isEmpty() || "YYYY-MM-DD".equals(date)) {
-                JOptionPane.showMessageDialog(this, "Please fill in Doctor Name and valid Date.", "Input Error", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            if (dept == null || dept.trim().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please select a valid department.", "Input Error", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            String rosterId = "RS" + (1001 + rosterTableModel.getRowCount());
-            rosterTableModel.addRow(new Object[]{rosterId, doc, dept, date, shift});
-
-            doctorNameField.setText("");
-            rosterDateField.setText("YYYY-MM-DD");
-            rosterDateField.setForeground(Color.GRAY);
-        });
-
-        // 3. Delete Shift Button action
-        deleteShiftBtn.addActionListener(e -> {
-            int selectedRow = rosterTable.getSelectedRow();
-            if (selectedRow == -1) {
-                JOptionPane.showMessageDialog(this, "Please select a roster row to delete.", "Notice", JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-            rosterTableModel.removeRow(selectedRow);
-        });
-
-        // 4. Clear Shift Button action
-        clearShiftBtn.addActionListener(e -> {
-            doctorNameField.setText("");
-            rosterDateField.setText("YYYY-MM-DD");
-            rosterDateField.setForeground(Color.GRAY);
-            rosterTable.clearSelection();
-        });
-
-        // 5. Load mock data for Metrics Table
-        metricsTableModel.addRow(new Object[]{"DP0001", "Mental Health", "310", "34,100.00", "4.2"});
-        metricsTableModel.addRow(new Object[]{"DP0002", "Emergency Surgery", "520", "68,750.00", "2.8"});
-        metricsTableModel.addRow(new Object[]{"DP0003", "Pediatrics", "410", "25,600.00", "1.5"});
-
-        // 6. Refresh Metrics Button action
+        // Refresh Metrics Button action
         refreshMetricsBtn.addActionListener(e -> {
-            String selectedMonth = (String) monthFilterBox.getSelectedItem();
-            JOptionPane.showMessageDialog(this, "Metrics refreshed for " + selectedMonth + ".", "Updated", JOptionPane.INFORMATION_MESSAGE);
+            refreshMetrics();
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Metrics refreshed for " + monthFilterBox.getSelectedItem() + ".",
+                    "Updated",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
         });
 
-        // 7. Export Report Button action
+        // Export Report Button action
         exportReportBtn.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Report exported to 'Revenue_Report.csv' successfully.", "Export Complete", JOptionPane.INFORMATION_MESSAGE);
+            String selectedMonth = (String) monthFilterBox.getSelectedItem();
+            String exportFileName = "Revenue_Report.csv";
+            try {
+                operation.exportMetricsReport(exportFileName, selectedMonth);
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Report exported to '" + exportFileName + "' successfully.",
+                        "Export Complete",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Failed to export report: " + ex.getMessage(),
+                        "Export Error",
+                        JOptionPane.ERROR_MESSAGE
+                );
+            }
         });
     }
 
@@ -197,43 +190,69 @@ public class MedicalManagerForm extends JFrame {
         gbc.insets = new Insets(8, 8, 8, 8);
 
         // Row 0: Name
-        gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.EAST;
         panel.add(new JLabel("Name:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 0; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
         panel.add(nameField, gbc);
 
         // Row 1: Password
-        gbc.gridx = 0; gbc.gridy = 1; gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.EAST;
         panel.add(new JLabel("Password:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 1; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.WEST;
         panel.add(passwordField, gbc);
 
         // Row 2: Gender
-        gbc.gridx = 0; gbc.gridy = 2; gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.EAST;
         panel.add(new JLabel("Gender:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 2; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.WEST;
         panel.add(genderBox, gbc);
 
         // Row 3: DOB
-        gbc.gridx = 0; gbc.gridy = 3; gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.anchor = GridBagConstraints.EAST;
         panel.add(new JLabel("Day Of Birth:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 3; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        gbc.anchor = GridBagConstraints.WEST;
         panel.add(dobField, gbc);
 
         // Row 4: Email
-        gbc.gridx = 0; gbc.gridy = 4; gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.anchor = GridBagConstraints.EAST;
         panel.add(new JLabel("Email:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 4; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.gridy = 4;
+        gbc.anchor = GridBagConstraints.WEST;
         panel.add(emailField, gbc);
 
         // Row 5: Phone Number
-        gbc.gridx = 0; gbc.gridy = 5; gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        gbc.anchor = GridBagConstraints.EAST;
         panel.add(new JLabel("Phone Number:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 5; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.gridy = 5;
+        gbc.anchor = GridBagConstraints.WEST;
         panel.add(phoneField, gbc);
 
         // Row 6: Save Button
-        gbc.gridx = 1; gbc.gridy = 6; gbc.anchor = GridBagConstraints.CENTER;
+        gbc.gridx = 1;
+        gbc.gridy = 6;
+        gbc.anchor = GridBagConstraints.CENTER;
         saveBtn.setFocusPainted(false);
         panel.add(saveBtn, gbc);
 
@@ -243,18 +262,10 @@ public class MedicalManagerForm extends JFrame {
 
     // Initialize event listeners and table selections
     private void initEvents() {
-        // Load initial department records into table & dropdown
-        deptTableModel.setRowCount(0);
-        ArrayList<String[]> dept = operation.loadDepartment();
-        for (String[] s : dept) {
-            deptTableModel.addRow(s);
-        }
-        refreshDepartmentComboBox();
+        // Load initial department records
+        refreshDepartmentTable();
 
-        // Set initial ID in Add Mode
-        resetToNewDeptMode();
-
-        // Row selection listener: populate fields or reset to next ID
+        // Row selection listener for Department Table
         deptTable.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 int selectedRow = deptTable.getSelectedRow();
@@ -297,17 +308,10 @@ public class MedicalManagerForm extends JFrame {
                     return;
                 }
 
-                operation.addDepartment(name);
-                deptTableModel.addRow(new Object[]{id, name});
-
-                // Sync department dropdown
-                refreshDepartmentComboBox();
-
+                operation.addDepartment(id, name);
+                refreshDepartmentTable();
                 deptTable.clearSelection();
-                resetToNewDeptMode();
-
                 JOptionPane.showMessageDialog(this, "Department added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-
             } catch (IllegalArgumentException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Input Error", JOptionPane.WARNING_MESSAGE);
             }
@@ -323,9 +327,9 @@ public class MedicalManagerForm extends JFrame {
             String password = new String(passwordField.getPassword());
 
             try {
-                operation.updateProfile(name, password, UserWithDetails.Gender.valueOf(gender), dob, email, phone);
+                operation.updateProfile(name, password, UserWithDetails.Gender.valueOf(gender.toUpperCase()), dob, email, phone);
                 JOptionPane.showMessageDialog(this, "Profile updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                clearFields();
+                loadProfileData();
             } catch (IllegalArgumentException ex) {
                 JOptionPane.showMessageDialog(this, "Validation Error: " + ex.getMessage(), "Input Error", JOptionPane.WARNING_MESSAGE);
             } catch (Exception ex) {
@@ -350,15 +354,9 @@ public class MedicalManagerForm extends JFrame {
                 }
 
                 operation.updateDepartment(deptId, deptNewDeptName);
-                deptTable.setValueAt(deptNewDeptName, selectedRow, deptTable.getColumnModel().getColumnIndex("Department Name"));
-
-                // Sync department dropdown
-                refreshDepartmentComboBox();
-
+                refreshDepartmentTable();
                 deptTable.clearSelection();
-
                 JOptionPane.showMessageDialog(this, "Department updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-
             } catch (IllegalArgumentException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Input Error", JOptionPane.WARNING_MESSAGE);
             }
@@ -386,16 +384,96 @@ public class MedicalManagerForm extends JFrame {
             if (confirm == JOptionPane.YES_OPTION) {
                 try {
                     operation.deleteDepartment(deptId);
-                    deptTableModel.removeRow(selectedRow);
-
-                    // Sync department dropdown
-                    refreshDepartmentComboBox();
-
+                    refreshDepartmentTable();
                     deptTable.clearSelection();
-
                     JOptionPane.showMessageDialog(this, "Department deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                 } catch (IllegalArgumentException ex) {
                     JOptionPane.showMessageDialog(this, ex.getMessage(), "Input Error", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        });
+
+        // --- Shift Rosters Button Actions ---
+
+        // Assign Shift Button Action
+        assignShiftBtn.addActionListener(e -> {
+            String selectedDoc = (String) doctorBox.getSelectedItem();
+            if (selectedDoc == null || !selectedDoc.contains(" - ")) {
+                JOptionPane.showMessageDialog(this, "Please select a valid doctor.", "Input Error", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            String doctorId = selectedDoc.split(" - ")[0].trim();
+            String date = rosterDateField.getText().trim();
+            String shift = (String) shiftTypeBox.getSelectedItem();
+
+            if (date.isEmpty() || "YYYY-MM-DD".equals(date)) {
+                JOptionPane.showMessageDialog(this, "Please enter a valid shift date.", "Input Error", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            try {
+                operation.assignShift(doctorId, date, shift);
+                refreshRosterTable();
+                rosterDateField.setText("YYYY-MM-DD");
+                rosterDateField.setForeground(Color.GRAY);
+                JOptionPane.showMessageDialog(this, "Shift assigned successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+            } catch (IllegalArgumentException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Input Error", JOptionPane.WARNING_MESSAGE);
+            }
+        });
+
+        // Delete Shift Button Action
+        deleteShiftBtn.addActionListener(e -> {
+            int selectedRow = rosterTable.getSelectedRow();
+            if (selectedRow == -1) {
+                JOptionPane.showMessageDialog(this, "Please select a roster row to delete.", "Notice", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            String shiftId = rosterTable.getValueAt(selectedRow, 0).toString();
+            int confirm = JOptionPane.showConfirmDialog(
+                    this,
+                    "Are you sure you want to delete shift '" + shiftId + "'?",
+                    "Confirm Deletion",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE
+            );
+
+            if (confirm == JOptionPane.YES_OPTION) {
+                try {
+                    operation.deleteShift(shiftId);
+                    refreshRosterTable();
+                    JOptionPane.showMessageDialog(this, "Shift deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                } catch (IllegalArgumentException ex) {
+                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Input Error", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        });
+
+        // Clear Shift Button Action
+        clearShiftBtn.addActionListener(e -> {
+            rosterDateField.setText("YYYY-MM-DD");
+            rosterDateField.setForeground(Color.GRAY);
+            rosterTable.clearSelection();
+            if (doctorBox.getItemCount() > 0) {
+                doctorBox.setSelectedIndex(0);
+            }
+        });
+
+        // Automatically sync department display when doctor selection changes
+        doctorBox.addActionListener(e -> {
+            String selectedDoc = (String) doctorBox.getSelectedItem();
+            if (selectedDoc != null && selectedDoc.contains(" - ")) {
+                String docId = selectedDoc.split(" - ")[0].trim();
+                try {
+                    Doctor docBiz = allocator.getBusinessEntity(docId);
+                    if (docBiz != null && docBiz.getBelongsToDepartment() != null) {
+                        departmentBox.setSelectedItem(docBiz.getBelongsToDepartment().getName());
+                    } else {
+                        departmentBox.setSelectedIndex(-1);
+                    }
+                } catch (Exception ignored) {
                 }
             }
         });
@@ -443,15 +521,23 @@ public class MedicalManagerForm extends JFrame {
         }
 
         // Row 0: Dept ID
-        gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(new JLabel("Dept ID:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 0; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
         formPanel.add(deptIdField, gbc);
 
         // Row 1: Dept Name
-        gbc.gridx = 0; gbc.gridy = 1; gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(new JLabel("Dept Name:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 1; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.WEST;
         formPanel.add(deptNameField, gbc);
 
         // Row 2: Buttons
@@ -462,7 +548,10 @@ public class MedicalManagerForm extends JFrame {
         btnGroup.add(deleteDeptBtn);
         btnGroup.add(clearDeptBtn);
 
-        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2; gbc.anchor = GridBagConstraints.CENTER;
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
         formPanel.add(btnGroup, gbc);
 
         panel.add(formPanel, BorderLayout.SOUTH);
@@ -493,7 +582,7 @@ public class MedicalManagerForm extends JFrame {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        doctorNameField = new JTextField(14);
+        doctorBox = new JComboBox<>();
         rosterDateField = new JTextField(14);
         rosterDateField.setText("YYYY-MM-DD");
         rosterDateField.setForeground(Color.GRAY);
@@ -517,7 +606,7 @@ public class MedicalManagerForm extends JFrame {
             }
         });
 
-        // Initialize empty dropdown; populated dynamically via refreshDepartmentComboBox()
+        // Initialize department dropdown
         departmentBox = new JComboBox<>();
 
         String[] shiftTypes = {"Morning (08:00 - 16:00)", "Evening (16:00 - 00:00)", "Night (00:00 - 08:00)"};
@@ -534,28 +623,44 @@ public class MedicalManagerForm extends JFrame {
             btn.setFocusPainted(false);
         }
 
-        // Row 0: Doctor Name
-        gbc.gridx = 0; gbc.gridy = 0; gbc.anchor = GridBagConstraints.EAST;
-        formPanel.add(new JLabel("Doctor Name:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 0; gbc.anchor = GridBagConstraints.WEST;
-        formPanel.add(doctorNameField, gbc);
+        // Row 0: Doctor Dropdown
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.EAST;
+        formPanel.add(new JLabel("Doctor:"), gbc);
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
+        formPanel.add(doctorBox, gbc);
 
         // Row 1: Department Dropdown
-        gbc.gridx = 0; gbc.gridy = 1; gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(new JLabel("Department:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 1; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.WEST;
         formPanel.add(departmentBox, gbc);
 
         // Row 2: Date
-        gbc.gridx = 0; gbc.gridy = 2; gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(new JLabel("Shift Date:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 2; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.WEST;
         formPanel.add(rosterDateField, gbc);
 
         // Row 3: Shift Type
-        gbc.gridx = 0; gbc.gridy = 3; gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(new JLabel("Shift Type:"), gbc);
-        gbc.gridx = 1; gbc.gridy = 3; gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 1;
+        gbc.gridy = 3;
+        gbc.anchor = GridBagConstraints.WEST;
         formPanel.add(shiftTypeBox, gbc);
 
         // Row 4: Buttons
@@ -565,7 +670,10 @@ public class MedicalManagerForm extends JFrame {
         btnGroup.add(deleteShiftBtn);
         btnGroup.add(clearShiftBtn);
 
-        gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2; gbc.anchor = GridBagConstraints.CENTER;
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
         formPanel.add(btnGroup, gbc);
 
         panel.add(formPanel, BorderLayout.SOUTH);
@@ -645,9 +753,47 @@ public class MedicalManagerForm extends JFrame {
         valueLabel.setForeground(Color.decode("#2E7D5E"));
         valueLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
 
+        // Retain reference according to card title
+        if ("Total Revenue".equalsIgnoreCase(title)) {
+            totalRevenueVal = valueLabel;
+        } else if ("Appointments".equalsIgnoreCase(title)) {
+            appointmentsVal = valueLabel;
+        } else if ("Active Doctors".equalsIgnoreCase(title)) {
+            activeDoctorsVal = valueLabel;
+        } else if ("Bed Occupancy".equalsIgnoreCase(title)) {
+            bedOccupancyVal = valueLabel;
+        }
+
         card.add(titleLabel, BorderLayout.NORTH);
         card.add(valueLabel, BorderLayout.CENTER);
         return card;
+    }
+
+    // Fetch live data via Operation and refresh both KPI cards and table rows
+    private void refreshMetrics() {
+        if (metricsTableModel == null) return;
+        String selectedMonth = (String) monthFilterBox.getSelectedItem();
+        MedicalManagerOperation.HospitalMetrics metrics = operation.calculateMetrics(selectedMonth);
+
+        // 1. Update KPI value labels
+        if (totalRevenueVal != null) {
+            totalRevenueVal.setText(String.format("$%,.2f", metrics.totalRevenue));
+        }
+        if (appointmentsVal != null) {
+            appointmentsVal.setText(String.format("%,d", metrics.totalAppointments));
+        }
+        if (activeDoctorsVal != null) {
+            activeDoctorsVal.setText(String.valueOf(metrics.activeDoctors));
+        }
+        if (bedOccupancyVal != null) {
+            bedOccupancyVal.setText(String.format("%.1f%%", metrics.bedOccupancyRate));
+        }
+
+        // 2. Refresh metrics table data
+        metricsTableModel.setRowCount(0);
+        for (String[] row : metrics.tableRows) {
+            metricsTableModel.addRow(row);
+        }
     }
 
     // Reset personal profile input fields
@@ -661,27 +807,89 @@ public class MedicalManagerForm extends JFrame {
         genderBox.setSelectedIndex(0);
     }
 
+    // Load personal profile directly from allocator/file
+    private void loadProfileData() {
+        try {
+            MedicalManager freshManager = allocator.getBusinessEntity(currentManagerId);
+            var self = freshManager.getSelf();
+            if (self != null) {
+                nameField.setText(self.getName());
+                emailField.setText(self.getEmail());
+                phoneField.setText(self.getPhoneNumber());
+                passwordField.setText(self.getPassword());
+                if (self.getDateOfBirth() != null) {
+                    dobField.setText(self.getDateOfBirth().toString());
+                    dobField.setForeground(Color.BLACK);
+                }
+                if (self.getGender() != null) {
+                    genderBox.setSelectedItem("MALE".equalsIgnoreCase(self.getGender().name()) ? "Male" : "Female");
+                }
+            }
+        } catch (Exception e) {
+            // Silently keep fields blank if no record exists yet
+        }
+    }
+
     // Reset department fields to Add Mode
     private void resetToNewDeptMode() {
         deptIdField.setText(operation.generateNextDeptId());
         deptNameField.setText("");
     }
 
+    // Refresh Department Table directly from data
+    private void refreshDepartmentTable() {
+        deptTableModel.setRowCount(0);
+        ArrayList<String[]> depts = operation.loadDepartment();
+        for (String[] d : depts) {
+            deptTableModel.addRow(d);
+        }
+        refreshDepartmentComboBox();
+        resetToNewDeptMode();
+    }
+
+    // Populate doctor dropdown with real doctors from allocator
+    private void refreshDoctorComboBox() {
+        if (doctorBox == null) return;
+        doctorBox.removeAllItems();
+        try {
+            List<Doctor> doctors = operation.loadDoctors();
+            for (Doctor doc : doctors) {
+                if (doc.getSelf() != null) {
+                    doctorBox.addItem(doc.getId() + " - " + doc.getSelf().getName());
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to refresh doctor dropdown: " + e.getMessage());
+        }
+    }
+
+    // Refresh the roster table with real shift records from allocator
+    private void refreshRosterTable() {
+        if (rosterTableModel == null) return;
+        rosterTableModel.setRowCount(0);
+        try {
+            ArrayList<String[]> rosters = operation.loadRosters();
+            for (String[] row : rosters) {
+                rosterTableModel.addRow(row);
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to load rosters: " + e.getMessage());
+        }
+    }
+
     // Application entry point
     public static void main(String[] args) {
-        // Set ID number width to 4 digits
         BaseEntity.setIdNumberWidth(4);
 
-        // Create allocator instance with data paths
         HospitalEntityAllocator allocator = new HospitalEntityAllocator(
                 java.nio.file.Path.of("data/Linker"),
                 java.nio.file.Path.of("data/Entity")
         );
 
-        // Launch UI
         SwingUtilities.invokeLater(() -> {
             try {
-                new MedicalManagerForm(allocator).setVisible(true);
+                MedicalManager manager = allocator.getBusinessEntity("MM0001");
+                new MedicalManagerForm(allocator, manager).setVisible(true);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
