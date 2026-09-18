@@ -278,13 +278,39 @@ public class PatientOperation
     /** 12. Submits one feedback record for a completed appointment that has no feedback yet. Appointment -> Feedback. */
     public void submitFeedback(Appointment appointment, int rating, String comment)
     {
-        throw new UnsupportedOperationException("not yet implemented");
+        if (appointment == null) {
+            throw new IllegalArgumentException("Appointment cannot be null.");
+        }
+        if (appointment.getSelf().getStatus() != AppointmentStatus.COMPLETED) {
+            throw new IllegalArgumentException("Feedback can only be submitted for completed appointments.");
+        }
+        if (appointment.getFeedback() != null) {
+            throw new IllegalArgumentException("Feedback already exists for this appointment.");
+        }
+
+        FeedbackToFile feedbackData = new FeedbackToFile(
+                null,
+                rating,
+                comment,
+                LocalDateTime.now()
+        );
+        appointment.setFeedback(feedbackData);
+        allocator.saveChanges(appointment);
     }
 
     /** 13. Loads feedback submitted by the patient. Patient -> Appointment -> Feedback. */
     public List<FeedbackToFile> loadMyFeedback()
     {
-        throw new UnsupportedOperationException("not yet implemented");
+        List<FeedbackToFile> feedbackList = new ArrayList<>();
+        for (AppointmentToFile appointmentData : patient.getAppointments())
+        {
+            Appointment appointment = allocator.getBusinessEntity(appointmentData.getId());
+            FeedbackToFile feedback = appointment.getFeedback();
+            if (feedback != null) {
+                feedbackList.add(feedback);
+            }
+        }
+        return feedbackList;
     }
 
     /** 14. Loads the patient's insurance status. Patient -> Insurance. */
