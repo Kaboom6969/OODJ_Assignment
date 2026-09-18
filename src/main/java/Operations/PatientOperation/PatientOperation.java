@@ -315,12 +315,26 @@ public class PatientOperation
     /** 14. Loads the patient's insurance status. Patient -> Insurance. */
     public InsuranceToFile loadInsuranceStatus()
     {
-        throw new UnsupportedOperationException("not yet implemented");
+        return patient.getInsurance();
     }
 
     /** 15. Loads the next upcoming appointment, or null when none exists. Patient -> Appointment. */
     public Appointment loadNextUpcomingAppointment()
     {
-        throw new UnsupportedOperationException("not yet implemented");
+        LocalDateTime now = LocalDateTime.now();
+        Appointment nextAppointment = null;
+        for (Appointment appointment : loadMyAppointments())
+        {
+            AppointmentStatus status = appointment.getSelf().getStatus();
+            LocalDateTime appointmentTime = appointment.getSelf().getAppointmentTime();
+            if ((status != AppointmentStatus.BOOKED && status != AppointmentStatus.RESCHEDULED)
+                    || !appointmentTime.isAfter(now)) continue;
+            if (nextAppointment == null
+                    || appointmentTime.isBefore(nextAppointment.getSelf().getAppointmentTime()))
+            {
+                nextAppointment = appointment;
+            }
+        }
+        return nextAppointment;
     }
 }
