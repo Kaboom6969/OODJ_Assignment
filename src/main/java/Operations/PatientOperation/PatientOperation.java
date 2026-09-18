@@ -14,6 +14,8 @@ import entities.BusinessEntity.Doctor;
 import entities.BusinessEntity.Facility;
 import entities.BusinessEntity.MedicalRecord;
 import entities.BusinessEntity.Patient;
+import entities.BusinessEntity.Department;
+import entities.BaseEntity.DepartmentToFile.
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -99,6 +101,12 @@ public class PatientOperation
         allocator.saveChanges(patient);
     }
 
+    /** 16. Loads all departments. Department records. */
+    public List<Department> loadAllDepartments()
+    {
+        return allocator.getAllBusinessEntities(DepartmentToFile.PREFIX);
+    }
+
     /** 3. Loads all doctors available to the patient. Doctor records. */
     public List<Doctor> loadAllDoctors()
     {
@@ -121,6 +129,20 @@ public class PatientOperation
         }
         if (ratedAppointmentCount == 0) return 0.0;
         return (double) totalRating / ratedAppointmentCount;
+    }
+    
+    /** 17. Filter all doctors available to the patient. Doctor records. */
+    public List<Doctor> loadDoctorsByDepartment(Department department)
+    {
+        List<Doctor> filtered = new ArrayList<>();
+        for (Doctor doctor : loadAllDoctors())
+        {
+            if (doctor.getBelongsToDepartment().getId().equals(department.getSelf().getId()))
+            {
+                filtered.add(doctor);
+            }
+        }
+        return filtered;
     }
 
     /** 5. Loads available appointment slots from doctor shifts. Doctor -> DoctorShift -> Appointment. */
