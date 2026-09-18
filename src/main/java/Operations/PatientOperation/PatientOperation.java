@@ -128,7 +128,7 @@ public class PatientOperation
         return loadAvailableShifts(doctor, null);
     }
 
-    private List<DoctorShiftToFile> loadAvailableShifts(Doctor doctor, String ignoredAppointmentId)
+    public List<DoctorShiftToFile> loadAvailableShifts(Doctor doctor, String excludeAppointmentId)
     {
         List<DoctorShiftToFile> availableShifts = new ArrayList<>();
         for (DoctorShiftToFile shift : doctor.getDoctorShifts())
@@ -137,14 +137,13 @@ public class PatientOperation
             LocalDateTime shiftEnd = LocalDateTime.of(shift.getShiftDate(), shift.getEndTime());
             boolean unavailable = false;
 
-            // A shift overlaps a blocking appointment when appointmentTime is in [shiftStart, shiftEnd).
             for (AppointmentToFile appointment : doctor.getAppointments())
             {
-                if (appointment.getId().equals(ignoredAppointmentId)) continue;
-                AppointmentToFile.AppointmentStatus status = appointment.getStatus();
+                if (appointment.getId().equals(excludeAppointmentId)) continue; // don't let a booking block its own reschedule
+                AppointmentStatus status = appointment.getStatus();
                 LocalDateTime appointmentTime = appointment.getAppointmentTime();
-                boolean blocksShift = status == AppointmentToFile.AppointmentStatus.BOOKED
-                        || status == AppointmentToFile.AppointmentStatus.RESCHEDULED;
+                boolean blocksShift = status == AppointmentStatus.BOOKED
+                        || status == AppointmentStatus.RESCHEDULED;
                 if (blocksShift
                         && !appointmentTime.isBefore(shiftStart)
                         && appointmentTime.isBefore(shiftEnd))
@@ -157,7 +156,7 @@ public class PatientOperation
         }
         return availableShifts;
     }
-
+    
     /** 6. Books an appointment for the patient with the selected doctor and facility. Patient -> Appointment -> Doctor/Facility. */
     public void bookAppointment(Doctor doctor, Facility facility, LocalDateTime time, String reason)
     {
