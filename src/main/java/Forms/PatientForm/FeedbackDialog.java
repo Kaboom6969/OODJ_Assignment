@@ -11,6 +11,9 @@ package Forms.PatientForm;
 public class FeedbackDialog extends javax.swing.JDialog {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(FeedbackDialog.class.getName());
+    private boolean submitted = false;
+    private int selectedRating;
+    private String enteredComment;
 
     /**
      * Creates new form FeedbackDialog
@@ -18,6 +21,19 @@ public class FeedbackDialog extends javax.swing.JDialog {
     public FeedbackDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        submitBtn.addActionListener(this::submitBtnActionPerformed);
+    }
+
+    public boolean isSubmitted() {
+        return submitted;
+    }
+
+    public int getSelectedRating() {
+        return selectedRating;
+    }
+
+    public String getEnteredComment() {
+        return enteredComment;
     }
 
     /**
@@ -43,8 +59,12 @@ public class FeedbackDialog extends javax.swing.JDialog {
         jLabel12.setText("Feedback");
         jLabel12.setToolTipText("");
 
+        ratingSlider.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        ratingSlider.setMajorTickSpacing(1);
         ratingSlider.setMaximum(5);
+        ratingSlider.setMinimum(1);
         ratingSlider.setPaintLabels(true);
+        ratingSlider.setPaintTicks(true);
         ratingSlider.setValue(3);
 
         jLabel11.setFont(new java.awt.Font("Trebuchet MS", 0, 14)); // NOI18N
@@ -102,11 +122,18 @@ public class FeedbackDialog extends javax.swing.JDialog {
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(submitBtn)
-                .addContainerGap(14, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void submitBtnActionPerformed(java.awt.event.ActionEvent evt) {
+        selectedRating = ratingSlider.getValue();
+        enteredComment = commentTa.getText();
+        submitted = true;
+        dispose();
+    }
 
     /**
      * @param args the command line arguments
@@ -137,7 +164,7 @@ public class FeedbackDialog extends javax.swing.JDialog {
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
+                        dialog.dispose();
                     }
                 });
                 dialog.setVisible(true);

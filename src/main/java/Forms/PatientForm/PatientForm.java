@@ -6,18 +6,23 @@ package Forms.PatientForm;
 
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.BaseEntity;
+import entities.BaseEntity.AppointmentToFile.AppointmentStatus;
+import entities.BaseEntity.PrescriptionToFile;
 import entities.BaseEntity.Users.PatientToFile;
 import entities.BaseEntity.Users.UserWithDetails;
 import entities.BusinessEntity.Appointment;
 import entities.BusinessEntity.Department;
 import entities.BusinessEntity.Doctor;
 import entities.BusinessEntity.Facility;
+import entities.BusinessEntity.MedicalRecord;
 import entities.BusinessEntity.Patient;
 import Operations.PatientOperation.PatientOperation;
 import Operations.PatientOperation.PatientOperation.DoctorAvailability;
+import entities.BaseEntity.AppointmentToFile;
 import entities.BaseEntity.DepartmentToFile;
 import entities.BaseEntity.DoctorShiftToFile;
 import entities.BaseEntity.FacilityToFile;
+import entities.BaseEntity.MedicalRecordToFile;
 import entities.BaseEntity.Users.DoctorToFile;
 import entities.BaseEntity.Users.MedicalManagerToFile;
 import entities.BusinessEntity.MedicalManager;
@@ -28,11 +33,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import javax.swing.DefaultListModel;
 import javax.swing.JSpinner;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -47,6 +52,8 @@ public class PatientForm extends javax.swing.JFrame {
     private List<Department> departments;
     private List<DoctorAvailability> currentDoctorOptions;
     private List<LocalDateTime> currentSlotOptions;
+    private List<Appointment> currentAppointments;
+    private List<MedicalRecord> currentMedicalHistory;
 
     /**
      * Creates new form PatientForm
@@ -66,6 +73,8 @@ public class PatientForm extends javax.swing.JFrame {
         this.operation = new PatientOperation(allocator, patient);
         populateDashboard();
         populateBookingTab();
+        populateAppointmentsTable();
+        populateMedicalHistoryTable();
         
         jComboBox2.addActionListener(evt -> refreshDoctorList());
         jSpinner1.addChangeListener(evt -> refreshDoctorList());
@@ -74,6 +83,17 @@ public class PatientForm extends javax.swing.JFrame {
                 refreshSlotList();
             }
         });
+        appointmentTbl.getSelectionModel().addListSelectionListener(evt -> {
+            if (!evt.getValueIsAdjusting()) {
+                updateAppointmentActionButtons();
+            }
+        });
+        medicalTbl.getSelectionModel().addListSelectionListener(evt -> {
+            if (!evt.getValueIsAdjusting()) {
+                refreshPrescriptionsTable();
+            }
+        });
+        updateAppointmentActionButtons();
     }
 
     private void populateDashboard() {
@@ -88,7 +108,7 @@ public class PatientForm extends javax.swing.JFrame {
         Doctor doctor = allocator.getBusinessEntity(appointment.getDoctor().getId());
         String formattedTime = appointment.getSelf().getAppointmentTime()
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-        jLabel3.setText("Dr. " + doctor.getSelf().getName() + " - " + formattedTime);
+        jLabel3.setText( doctor.getSelf().getName() + " - " + formattedTime);
     }
 
     private void populateBookingTab() {
@@ -153,6 +173,124 @@ public class PatientForm extends javax.swing.JFrame {
         jList1.setModel(slotModel);
     }
 
+    private void populateAppointmentsTable() {
+        currentAppointments = operation.loadMyAppointments();
+        DefaultTableModel tableModel = new DefaultTableModel(
+                new Object[] {"Doctor", "Date & Time", "Facility", "Status", "My Rating"},
+                0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        DateTimeFormatter appointmentFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        for (Appointment appointment : currentAppointments) {
+            Doctor doctor = allocator.getBusinessEntity(appointment.getDoctor().getId());
+            Facility facility = allocator.getBusinessEntity(appointment.getFacility().getId());
+            String rating = appointment.getFeedback() == null
+                    ? "" : String.valueOf(appointment.getFeedback().getRating());
+            tableModel.addRow(new Object[] {
+                doctor.getSelf().getName(),
+                appointment.getSelf().getAppointmentTime().format(appointmentFormatter),
+                facility.getSelf().getName(),
+                appointment.getSelf().getStatus().toString(),
+                rating
+            });
+        }
+        appointmentTbl.setModel(tableModel);
+        updateAppointmentActionButtons();
+    }
+
+    private void updateAppointmentActionButtons() {
+        int selectedRow = appointmentTbl.getSelectedRow();
+        if (selectedRow < 0 || currentAppointments == null
+                || selectedRow >= currentAppointments.size()) {
+            RescheduleBtn.setEnabled(false);
+            CancelBtn.setEnabled(false);
+            feedbackBtn.setEnabled(false);
+            return;
+        }
+
+        Appointment appointment = currentAppointments.get(selectedRow);
+        AppointmentStatus status = appointment.getSelf().getStatus();
+        boolean active = status == AppointmentStatus.BOOKED
+                || status == AppointmentStatus.RESCHEDULED;
+        boolean canRate = status == AppointmentStatus.COMPLETED
+                && appointment.getFeedback() == null;
+        RescheduleBtn.setEnabled(active);
+        CancelBtn.setEnabled(active);
+        feedbackBtn.setEnabled(canRate);
+    }
+
+    private Appointment getSelectedAppointment() {
+        int selectedRow = appointmentTbl.getSelectedRow();
+        if (selectedRow < 0 || currentAppointments == null
+                || selectedRow >= currentAppointments.size()) {
+            return null;
+        }
+        return currentAppointments.get(selectedRow);
+    }
+
+    private void populateMedicalHistoryTable() {
+        currentMedicalHistory = operation.loadMedicalHistory();
+        DefaultTableModel tableModel = new DefaultTableModel(
+                new Object[] {"Date", "Doctor", "Diagnosis", "Vitals"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        DateTimeFormatter recordFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        for (MedicalRecord record : currentMedicalHistory) {
+            Appointment appointment = allocator.getBusinessEntity(
+                    record.getAppointment().getId());
+            var recordData = record.getSelf();
+            String vitals = "Temp " + recordData.getTemperature() + "°C, HR "
+                    + recordData.getHeartRate() + "bpm, BP "
+                    + recordData.getSystolicPressure() + "/"
+                    + recordData.getDiastolicPressure();
+            tableModel.addRow(new Object[] {
+                record.getAppointment().getAppointmentTime().format(recordFormatter),
+                appointment.getDoctor().getName(),
+                recordData.getDiagnosis(),
+                vitals
+            });
+        }
+        medicalTbl.setModel(tableModel);
+        refreshPrescriptionsTable();
+    }
+
+    private void refreshPrescriptionsTable() {
+        int selectedRow = medicalTbl.getSelectedRow();
+        DefaultTableModel tableModel = new DefaultTableModel(
+                new Object[] {"Medication", "Dosage", "Frequency", "Duration & Instructions"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        if (selectedRow < 0 || currentMedicalHistory == null
+                || currentMedicalHistory.isEmpty()
+                || selectedRow >= currentMedicalHistory.size()) {
+            PrescriptionsTbl.setModel(tableModel);
+            return;
+        }
+
+        MedicalRecord record = currentMedicalHistory.get(selectedRow);
+        List<PrescriptionToFile> prescriptions = operation.loadPrescriptions(record);
+        for (PrescriptionToFile prescription : prescriptions) {
+            tableModel.addRow(new Object[] {
+                prescription.getMedicationName(),
+                prescription.getDosage(),
+                prescription.getFrequency(),
+                prescription.getDurationDays() + " days — " + prescription.getInstructions()
+            });
+        }
+        PrescriptionsTbl.setModel(tableModel);
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -206,11 +344,11 @@ public class PatientForm extends javax.swing.JFrame {
         emailTf = new javax.swing.JTextField();
         editProfileBtn = new javax.swing.JButton();
         resetPwBtn = new javax.swing.JButton();
-        jPanel5 = new javax.swing.JPanel();
-        insuranceLbl = new javax.swing.JLabel();
         jLabel14 = new javax.swing.JLabel();
         jLabel15 = new javax.swing.JLabel();
         emailTf1 = new javax.swing.JTextField();
+        jScrollPane6 = new javax.swing.JScrollPane();
+        insuranceLbl = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -295,7 +433,7 @@ public class PatientForm extends javax.swing.JFrame {
                 .addContainerGap(203, Short.MAX_VALUE))
         );
 
-        jTabbedPane1.addTab("tab1", jPanel1);
+        jTabbedPane1.addTab("Dashboard", jPanel1);
 
         jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
@@ -374,7 +512,7 @@ public class PatientForm extends javax.swing.JFrame {
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 79, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 80, Short.MAX_VALUE)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -411,7 +549,7 @@ public class PatientForm extends javax.swing.JFrame {
                 .addContainerGap(114, Short.MAX_VALUE))
         );
 
-        jTabbedPane1.addTab("tab2", jPanel2);
+        jTabbedPane1.addTab("Booking", jPanel2);
 
         appointmentTbl.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -474,7 +612,7 @@ public class PatientForm extends javax.swing.JFrame {
                 .addContainerGap(94, Short.MAX_VALUE))
         );
 
-        jTabbedPane1.addTab("tab3", jPanel3);
+        jTabbedPane1.addTab("Appointments", jPanel3);
 
         jLabel10.setFont(new java.awt.Font("Times New Roman", 1, 36)); // NOI18N
         jLabel10.setText("Medical Records & Presriptions");
@@ -534,7 +672,7 @@ public class PatientForm extends javax.swing.JFrame {
                 .addContainerGap(18, Short.MAX_VALUE))
         );
 
-        jTabbedPane1.addTab("tab4", jPanel4);
+        jTabbedPane1.addTab("Records", jPanel4);
 
         jLabel12.setFont(new java.awt.Font("Times New Roman", 1, 36)); // NOI18N
         jLabel12.setText("My Profile");
@@ -558,28 +696,6 @@ public class PatientForm extends javax.swing.JFrame {
         resetPwBtn.setText("Reset Password");
         resetPwBtn.addActionListener(this::resetPwBtnActionPerformed);
 
-        jPanel5.setBackground(new java.awt.Color(255, 255, 255));
-
-        insuranceLbl.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        insuranceLbl.setText("Insurance status");
-
-        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
-        jPanel5.setLayout(jPanel5Layout);
-        jPanel5Layout.setHorizontalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
-                .addContainerGap(53, Short.MAX_VALUE)
-                .addComponent(insuranceLbl, javax.swing.GroupLayout.PREFERRED_SIZE, 193, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(143, 143, 143))
-        );
-        jPanel5Layout.setVerticalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel5Layout.createSequentialGroup()
-                .addContainerGap(20, Short.MAX_VALUE)
-                .addComponent(insuranceLbl)
-                .addContainerGap(17, Short.MAX_VALUE))
-        );
-
         jLabel14.setFont(new java.awt.Font("Trebuchet MS", 0, 14)); // NOI18N
         jLabel14.setText("Insurance:");
 
@@ -588,6 +704,10 @@ public class PatientForm extends javax.swing.JFrame {
 
         emailTf1.setEditable(false);
         emailTf1.setText("your phone");
+
+        insuranceLbl.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        insuranceLbl.setText("Insurance status");
+        jScrollPane6.setViewportView(insuranceLbl);
 
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
         jPanel7.setLayout(jPanel7Layout);
@@ -621,9 +741,9 @@ public class PatientForm extends javax.swing.JFrame {
                         .addGap(132, 132, 132))
                     .addGroup(jPanel7Layout.createSequentialGroup()
                         .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 269, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))))
         );
         jPanel7Layout.setVerticalGroup(
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -645,18 +765,17 @@ public class PatientForm extends javax.swing.JFrame {
                     .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(emailTf1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(editProfileBtn)))
-                .addGap(56, 56, 56)
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel7Layout.createSequentialGroup()
-                        .addGap(44, 44, 44)
+                        .addGap(100, 100, 100)
                         .addComponent(jLabel14))
                     .addGroup(jPanel7Layout.createSequentialGroup()
-                        .addGap(27, 27, 27)
-                        .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(159, Short.MAX_VALUE))
+                        .addGap(61, 61, 61)
+                        .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(142, Short.MAX_VALUE))
         );
 
-        jTabbedPane1.addTab("tab5", jPanel7);
+        jTabbedPane1.addTab("Profile", jPanel7);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -717,15 +836,90 @@ public class PatientForm extends javax.swing.JFrame {
     }//GEN-LAST:event_allAppBtnActionPerformed
 
     private void RescheduleBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_RescheduleBtnActionPerformed
-        // TODO add your handling code here:
+        Appointment appointment = getSelectedAppointment();
+        if (appointment == null) {
+            return;
+        }
+
+        Doctor doctor = allocator.getBusinessEntity(appointment.getDoctor().getId());
+        List<LocalDateTime> availableSlots = operation.loadAvailableSlots(
+                doctor, appointment.getId());
+        DateTimeFormatter slotFormatter = DateTimeFormatter.ofPattern("EEE, dd MMM — HH:mm");
+        Object[] slotOptions = availableSlots.stream()
+                .map(slot -> slot.format(slotFormatter))
+                .toArray();
+        Object selectedSlot = javax.swing.JOptionPane.showInputDialog(this,
+                "Select a new appointment time:", "Reschedule Appointment",
+                javax.swing.JOptionPane.QUESTION_MESSAGE, null, slotOptions,
+                slotOptions.length == 0 ? null : slotOptions[0]);
+        if (selectedSlot == null) {
+            return;
+        }
+
+        int selectedSlotIndex = java.util.Arrays.asList(slotOptions).indexOf(selectedSlot);
+        try {
+            operation.rescheduleAppointment(appointment, availableSlots.get(selectedSlotIndex));
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Appointment rescheduled successfully.", "Appointment Updated",
+                    javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            populateAppointmentsTable();
+        } catch (IllegalArgumentException exception) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    exception.getMessage(), "Reschedule Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_RescheduleBtnActionPerformed
 
     private void CancelBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CancelBtnActionPerformed
-        // TODO add your handling code here:
+        Appointment appointment = getSelectedAppointment();
+        if (appointment == null) {
+            return;
+        }
+
+        int confirmation = javax.swing.JOptionPane.showConfirmDialog(this,
+                "Are you sure you want to cancel this appointment?",
+                "Cancel Appointment", javax.swing.JOptionPane.YES_NO_OPTION);
+        if (confirmation != javax.swing.JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        try {
+            operation.cancelAppointment(appointment);
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Appointment cancelled successfully.", "Appointment Updated",
+                    javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            populateAppointmentsTable();
+        } catch (IllegalArgumentException exception) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    exception.getMessage(), "Cancellation Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_CancelBtnActionPerformed
 
     private void feedbackBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_feedbackBtnActionPerformed
-        // TODO add your handling code here:
+        Appointment appointment = getSelectedAppointment();
+        if (appointment == null) {
+            return;
+        }
+
+        FeedbackDialog dialog = new FeedbackDialog(this, true);
+        dialog.setVisible(true);
+        if (!dialog.isSubmitted()) {
+            return;
+        }
+
+        try {
+            operation.submitFeedback(appointment, dialog.getSelectedRating(),
+                dialog.getEnteredComment());
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Feedback submitted successfully.", "Feedback Submitted",
+                    javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            populateAppointmentsTable();
+        } catch (IllegalArgumentException exception) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    exception.getMessage(), "Feedback Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_feedbackBtnActionPerformed
 
     private void editProfileBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editProfileBtnActionPerformed
@@ -811,7 +1005,35 @@ public class PatientForm extends javax.swing.JFrame {
                 // 数据已经存在,直接拿第一个已有的病人来测试,不重复创建
                 testPatient = (Patient) allocator.getAllBusinessEntities(PatientToFile.PREFIX).get(0);
             }
+            
+            if (allocator.getAllBusinessEntities(MedicalRecordToFile.PREFIX).isEmpty()) {
+            List<Doctor> doctorsForHistory = allocator.getAllBusinessEntities(DoctorToFile.PREFIX);
+            List<Facility> facilitiesForHistory = allocator.getAllBusinessEntities(FacilityToFile.PREFIX);
+            if (!doctorsForHistory.isEmpty() && !facilitiesForHistory.isEmpty()) {
+                AppointmentToFile pastAppointmentData = new AppointmentToFile(
+                    null, LocalDateTime.now().minusDays(7), "Past checkup",
+                    AppointmentToFile.AppointmentStatus.COMPLETED);
+                Appointment pastAppointment = allocator.convertToBusinessEntity(pastAppointmentData, true);
+                pastAppointment.setPatient(testPatient.getSelf());
+                pastAppointment.setDoctor(doctorsForHistory.get(0).getSelf());
+                pastAppointment.setFacility(facilitiesForHistory.get(0).getSelf());
+                allocator.saveChanges(pastAppointment);
 
+                MedicalRecordToFile recordData = new MedicalRecordToFile(
+                    null, 37.2, 78, 120, 80, "Common cold", "Advised rest and fluids");
+                MedicalRecord testRecord = allocator.convertToBusinessEntity(recordData, true);
+                testRecord.setAppointment(pastAppointmentData);
+                allocator.saveChanges(testRecord);
+                pastAppointment.setMedicalRecord(recordData);
+                allocator.saveChanges(pastAppointment);
+
+                PrescriptionToFile prescriptionData = new PrescriptionToFile(
+                    null, "Paracetamol", "500mg", "Every 6 hours", 5,
+                    "Take after meals", LocalDateTime.now().minusDays(7));
+                testRecord.getPrescriptions().add(prescriptionData);
+                allocator.saveChanges(testRecord);
+            }
+        }
             java.awt.EventQueue.invokeLater(() ->
                 new PatientForm(allocator, testPatient).setVisible(true));
         } catch (java.io.IOException exception) {
@@ -854,7 +1076,6 @@ public class PatientForm extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
-    private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JScrollPane jScrollPane1;
@@ -862,6 +1083,7 @@ public class PatientForm extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
+    private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JSpinner jSpinner1;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JButton logOutBtn;
