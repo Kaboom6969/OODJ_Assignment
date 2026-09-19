@@ -15,16 +15,24 @@ import entities.BusinessEntity.Facility;
 import entities.BusinessEntity.Patient;
 import Operations.PatientOperation.PatientOperation;
 import Operations.PatientOperation.PatientOperation.DoctorAvailability;
+import entities.BaseEntity.DepartmentToFile;
+import entities.BaseEntity.DoctorShiftToFile;
+import entities.BaseEntity.FacilityToFile;
+import entities.BaseEntity.Users.DoctorToFile;
+import entities.BaseEntity.Users.MedicalManagerToFile;
+import entities.BusinessEntity.MedicalManager;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import javax.swing.DefaultListModel;
+import javax.swing.JSpinner;
 
 /**
  *
@@ -56,6 +64,9 @@ public class PatientForm extends javax.swing.JFrame {
         this.allocator = allocator;
         this.patient = patient;
         this.operation = new PatientOperation(allocator, patient);
+        populateDashboard();
+        populateBookingTab();
+        
         jComboBox2.addActionListener(evt -> refreshDoctorList());
         jSpinner1.addChangeListener(evt -> refreshDoctorList());
         jList2.addListSelectionListener(evt -> {
@@ -63,8 +74,6 @@ public class PatientForm extends javax.swing.JFrame {
                 refreshSlotList();
             }
         });
-        populateDashboard();
-        populateBookingTab();
     }
 
     private void populateDashboard() {
@@ -89,14 +98,14 @@ public class PatientForm extends javax.swing.JFrame {
             jComboBox2.addItem(department.getSelf().getName());
         }
 
-        Date today = Date.from(LocalDate.now().atStartOfDay(
-                java.time.ZoneId.systemDefault()).toInstant());
-        jSpinner1.setModel(new javax.swing.SpinnerDateModel(
-                new Date(), today, null, Calendar.DAY_OF_MONTH));
+        JSpinner.DateEditor dateEditor = new JSpinner.DateEditor(jSpinner1, "yyyy-MM-dd");
+        jSpinner1.setEditor(dateEditor);
+        jSpinner1.setValue(new java.util.Date()); // 默认显示今天
         refreshDoctorList();
     }
 
     private void refreshDoctorList() {
+        System.out.println("refreshDoctorList called, date=" + jSpinner1.getValue());
         int departmentIndex = jComboBox2.getSelectedIndex();
         if (departmentIndex < 0 || departmentIndex >= departments.size()) {
             jList2.setModel(new DefaultListModel<>());
@@ -175,6 +184,7 @@ public class PatientForm extends javax.swing.JFrame {
         jSpinner1 = new javax.swing.JSpinner();
         jScrollPane5 = new javax.swing.JScrollPane();
         jList2 = new javax.swing.JList<>();
+        jLabel16 = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         appointmentTbl = new javax.swing.JTable();
@@ -227,14 +237,13 @@ public class PatientForm extends javax.swing.JFrame {
         jPanel6Layout.setHorizontalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel6Layout.createSequentialGroup()
-                .addGroup(jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel6Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel6Layout.createSequentialGroup()
-                        .addGap(110, 110, 110)
-                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(125, Short.MAX_VALUE))
+                .addContainerGap()
+                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(232, Short.MAX_VALUE))
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
         jPanel6Layout.setVerticalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -332,6 +341,9 @@ public class PatientForm extends javax.swing.JFrame {
         });
         jScrollPane5.setViewportView(jList2);
 
+        jLabel16.setFont(new java.awt.Font("Tw Cen MT", 0, 14)); // NOI18N
+        jLabel16.setText("Rating:");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -341,26 +353,32 @@ public class PatientForm extends javax.swing.JFrame {
                 .addComponent(jLabel4)
                 .addGap(211, 211, 211))
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(59, 59, 59)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(78, 78, 78)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(ratingLbl, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 79, Short.MAX_VALUE)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(126, 126, 126))
-            .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGap(279, 279, 279)
                 .addComponent(confirmBtn)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(ratingLbl, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel2Layout.createSequentialGroup()
+                        .addGap(59, 59, 59)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(59, 59, 59)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 79, Short.MAX_VALUE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(69, 69, 69))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -378,9 +396,11 @@ public class PatientForm extends javax.swing.JFrame {
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18)
-                        .addComponent(ratingLbl)
-                        .addGap(37, 37, 37)
+                        .addGap(19, 19, 19)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(ratingLbl)
+                            .addComponent(jLabel16))
+                        .addGap(36, 36, 36)
                         .addComponent(confirmBtn))
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel2Layout.createSequentialGroup()
                         .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -471,7 +491,6 @@ public class PatientForm extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-    
         jScrollPane3.setViewportView(PrescriptionsTbl);
 
         medicalTbl.setModel(new javax.swing.table.DefaultTableModel(
@@ -748,11 +767,50 @@ public class PatientForm extends javax.swing.JFrame {
             BaseEntity.setIdNumberWidth(4);
             HospitalEntityAllocator allocator = new HospitalEntityAllocator(
                 linkerDirectory, entityDirectory);
-            PatientToFile patientData = new PatientToFile(
-                null, "Alice Tan", "OldPass1!", "alice@old.com",
-                UserWithDetails.Gender.FEMALE, LocalDate.of(1995, 5, 20), "0111234567");
-            Patient testPatient = allocator.convertToBusinessEntity(patientData, true);
-            allocator.saveChanges(testPatient);
+
+            List<Department> existingDepartments = allocator.getAllBusinessEntities(DepartmentToFile.PREFIX);
+            Patient testPatient;
+
+            if (existingDepartments.isEmpty()) {
+                // 数据是空的,才建一次完整的测试数据
+                PatientToFile patientData = new PatientToFile(
+                    null, "Alice Tan", "OldPass1!", "alice@old.com",
+                    UserWithDetails.Gender.FEMALE, LocalDate.of(1995, 5, 20), "0111234567");
+                testPatient = allocator.convertToBusinessEntity(patientData, true);
+                allocator.saveChanges(testPatient);
+
+                DepartmentToFile deptData = new DepartmentToFile(null, "Cardiology");
+                Department testDepartment = allocator.convertToBusinessEntity(deptData, true);
+                allocator.saveChanges(testDepartment);
+
+                MedicalManagerToFile managerData = new MedicalManagerToFile(
+                    null, "Manager Lim", "Passw0rd!", "lim@hospital.com",
+                    UserWithDetails.Gender.FEMALE, LocalDate.of(1975, 1, 1), "0138887777");
+                MedicalManager testManager = allocator.convertToBusinessEntity(managerData, true);
+                allocator.saveChanges(testManager);
+
+                DoctorToFile doctorData = new DoctorToFile(
+                    null, "Dr. Wong", "Passw0rd!", "wong@hospital.com",
+                    UserWithDetails.Gender.MALE, LocalDate.of(1980, 3, 10), "0129876543");
+                Doctor testDoctor = allocator.convertToBusinessEntity(doctorData, true);
+                testDoctor.setBelongsToDepartment(deptData);
+                testDoctor.setBelongsToMedicalManager(managerData);
+                allocator.saveChanges(testDoctor);
+
+                DoctorShiftToFile shiftData = new DoctorShiftToFile(
+                    null, LocalDate.of(2026, 9 , 20), LocalTime.of(9, 0), LocalTime.of(17, 0));
+                testDoctor.getDoctorShifts().add(shiftData);
+                allocator.saveChanges(testDoctor);
+
+                FacilityToFile facilityData = new FacilityToFile(
+                    null, "Room 101", FacilityToFile.FacilityType.CONSULTATION_ROOM, 1, true);
+                Facility testFacility = allocator.convertToBusinessEntity(facilityData, true);
+                testFacility.setBelongsToDepartment(deptData);
+                allocator.saveChanges(testFacility);
+            } else {
+                // 数据已经存在,直接拿第一个已有的病人来测试,不重复创建
+                testPatient = (Patient) allocator.getAllBusinessEntities(PatientToFile.PREFIX).get(0);
+            }
 
             java.awt.EventQueue.invokeLater(() ->
                 new PatientForm(allocator, testPatient).setVisible(true));
@@ -781,6 +839,7 @@ public class PatientForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
