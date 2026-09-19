@@ -1,4 +1,4 @@
-﻿package Operations.LoginOperation;
+package Operations.LoginOperation;
 
 import Tools.EntityConvertManager;import Tools.HospitalEntityAllocator;import entities.BaseEntity.Users.User;import entities.BusinessEntity.BusinessEntity;
 

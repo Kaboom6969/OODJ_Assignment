@@ -681,7 +681,7 @@ public class MedicalManagerForm extends JFrame {
         // Launch UI
         SwingUtilities.invokeLater(() -> {
             try {
-                new MedicalManagerForm(allocator).setVisible(true);
+                new MedicalManagerForm(allocator,allocator.getBusinessEntity("MM0001")).setVisible(true);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
