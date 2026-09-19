@@ -229,7 +229,15 @@ public class PatientForm extends javax.swing.JFrame {
                 || selectedRow >= currentAppointments.size()) {
             return null;
         }
-        return currentAppointments.get(selectedRow);
+            return currentAppointments.get(selectedRow);
+    }
+
+    private void refreshAllTabs() {
+        patient = allocator.getBusinessEntity(patient.getId());
+        operation = new PatientOperation(allocator, patient);
+        populateDashboard();
+        refreshDoctorList();
+        populateAppointmentsTable();
     }
 
     private void populateMedicalHistoryTable() {
@@ -823,7 +831,7 @@ public class PatientForm extends javax.swing.JFrame {
             javax.swing.JOptionPane.showMessageDialog(this,
                 "Appointment booked successfully.", "Booking Confirmed",
                 javax.swing.JOptionPane.INFORMATION_MESSAGE);
-            refreshDoctorList();
+            refreshAllTabs();
         } catch (IllegalArgumentException exception) {
             javax.swing.JOptionPane.showMessageDialog(this,
                 exception.getMessage(), "Booking Error",
@@ -862,7 +870,7 @@ public class PatientForm extends javax.swing.JFrame {
             javax.swing.JOptionPane.showMessageDialog(this,
                     "Appointment rescheduled successfully.", "Appointment Updated",
                     javax.swing.JOptionPane.INFORMATION_MESSAGE);
-            populateAppointmentsTable();
+                refreshAllTabs();
         } catch (IllegalArgumentException exception) {
             javax.swing.JOptionPane.showMessageDialog(this,
                     exception.getMessage(), "Reschedule Error",
@@ -888,7 +896,7 @@ public class PatientForm extends javax.swing.JFrame {
             javax.swing.JOptionPane.showMessageDialog(this,
                     "Appointment cancelled successfully.", "Appointment Updated",
                     javax.swing.JOptionPane.INFORMATION_MESSAGE);
-            populateAppointmentsTable();
+                refreshAllTabs();
         } catch (IllegalArgumentException exception) {
             javax.swing.JOptionPane.showMessageDialog(this,
                     exception.getMessage(), "Cancellation Error",
@@ -914,7 +922,7 @@ public class PatientForm extends javax.swing.JFrame {
             javax.swing.JOptionPane.showMessageDialog(this,
                     "Feedback submitted successfully.", "Feedback Submitted",
                     javax.swing.JOptionPane.INFORMATION_MESSAGE);
-            populateAppointmentsTable();
+                refreshAllTabs();
         } catch (IllegalArgumentException exception) {
             javax.swing.JOptionPane.showMessageDialog(this,
                     exception.getMessage(), "Feedback Error",
