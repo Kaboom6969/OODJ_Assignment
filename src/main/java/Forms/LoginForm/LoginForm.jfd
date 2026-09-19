@@ -1,0 +1,49 @@
+﻿JFDML JFormDesigner: "8.3" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class org.jdesktop.layout.GroupLayout ) {
+			"$horizontalGroup": "par l {seq {par l {seq {par l {seq {space :p:106:p, comp nameLabel:::p:40:p}, comp passwordLabel::t:p:65:p, comp roleLabel::t:p::p}, space :p:58:p, par l {comp nameField:::p:134:p, comp passwordField:::p:134:p, comp roleComboBox::l:p::p}}, seq l {space :p:146:p, comp loginButton:::p::p}}, space ::70:x}}"
+			"$verticalGroup": "par l {seq l {space :p:125:p, par l {comp nameField:::p::p, comp nameLabel:::::x}, space u:::p, par l {comp passwordLabel:::p:26:p, comp passwordField:::p::p}, space :p:16:p, par b {comp roleComboBox::b:p::p, comp roleLabel::b:p::p}, space s:::p, comp loginButton:::p::p, space :p:57:p}}"
+		} ) {
+			name: "this"
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "nameLabel"
+				"text": "Name:"
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "passwordLabel"
+				"text": "Password:"
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "nameField"
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "passwordField"
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "loginButton"
+				"text": "Login"
+				addEvent( new FormEvent( "java.awt.event.MouseListener", "mouseClicked", "loginButtonMouseClicked", true ) )
+			} )
+			add( new FormComponent( "javax.swing.JComboBox" ) {
+				name: "roleComboBox"
+				"model": new javax.swing.DefaultComboBoxModel {
+					selectedItem: "Admin Staff"
+					addElement( "Admin Staff" )
+					addElement( "Medical Manager" )
+					addElement( "Doctor" )
+					addElement( "Patient" )
+				}
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "roleLabel"
+				"text": "Role:"
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 410, 395 )
+		} )
+	}
+}
