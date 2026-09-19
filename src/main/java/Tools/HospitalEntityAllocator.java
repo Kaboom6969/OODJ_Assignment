@@ -155,12 +155,12 @@ public class HospitalEntityAllocator
         );
         return (T) EntityConvertManager.getBusinessConvertMap().get(prefix).apply(businessEntityConstructor);
     }
-    public <T extends BusinessEntity<?>> void deleteBusinessEntity (T businessEntity)
+    public <T extends BusinessEntity<?>> void deleteBusinessEntity (T businessEntity) throws EntityNotMatchException, EntityNotFoundException
     {
         deleteBusinessEntity(businessEntity.getId());
     }
 
-    public void deleteBusinessEntity(String id)
+    public void deleteBusinessEntity(String id) throws EntityNotFoundException, EntityNotMatchException
     {
 
         String prefix = PrefixFinder.findPrefix(id);
@@ -173,7 +173,7 @@ public class HospitalEntityAllocator
         BaseEntity entity = getEntity(id);
         if (entity == null)
         {
-            throw new IllegalArgumentException("Entity not found: " + id);
+            throw new EntityNotFoundException("Entity not found: " + id);
         }
         for (Field field : businessEntityClass.getDeclaredFields())
         {
@@ -187,13 +187,8 @@ public class HospitalEntityAllocator
             linkerHandler.updatePartialLinker(new LinkerManager(baseEntityClass,otherClass),id);
             linkerHandler.saveLinkers();
         }
-        try
-        {
-            removeEntity(getEntity(id));
-        } catch (EntityNotMatchException | EntityNotFoundException e)
-        {
-            throw new RuntimeException(e);
-        }
+        removeEntity(getEntity(id));
+
     }
 
 

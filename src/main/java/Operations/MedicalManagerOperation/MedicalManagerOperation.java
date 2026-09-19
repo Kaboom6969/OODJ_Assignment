@@ -145,14 +145,21 @@ public class MedicalManagerOperation {
     }
 
     // Delete department using allocator.removeEntity
-    public void deleteDepartment(String deptId) {
+    public void deleteDepartment(String deptId)
+    {
         if (deptId == null || deptId.trim().isEmpty()) {
             throw new IllegalArgumentException("Department ID cannot be empty.");
         }
-        DepartmentToFile dept = allocator.getEntity(deptId.trim());
+        Department dept = allocator.getBusinessEntity(deptId.trim());
         if (dept == null) {
             throw new IllegalArgumentException("Department ID '" + deptId + "' not found.");
         }
-        allocator.deleteBusinessEntity(deptId);
+        try
+        {
+            allocator.deleteBusinessEntity(dept);
+        } catch (EntityNotMatchException| EntityNotFoundException e)
+        {
+            throw new RuntimeException("Department ID '" + deptId + "' does not exist.");
+        }
     }
 }
