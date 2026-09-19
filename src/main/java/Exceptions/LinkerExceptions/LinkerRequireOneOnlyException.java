@@ -1,4 +1,4 @@
-﻿package Exceptions.LinkerExceptions;
+package Exceptions.LinkerExceptions;
 
 public class LinkerRequireOneOnlyException extends LinkerException
 {

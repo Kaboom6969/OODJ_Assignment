@@ -108,12 +108,17 @@ public class EntityHandler
         if (entityDataInFile.isEmpty()) throw new EntityNotFoundException("Entity in file is not founded!");
         switch (matchLogic)
         {
-            case CODE_ONLY: break;
-            case EXACT_DATA: break;
-
-
+            case CODE_ONLY:
+                fileDataHandler.deleteRow(entityDataInFile.row());
+                break;
+            case EXACT_DATA:
+                T tempEntity = ecm.convertEntity(entityDataInFile.data());
+                if (tempEntity == null) throw new EntityNotFoundException("Entity in file is not founded!");
+                if (!tempEntity.equals(Entity)) throw new EntityNotMatchException("Entity is not exact same!");
+                
+                fileDataHandler.deleteRow(entityDataInFile.row());
+                break;
         }
-        fileDataHandler.deleteRow(entityDataInFile.row());
     }
 
     public <T extends BaseEntity & ConvertToFileData> void upsertEntity(T entity)
