@@ -9,14 +9,22 @@ import entities.BaseEntity.BaseEntity;
 import entities.BaseEntity.Users.PatientToFile;
 import entities.BaseEntity.Users.UserWithDetails;
 import entities.BusinessEntity.Appointment;
+import entities.BusinessEntity.Department;
 import entities.BusinessEntity.Doctor;
+import entities.BusinessEntity.Facility;
 import entities.BusinessEntity.Patient;
 import Operations.PatientOperation.PatientOperation;
+import Operations.PatientOperation.PatientOperation.DoctorAvailability;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import javax.swing.DefaultListModel;
 
 /**
  *
@@ -28,6 +36,9 @@ public class PatientForm extends javax.swing.JFrame {
     private HospitalEntityAllocator allocator;
     private Patient patient;
     private PatientOperation operation;
+    private List<Department> departments;
+    private List<DoctorAvailability> currentDoctorOptions;
+    private List<LocalDateTime> currentSlotOptions;
 
     /**
      * Creates new form PatientForm
@@ -38,7 +49,6 @@ public class PatientForm extends javax.swing.JFrame {
             // TODO: Navigate to the login screen once it is merged.
             dispose();
         });
-        allAppBtn.addActionListener(evt -> jTabbedPane1.setSelectedIndex(2));
     }
 
     public PatientForm(HospitalEntityAllocator allocator, Patient patient) {
@@ -46,7 +56,15 @@ public class PatientForm extends javax.swing.JFrame {
         this.allocator = allocator;
         this.patient = patient;
         this.operation = new PatientOperation(allocator, patient);
+        jComboBox2.addActionListener(evt -> refreshDoctorList());
+        jSpinner1.addChangeListener(evt -> refreshDoctorList());
+        jList2.addListSelectionListener(evt -> {
+            if (!evt.getValueIsAdjusting()) {
+                refreshSlotList();
+            }
+        });
         populateDashboard();
+        populateBookingTab();
     }
 
     private void populateDashboard() {
@@ -62,6 +80,68 @@ public class PatientForm extends javax.swing.JFrame {
         String formattedTime = appointment.getSelf().getAppointmentTime()
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
         jLabel3.setText("Dr. " + doctor.getSelf().getName() + " - " + formattedTime);
+    }
+
+    private void populateBookingTab() {
+        departments = operation.loadAllDepartments();
+        jComboBox2.removeAllItems();
+        for (Department department : departments) {
+            jComboBox2.addItem(department.getSelf().getName());
+        }
+
+        Date today = Date.from(LocalDate.now().atStartOfDay(
+                java.time.ZoneId.systemDefault()).toInstant());
+        jSpinner1.setModel(new javax.swing.SpinnerDateModel(
+                new Date(), today, null, Calendar.DAY_OF_MONTH));
+        refreshDoctorList();
+    }
+
+    private void refreshDoctorList() {
+        int departmentIndex = jComboBox2.getSelectedIndex();
+        if (departmentIndex < 0 || departmentIndex >= departments.size()) {
+            jList2.setModel(new DefaultListModel<>());
+            jList1.setModel(new DefaultListModel<>());
+            ratingLbl.setText("");
+            return;
+        }
+
+        Date selectedDate = (Date) jSpinner1.getValue();
+        LocalDate date = selectedDate.toInstant()
+                .atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+        Department department = departments.get(departmentIndex);
+        currentDoctorOptions = operation.loadDoctorAvailability(department, date);
+
+        DefaultListModel<String> doctorModel = new DefaultListModel<>();
+        for (DoctorAvailability option : currentDoctorOptions) {
+            doctorModel.addElement(option.doctor().getSelf().getName()
+                    + " (" + option.availableSlots().size() + " slots)");
+        }
+        jList2.setModel(doctorModel);
+        jList1.setModel(new DefaultListModel<>());
+        ratingLbl.setText("");
+    }
+
+    private void refreshSlotList() {
+        int doctorIndex = jList2.getSelectedIndex();
+        if (doctorIndex < 0 || currentDoctorOptions == null
+                || doctorIndex >= currentDoctorOptions.size()) {
+            jList1.setModel(new DefaultListModel<>());
+            ratingLbl.setText("");
+            return;
+        }
+
+        DoctorAvailability doctorOption = currentDoctorOptions.get(doctorIndex);
+        Doctor doctor = doctorOption.doctor();
+        ratingLbl.setText(String.format("Rating: %.1f",
+                operation.loadDoctorAverageRating(doctor)));
+        currentSlotOptions = doctorOption.availableSlots();
+
+        DateTimeFormatter slotFormatter = DateTimeFormatter.ofPattern("EEE, dd MMM — HH:mm");
+        DefaultListModel<String> slotModel = new DefaultListModel<>();
+        for (LocalDateTime slot : currentSlotOptions) {
+            slotModel.addElement(slot.format(slotFormatter));
+        }
+        jList1.setModel(slotModel);
     }
 
     /**
@@ -577,11 +657,44 @@ public class PatientForm extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void confirmBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_confirmBtnActionPerformed
-        // TODO add your handling code here:
+        int doctorIndex = jList2.getSelectedIndex();
+        int slotIndex = jList1.getSelectedIndex();
+        if (doctorIndex < 0 || currentDoctorOptions == null
+            || doctorIndex >= currentDoctorOptions.size()) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Please select a doctor.", "Booking Error",
+                javax.swing.JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (slotIndex < 0 || currentSlotOptions == null
+            || slotIndex >= currentSlotOptions.size()) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Please select an appointment slot.", "Booking Error",
+                javax.swing.JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        Doctor doctor = currentDoctorOptions.get(doctorIndex).doctor();
+        LocalDateTime slot = currentSlotOptions.get(slotIndex);
+        Facility facility = allocator.<Facility>getAllBusinessEntities(
+            entities.BaseEntity.FacilityToFile.PREFIX).get(0);
+        String reason = javax.swing.JOptionPane.showInputDialog(this,
+            "Reason for appointment:");
+        try {
+            operation.bookAppointment(doctor, facility, slot, reason);
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Appointment booked successfully.", "Booking Confirmed",
+                javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            refreshDoctorList();
+        } catch (IllegalArgumentException exception) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                exception.getMessage(), "Booking Error",
+                javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_confirmBtnActionPerformed
 
     private void allAppBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_allAppBtnActionPerformed
-        // TODO add your handling code here:
+        jTabbedPane1.setSelectedIndex(2);
     }//GEN-LAST:event_allAppBtnActionPerformed
 
     private void RescheduleBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_RescheduleBtnActionPerformed

@@ -30,4 +30,4 @@ bin/
 .vscode/
 
 ### Mac OS ###
-.DS_Storesrc/main/java/PatientTestScratch.java
+.DS_Storesrc/test/java/PatientTestScratch.java
