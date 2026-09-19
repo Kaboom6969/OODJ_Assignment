@@ -15,7 +15,7 @@ import entities.BusinessEntity.Facility;
 import entities.BusinessEntity.MedicalRecord;
 import entities.BusinessEntity.Patient;
 import entities.BusinessEntity.Department;
-import entities.BaseEntity.DepartmentToFile.
+import entities.BaseEntity.DepartmentToFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -181,7 +181,24 @@ public class PatientOperation
         }
         return availableSlots;
     }
-    
+
+    /** 18. Returns date-filtered results per doctor */
+    public record DoctorAvailability(Doctor doctor, List<LocalDateTime> availableSlots) {}
+
+    public List<DoctorAvailability> loadDoctorAvailability(Department department, LocalDate date)
+    {
+        List<DoctorAvailability> results = new ArrayList<>();
+        for (Doctor doctor : loadDoctorsByDepartment(department))
+        {
+            List<LocalDateTime> slotsThatDay = new ArrayList<>();
+            for (LocalDateTime slot : loadAvailableSlots(doctor))
+            {
+                if (slot.toLocalDate().equals(date)) slotsThatDay.add(slot);
+            }
+            if (!slotsThatDay.isEmpty()) results.add(new DoctorAvailability(doctor, slotsThatDay));
+        }
+        return results;
+    }
     /** 6. Books an appointment for the patient with the selected doctor and facility. Patient -> Appointment -> Doctor/Facility. */
     public void bookAppointment(Doctor doctor, Facility facility, LocalDateTime time, String reason)
     {
