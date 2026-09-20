@@ -1,29 +1,29 @@
-﻿package Operations.AdminOperation;
+package Operations.AdminOperation;
 
 import Exceptions.EntityExceptions.EntityNotFoundException;
 import Exceptions.EntityExceptions.EntityNotMatchException;
 import Interfaces.ConvertToFileData;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.BaseEntity;
+import entities.BaseEntity.FacilityToFile;
 import entities.BaseEntity.Users.DoctorToFile;
 import entities.BaseEntity.Users.MedicalManagerToFile;
 import entities.BaseEntity.Users.PatientToFile;
 import entities.BaseEntity.Users.User;
-import entities.BusinessEntity.BusinessEntity;
-import entities.BusinessEntity.Doctor;
-import entities.BusinessEntity.MedicalManager;
-import entities.BusinessEntity.Patient;
+import entities.BusinessEntity.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class AdminOperation
 {
+    private final Admin admin;
     private final HospitalEntityAllocator hospitalEntityAllocator;
     public record CRUDInformation(boolean isSuccess,String message){}
 
-    public AdminOperation(HospitalEntityAllocator hospitalEntityAllocator)
+    public AdminOperation(HospitalEntityAllocator hospitalEntityAllocator,Admin admin)
     {
+        this.admin = admin;
         this.hospitalEntityAllocator = hospitalEntityAllocator;
     }
 
@@ -78,5 +78,25 @@ public class AdminOperation
         doctor.setBelongsToMedicalManager(medicalManager.getSelf());
         hospitalEntityAllocator.saveChanges(doctor);
     }
+
+    public List<Facility> getAllFacilities()
+    {
+        return hospitalEntityAllocator.getAllBusinessEntities(FacilityToFile.PREFIX);
+    }
+
+    public CRUDInformation addFacility(Facility facility)
+    {
+        try
+        {
+            hospitalEntityAllocator.addEntityForceNewId(facility.getSelf());
+            return new CRUDInformation(true, "Success");
+        }
+        catch (RuntimeException e)
+        {
+            return new CRUDInformation(false,e.getMessage());
+        }
+    }
+
+
 
 }
