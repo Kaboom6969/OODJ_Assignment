@@ -11,6 +11,10 @@ package Forms.PatientForm;
 public class ResetPassword extends javax.swing.JDialog {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ResetPassword.class.getName());
+    private boolean submitted = false;
+    private String oldPassword;
+    private String newPassword;
+    private String confirmPassword;
 
     /**
      * Creates new form ResetPassword
@@ -18,6 +22,23 @@ public class ResetPassword extends javax.swing.JDialog {
     public ResetPassword(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        resetBtn.addActionListener(this::resetBtnActionPerformed);
+    }
+
+    public boolean isSubmitted() {
+        return submitted;
+    }
+
+    public String getOldPassword() {
+        return oldPassword;
+    }
+
+    public String getNewPassword() {
+        return newPassword;
+    }
+
+    public String getConfirmPassword() {
+        return confirmPassword;
     }
 
     /**
@@ -52,12 +73,6 @@ public class ResetPassword extends javax.swing.JDialog {
 
         jLabel14.setFont(new java.awt.Font("Trebuchet MS", 0, 14)); // NOI18N
         jLabel14.setText("Confirm Password:");
-
-        oldPasswordTf.setText("jPasswordField1");
-
-        newPasswordTf.setText("jPasswordField1");
-
-        confirmPasswordTf.setText("jPasswordField1");
 
         resetBtn.setText("Reset");
 
@@ -116,6 +131,23 @@ public class ResetPassword extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void resetBtnActionPerformed(java.awt.event.ActionEvent evt) {
+        String enteredNewPassword = new String(newPasswordTf.getPassword());
+        String enteredConfirmPassword = new String(confirmPasswordTf.getPassword());
+        if (!enteredNewPassword.equals(enteredConfirmPassword)) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "New password and confirmation do not match.", "Reset Password Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        oldPassword = new String(oldPasswordTf.getPassword());
+        newPassword = enteredNewPassword;
+        confirmPassword = enteredConfirmPassword;
+        submitted = true;
+        dispose();
+    }
+
     /**
      * @param args the command line arguments
      */
@@ -145,7 +177,7 @@ public class ResetPassword extends javax.swing.JDialog {
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
+                        dialog.dispose();
                     }
                 });
                 dialog.setVisible(true);

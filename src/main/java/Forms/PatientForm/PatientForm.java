@@ -19,9 +19,11 @@ import entities.BusinessEntity.Patient;
 import Operations.PatientOperation.PatientOperation;
 import Operations.PatientOperation.PatientOperation.DoctorAvailability;
 import entities.BaseEntity.AppointmentToFile;
+import entities.BaseEntity.BillToFile;
 import entities.BaseEntity.DepartmentToFile;
 import entities.BaseEntity.DoctorShiftToFile;
 import entities.BaseEntity.FacilityToFile;
+import entities.BaseEntity.InsuranceToFile;
 import entities.BaseEntity.MedicalRecordToFile;
 import entities.BaseEntity.Users.DoctorToFile;
 import entities.BaseEntity.Users.MedicalManagerToFile;
@@ -54,6 +56,7 @@ public class PatientForm extends javax.swing.JFrame {
     private List<LocalDateTime> currentSlotOptions;
     private List<Appointment> currentAppointments;
     private List<MedicalRecord> currentMedicalHistory;
+    private boolean editingProfile = false;
 
     /**
      * Creates new form PatientForm
@@ -75,6 +78,7 @@ public class PatientForm extends javax.swing.JFrame {
         populateBookingTab();
         populateAppointmentsTable();
         populateMedicalHistoryTable();
+        populateProfileTab();
         
         jComboBox2.addActionListener(evt -> refreshDoctorList());
         jSpinner1.addChangeListener(evt -> refreshDoctorList());
@@ -240,6 +244,44 @@ public class PatientForm extends javax.swing.JFrame {
         populateAppointmentsTable();
     }
 
+    private void populateProfileTab() {
+        usernameTf.setText(patient.getSelf().getName());
+        emailTf.setText(patient.getSelf().getEmail());
+        emailTf1.setText(patient.getSelf().getPhoneNumber());
+        usernameTf.setEditable(false);
+        emailTf.setEditable(false);
+        emailTf1.setEditable(false);
+
+        InsuranceToFile insurance = operation.loadInsuranceStatus();
+        StringBuilder profileText = new StringBuilder();
+        if (insurance == null) {
+            profileText.append("No insurance on file.");
+        } else {
+            profileText.append("Company: ").append(insurance.getCompanyName()).append('\n')
+                    .append("Coverage: ").append(insurance.getCoveragePercentage()).append("%\n")
+                    .append("Accepted: ").append(insurance.isAccepted());
+        }
+
+        profileText.append("\n\nBilling:");
+        boolean hasBillingRecords = false;
+        if (currentMedicalHistory != null) {
+            for (MedicalRecord record : currentMedicalHistory) {
+                BillToFile bill = record.getBill();
+                if (bill == null) {
+                    continue;
+                }
+                hasBillingRecords = true;
+                profileText.append("\nTotal: ").append(bill.getMoney())
+                        .append(", Status: ").append(bill.getStatus());
+            }
+        }
+        if (!hasBillingRecords) {
+            profileText.append("\nNo billing records yet.");
+        }
+        insuranceTextArea.setText(profileText.toString());
+        insuranceTextArea.setEditable(false);
+    }
+
     private void populateMedicalHistoryTable() {
         currentMedicalHistory = operation.loadMedicalHistory();
         DefaultTableModel tableModel = new DefaultTableModel(
@@ -356,7 +398,7 @@ public class PatientForm extends javax.swing.JFrame {
         jLabel15 = new javax.swing.JLabel();
         emailTf1 = new javax.swing.JTextField();
         jScrollPane6 = new javax.swing.JScrollPane();
-        insuranceLbl = new javax.swing.JLabel();
+        insuranceTextArea = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -713,9 +755,11 @@ public class PatientForm extends javax.swing.JFrame {
         emailTf1.setEditable(false);
         emailTf1.setText("your phone");
 
-        insuranceLbl.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        insuranceLbl.setText("Insurance status");
-        jScrollPane6.setViewportView(insuranceLbl);
+        insuranceTextArea.setEditable(false);
+        insuranceTextArea.setLineWrap(true);
+        insuranceTextArea.setRows(5);
+        insuranceTextArea.setWrapStyleWord(true);
+        jScrollPane6.setViewportView(insuranceTextArea);
 
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
         jPanel7.setLayout(jPanel7Layout);
@@ -931,11 +975,60 @@ public class PatientForm extends javax.swing.JFrame {
     }//GEN-LAST:event_feedbackBtnActionPerformed
 
     private void editProfileBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editProfileBtnActionPerformed
-        // TODO add your handling code here:
+        if (!editingProfile) {
+            usernameTf.setEditable(true);
+            emailTf.setEditable(true);
+            emailTf1.setEditable(true);
+            editProfileBtn.setText("Update Profile");
+            editingProfile = true;
+            return;
+        }
+
+        try {
+            operation.updateProfile(usernameTf.getText(), patient.getSelf().getPassword(),
+                    patient.getSelf().getGender(), patient.getSelf().getDateOfBirth().toString(),
+                    emailTf.getText(), emailTf1.getText());
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Profile updated successfully.", "Profile Updated",
+                    javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            usernameTf.setEditable(false);
+            emailTf.setEditable(false);
+            emailTf1.setEditable(false);
+            editProfileBtn.setText("Edit Profile");
+            editingProfile = false;
+            refreshAllTabs();
+        } catch (IllegalArgumentException exception) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    exception.getMessage(), "Profile Update Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_editProfileBtnActionPerformed
 
     private void resetPwBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetPwBtnActionPerformed
-        // TODO add your handling code here:
+        ResetPassword dialog = new ResetPassword(this, true);
+        dialog.setVisible(true);
+        if (!dialog.isSubmitted()) {
+            return;
+        }
+        if (!dialog.getOldPassword().equals(patient.getSelf().getPassword())) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Old password is incorrect", "Reset Password Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        try {
+            operation.updateProfile(patient.getSelf().getName(), dialog.getNewPassword(),
+                    patient.getSelf().getGender(), patient.getSelf().getDateOfBirth().toString(),
+                    patient.getSelf().getEmail(), patient.getSelf().getPhoneNumber());
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Password reset successfully.", "Password Updated",
+                    javax.swing.JOptionPane.INFORMATION_MESSAGE);
+        } catch (IllegalArgumentException exception) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    exception.getMessage(), "Reset Password Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_resetPwBtnActionPerformed
 
     /**
@@ -1060,7 +1153,7 @@ public class PatientForm extends javax.swing.JFrame {
     private javax.swing.JTextField emailTf;
     private javax.swing.JTextField emailTf1;
     private javax.swing.JButton feedbackBtn;
-    private javax.swing.JLabel insuranceLbl;
+    private javax.swing.JTextArea insuranceTextArea;
     private javax.swing.JComboBox<String> jComboBox2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
