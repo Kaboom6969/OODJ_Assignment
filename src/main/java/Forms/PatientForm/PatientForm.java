@@ -64,6 +64,12 @@ public class PatientForm extends javax.swing.JFrame {
     public PatientForm() {
         initComponents();
         logOutBtn.addActionListener(evt -> {
+            int result = javax.swing.JOptionPane.showConfirmDialog(this,
+                    "Are you sure you want to log out?", "Confirm Logout",
+                    javax.swing.JOptionPane.YES_NO_OPTION);
+            if (result != javax.swing.JOptionPane.YES_OPTION) {
+                return;
+            }
             // TODO: Navigate to the login screen once it is merged.
             dispose();
         });
@@ -358,6 +364,7 @@ public class PatientForm extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         allAppBtn = new javax.swing.JButton();
+        bookAppBtn = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jComboBox2 = new javax.swing.JComboBox<>();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -447,12 +454,16 @@ public class PatientForm extends javax.swing.JFrame {
         allAppBtn.setText("See all Appoinment");
         allAppBtn.addActionListener(this::allAppBtnActionPerformed);
 
+        bookAppBtn.setFont(new java.awt.Font("Tw Cen MT", 0, 14)); // NOI18N
+        bookAppBtn.setText("Book new Appoinment");
+        bookAppBtn.addActionListener(this::bookAppBtnActionPerformed);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(0, 186, Short.MAX_VALUE)
+                .addGap(0, 194, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addComponent(logOutBtn)
@@ -462,12 +473,13 @@ public class PatientForm extends javax.swing.JFrame {
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addGap(114, 114, 114)
                                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addGroup(jPanel1Layout.createSequentialGroup()
+                                    .addComponent(allAppBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(bookAppBtn))
+                                .addComponent(jPanel6, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(186, 186, 186))))
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(allAppBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 153, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(294, 294, 294))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -478,9 +490,11 @@ public class PatientForm extends javax.swing.JFrame {
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(34, 34, 34)
-                .addComponent(allAppBtn)
-                .addContainerGap(203, Short.MAX_VALUE))
+                .addGap(31, 31, 31)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(allAppBtn)
+                    .addComponent(bookAppBtn))
+                .addContainerGap(206, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Dashboard", jPanel1);
@@ -1031,6 +1045,10 @@ public class PatientForm extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_resetPwBtnActionPerformed
 
+    private void bookAppBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bookAppBtnActionPerformed
+        jTabbedPane1.setSelectedIndex(1);
+    }//GEN-LAST:event_bookAppBtnActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1148,6 +1166,7 @@ public class PatientForm extends javax.swing.JFrame {
     private javax.swing.JButton RescheduleBtn;
     private javax.swing.JButton allAppBtn;
     private javax.swing.JTable appointmentTbl;
+    private javax.swing.JButton bookAppBtn;
     private javax.swing.JButton confirmBtn;
     private javax.swing.JButton editProfileBtn;
     private javax.swing.JTextField emailTf;
