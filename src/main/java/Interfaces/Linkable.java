@@ -26,7 +26,10 @@ public interface Linkable
         {
             selfId = businessEntity.getId();
         }
-        if (selfId.isEmpty()) throw new RuntimeException("Self ID is empty");
+        if (selfId == null || selfId.isEmpty())
+        {
+            throw new IllegalStateException("Self ID is empty");
+        }
         classBaseEntitySelf =
                 ((Class<?>) ((ParameterizedType)
                         classThatCallRightNow.getGenericSuperclass()).
@@ -34,19 +37,12 @@ public interface Linkable
                         asSubclass(BaseEntity.class);
         for (Field field : classThatCallRightNow.getDeclaredFields())
         {
-            field.setAccessible(true);
             if (field.getType().equals(LazyEntity.class))
             {
+                LinkerManager linkerManager = getLinkerManagerWithField(classBaseEntitySelf, field);
                 try
                 {
                     LazyEntity<? extends BaseEntity> lazyEntityOther = (LazyEntity<? extends BaseEntity>) field.get(this);
-
-                    Class<? extends BaseEntity> classBaseEntityOther =
-                            ((Class<?>) ((ParameterizedType)
-                                    field.getGenericType()).
-                                    getActualTypeArguments()[0]).
-                                    asSubclass(BaseEntity.class);
-                    LinkerManager linkerManager = new LinkerManager(classBaseEntitySelf, classBaseEntityOther);
                     if (lazyEntityOther != null && lazyEntityOther.getId() != null)
                     {
                         linkerManager.addLinker(new Linker(selfId, lazyEntityOther.getId()));
@@ -62,13 +58,8 @@ public interface Linkable
             {
                 try
                 {
+                    LinkerManager linkerManager = getLinkerManagerWithField(classBaseEntitySelf,field);
                     LazyEntityList<? extends BaseEntity> lazyEntityOther = (LazyEntityList<? extends BaseEntity>) field.get(this);
-                    Class<? extends BaseEntity> classBaseEntityOther =
-                            ((Class<?>) ((ParameterizedType)
-                                    field.getGenericType()).
-                                    getActualTypeArguments()[0]).
-                                    asSubclass(BaseEntity.class);
-                    LinkerManager linkerManager = new LinkerManager(classBaseEntitySelf, classBaseEntityOther);
                     if (lazyEntityOther != null)
                     {
                         for (String id : lazyEntityOther.getIds())
@@ -86,7 +77,20 @@ public interface Linkable
         }
         return list;
     }
-
+    static LinkerManager getLinkerManagerWithField(Class<? extends BaseEntity> classSelf, Field field)
+    {
+        field.setAccessible(true);
+        if (field.getType().equals(LazyEntity.class) || field.getType().equals(LazyEntityList.class))
+        {
+            Class<? extends BaseEntity> classBaseEntityOther =
+                    ((Class<?>) ((ParameterizedType)
+                            field.getGenericType()).
+                            getActualTypeArguments()[0]).
+                            asSubclass(BaseEntity.class);
+            return new LinkerManager(classSelf, classBaseEntityOther);
+        }
+        return null;
+    }
     default List<LinkerManager> getLinkerManager()
     {
         return getLinkerManagerWithoutValidate();
