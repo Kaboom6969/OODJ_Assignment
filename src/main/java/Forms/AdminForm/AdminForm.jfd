@@ -4,13 +4,67 @@ new FormModel {
 	contentType: "form/swing"
 	root: new FormRoot {
 		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class org.jdesktop.layout.GroupLayout ) {
-			"$horizontalGroup": "par l {space :0:588:x}"
-			"$verticalGroup": "par l {space :0:399:x}"
+			"$horizontalGroup": "par l {seq l {space :::p, comp adminTab::::796:x, space :::p}}"
+			"$verticalGroup": "par l {seq l {space :::p, comp adminTab:::::x, space :::p}}"
 		} ) {
 			name: "this"
+			add( new FormContainer( "javax.swing.JTabbedPane", new FormLayoutManager( class javax.swing.JTabbedPane ) ) {
+				name: "adminTab"
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class org.jdesktop.layout.GroupLayout ) {
+					"$horizontalGroup": "par l {seq l {space :::p, comp allUserScrollPanel:::p:709:p, space :::p, comp reloadUserButton:::p:84:p, space :::x}}"
+					"$verticalGroup": "par l {seq l {space :p:40:p, comp reloadUserButton:::p::p, space ::363:x}, seq l {space :::p, comp allUserScrollPanel::::425:x, space :::p}}"
+				} ) {
+					name: "allUserPanel"
+					add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+						name: "allUserScrollPanel"
+						add( new FormComponent( "javax.swing.JTable" ) {
+							name: "userTable"
+							"model": new com.jformdesigner.model.SwingTableModel( new java.util.Vector, new java.util.Vector {
+								add( "Role" )
+								add( "Id" )
+								add( "Name" )
+								add( "Email" )
+								add( "Gender" )
+								add( "Date Of Birth" )
+								add( "Phone Number" )
+							}, new java.util.Vector {
+								add( null )
+								add( null )
+								add( null )
+								add( null )
+								add( null )
+								add( null )
+								add( null )
+							}, new java.util.Vector {
+								add( null )
+								add( null )
+								add( null )
+								add( null )
+								add( null )
+								add( null )
+								add( null )
+							}, new java.util.Vector {
+								add( null )
+								add( null )
+								add( null )
+								add( new com.jformdesigner.model.SwingTableColumn( null, 150, 0, 0, true ) )
+								add( null )
+								add( null )
+								add( null )
+							} )
+						} )
+					} )
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "reloadUserButton"
+						"text": "Reload"
+					} )
+				}, new FormLayoutConstraints( null ) {
+					"title": "All User"
+				} )
+			} )
 		}, new FormLayoutConstraints( null ) {
 			"location": new java.awt.Point( 0, 0 )
-			"size": new java.awt.Dimension( 590, 430 )
+			"size": new java.awt.Dimension( 810, 520 )
 		} )
 	}
 }
