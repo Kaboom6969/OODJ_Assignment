@@ -219,6 +219,7 @@ public class PatientForm extends javax.swing.JFrame {
             RescheduleBtn.setEnabled(false);
             CancelBtn.setEnabled(false);
             feedbackBtn.setEnabled(false);
+            feedbackBtn.setText("Feedback");
             return;
         }
 
@@ -228,9 +229,12 @@ public class PatientForm extends javax.swing.JFrame {
                 || status == AppointmentStatus.RESCHEDULED;
         boolean canRate = status == AppointmentStatus.COMPLETED
                 && appointment.getFeedback() == null;
+        boolean canViewFeedback = status == AppointmentStatus.COMPLETED
+            && appointment.getFeedback() != null;
         RescheduleBtn.setEnabled(active);
         CancelBtn.setEnabled(active);
-        feedbackBtn.setEnabled(canRate);
+        feedbackBtn.setEnabled(canRate || canViewFeedback);
+        feedbackBtn.setText(canViewFeedback ? "View Feedback" : "Feedback");
     }
 
     private Appointment getSelectedAppointment() {
@@ -650,16 +654,18 @@ public class PatientForm extends javax.swing.JFrame {
                 .addComponent(jLabel9)
                 .addGap(215, 215, 215))
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addGap(147, 147, 147)
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGap(147, 147, 147)
                         .addComponent(RescheduleBtn)
-                        .addGap(118, 118, 118)
+                        .addGap(102, 102, 102)
                         .addComponent(CancelBtn)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(108, 108, 108)
                         .addComponent(feedbackBtn))
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(140, Short.MAX_VALUE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGap(29, 29, 29)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 697, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(21, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -965,6 +971,14 @@ public class PatientForm extends javax.swing.JFrame {
     private void feedbackBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_feedbackBtnActionPerformed
         Appointment appointment = getSelectedAppointment();
         if (appointment == null) {
+            return;
+        }
+
+        if ("View Feedback".equals(feedbackBtn.getText())) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                    "Rating: " + appointment.getFeedback().getRating()
+                    + "\nComment: " + appointment.getFeedback().getComment(),
+                    "Appointment Feedback", javax.swing.JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
