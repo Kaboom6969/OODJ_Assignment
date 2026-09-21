@@ -1,0 +1,545 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package Operations.DoctorOperation;
+
+import Tools.HospitalEntityAllocator;
+import entities.BaseEntity.AppointmentToFile;
+import entities.BaseEntity.AssessmentTypeToFile;
+import entities.BaseEntity.MedicalRecordToFile;
+import entities.BaseEntity.MedicalRequestToFile;
+import entities.BaseEntity.PrescriptionToFile;
+import entities.BaseEntity.Users.PatientToFile;
+import entities.BusinessEntity.Doctor;
+import entities.BaseEntity.Users.UserWithDetails;
+import entities.BusinessEntity.Appointment;
+import entities.BusinessEntity.AssessmentType;
+import entities.BusinessEntity.BusinessEntity;
+import entities.BusinessEntity.MedicalRecord;
+import entities.BusinessEntity.MedicalRequest;
+import entities.BusinessEntity.Patient;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+
+public class DoctorOperation {
+
+    //Constructer
+    private final HospitalEntityAllocator allocator;
+    private final Doctor doctor;
+
+    public DoctorOperation(HospitalEntityAllocator allocator, Doctor doctor) {
+        this.allocator = allocator;
+        this.doctor = doctor;
+    }
+
+    public void updateProfile(
+            String name, 
+            String password, 
+            UserWithDetails.Gender gender, 
+            String dob, 
+            String email, 
+            String phone) {
+        // Validate name
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Name cannot be empty.");
+        }
+
+        if (!name.matches("^[a-zA-Z\\s]+$")) {
+            throw new IllegalArgumentException(
+                    "Name can only contain letters and spaces."
+            );
+        }
+
+        // Validate password
+        if (password == null || password.length() < 6) {
+            throw new IllegalArgumentException(
+                    "Password must be at least 6 characters."
+            );
+        }
+
+        if (!password.matches(".*[A-Z].*")) {
+            throw new IllegalArgumentException(
+                    "Password must contain at least one uppercase letter."
+            );
+        }
+
+        if (!password.matches(".*[^a-zA-Z0-9].*")) {
+            throw new IllegalArgumentException(
+                    "Password must contain at least one special character."
+            );
+        }
+
+        // Validate date of birth
+        if (dob == null || dob.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Date of Birth cannot be empty."
+            );
+        }
+
+        if (!dob.matches("^\\d{4}-\\d{2}-\\d{2}$")) {
+            throw new IllegalArgumentException(
+                    "DOB must follow the format YYYY-MM-DD."
+            );
+        }
+
+        LocalDate birthDate;
+
+        try {
+            birthDate = LocalDate.parse(
+                    dob,
+                    DateTimeFormatter.ISO_LOCAL_DATE
+            );
+        } catch (DateTimeParseException e) {
+            throw new IllegalArgumentException(
+                    "Invalid calendar date. Please enter a real date."
+            );
+        }
+
+        if (birthDate.isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException(
+                    "Date of Birth cannot be in the future."
+            );
+        }
+
+        // Validate email
+        if (email == null || !email.contains("@")) {
+            throw new IllegalArgumentException(
+                    "Invalid email format."
+            );
+        }
+
+        // Validate phone
+        if (phone == null || !phone.matches("\\d+")) {
+            throw new IllegalArgumentException(
+                    "Phone number must contain digits only."
+            );
+        }
+
+        // Update Doctor profile
+        doctor.getSelf().setName(name.trim());
+        doctor.getSelf().setPassword(password);
+        doctor.getSelf().setGender(gender);
+        doctor.getSelf().setDateOfBirth(birthDate);
+        doctor.getSelf().setEmail(email.trim());
+        doctor.getSelf().setPhoneNumber(phone);
+
+        // Use existing allocator to save changes
+        allocator.saveChanges(doctor);
+    }
+
+    public void updateAppointmentStatus(
+            String appointmentId,
+            AppointmentToFile.AppointmentStatus status) {
+        if (appointmentId == null || appointmentId.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Appointment ID cannot be empty."
+            );
+        }
+
+        if (status == null) {
+            throw new IllegalArgumentException(
+                    "Appointment status cannot be empty."
+            );
+        }
+
+        AppointmentToFile appointment;
+
+        try {
+            appointment = doctor.getAppointments().get(appointmentId.trim());
+        } catch (Exception e) {
+            throw new IllegalArgumentException(
+                    "Appointment not found."
+            );
+        }
+
+        appointment.setStatus(status);
+
+        allocator.saveChanges(doctor);
+    }
+
+    public AppointmentToFile getAppointment(String appointmentId) {
+        if (appointmentId == null || appointmentId.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Appointment ID cannot be empty."
+            );
+        }
+
+        try {
+            return doctor.getAppointments()
+                    .get(appointmentId.trim());
+        } catch (Exception e) {
+            throw new IllegalArgumentException(
+                    "Appointment not found."
+            );
+        }
+    }
+
+    public PatientToFile getAppointmentPatient(String appointmentId) {
+        if (appointmentId == null || appointmentId.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Appointment ID cannot be empty."
+            );
+        }
+
+        try {
+            Appointment appointment
+                    = allocator.getBusinessEntity(appointmentId.trim());
+
+            return appointment.getPatient();
+        } catch (Exception e) {
+            throw new IllegalArgumentException(
+                    "Patient not found for this appointment."
+            );
+        }
+    }
+
+    public void saveConsultation(
+            String patientId,
+            double temperature,
+            int heartRate,
+            int systolicPressure,
+            int diastolicPressure,
+            String diagnosis,
+            String consultationNote) {
+        if (patientId == null || patientId.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Patient ID cannot be empty."
+            );
+        }
+
+        if (temperature <= 0) {
+            throw new IllegalArgumentException(
+                    "Temperature must be greater than 0."
+            );
+        }
+
+        if (heartRate <= 0) {
+            throw new IllegalArgumentException(
+                    "Heart rate must be greater than 0."
+            );
+        }
+
+        if (systolicPressure <= 0 || diastolicPressure <= 0) {
+            throw new IllegalArgumentException(
+                    "Blood pressure must be greater than 0."
+            );
+        }
+
+        if (diagnosis == null || diagnosis.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Diagnosis cannot be empty."
+            );
+        }
+
+        if (consultationNote == null || consultationNote.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Consultation note cannot be empty."
+            );
+        }
+
+        Patient patient;
+
+        try {
+            patient
+                    = allocator.getBusinessEntity(
+                            patientId.trim()
+                    );
+        } catch (Exception e) {
+            throw new IllegalArgumentException(
+                    "Patient not found."
+            );
+        }
+
+        Appointment selectedAppointment = null;
+
+        for (int i = 0; i < patient.getAppointments().size(); i++) {
+            AppointmentToFile appointment
+                    = patient.getAppointments().get(i);
+
+            if (appointment.getStatus()
+                    == AppointmentToFile.AppointmentStatus.COMPLETED) {
+                if (selectedAppointment == null) {
+                    selectedAppointment
+                            = allocator.getBusinessEntity(
+                                    appointment.getId()
+                            );
+                } else {
+                    Appointment currentAppointment
+                            = allocator.getBusinessEntity(
+                                    appointment.getId()
+                            );
+
+                    if (currentAppointment
+                            .getSelf()
+                            .getAppointmentTime()
+                            .isAfter(
+                                    selectedAppointment
+                                            .getSelf()
+                                            .getAppointmentTime()
+                            )) {
+                        selectedAppointment = currentAppointment;
+                    }
+                }
+            }
+        }
+
+        if (selectedAppointment == null) {
+            throw new IllegalArgumentException(
+                    "No completed appointment found for this patient."
+            );
+        }
+
+        MedicalRecordToFile medicalRecord
+                = new MedicalRecordToFile(
+                        null,
+                        temperature,
+                        heartRate,
+                        systolicPressure,
+                        diastolicPressure,
+                        diagnosis.trim(),
+                        consultationNote.trim()
+                );
+
+        allocator.assignNewId(medicalRecord);
+        selectedAppointment.setMedicalRecord(medicalRecord);
+        allocator.saveChanges(selectedAppointment);
+    }
+
+    public void savePrescription(
+            String patientId,
+            String medicationName,
+            String dosage,
+            String frequency,
+            int durationDays,
+            String instructions) {
+        if (patientId == null || patientId.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Patient ID cannot be empty."
+            );
+        }
+
+        if (medicationName == null || medicationName.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Medication name cannot be empty."
+            );
+        }
+
+        if (dosage == null || dosage.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Dosage cannot be empty."
+            );
+        }
+
+        if (frequency == null || frequency.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Frequency cannot be empty."
+            );
+        }
+
+        if (durationDays < 1) {
+            throw new IllegalArgumentException(
+                    "Duration must be at least 1 day."
+            );
+        }
+
+        if (instructions == null || instructions.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Instructions cannot be empty."
+            );
+        }
+
+        Patient patient;
+
+        try {
+            patient = allocator.getBusinessEntity(patientId.trim());
+        } catch (Exception e) {
+            throw new IllegalArgumentException(
+                    "Patient not found."
+            );
+        }
+
+        Appointment selectedAppointment = null;
+
+        for (int i = 0; i < patient.getAppointments().size(); i++) {
+            AppointmentToFile appointment = patient.getAppointments().get(i);
+
+            if (appointment.getStatus() == AppointmentToFile.AppointmentStatus.COMPLETED) {
+                Appointment currentAppointment = allocator.getBusinessEntity(appointment.getId());
+
+                if (currentAppointment.getMedicalRecord() != null) {
+                    if (selectedAppointment == null) {
+                        selectedAppointment = currentAppointment;
+                    } else if (currentAppointment
+                            .getSelf()
+                            .getAppointmentTime()
+                            .isAfter(
+                                    selectedAppointment
+                                            .getSelf()
+                                            .getAppointmentTime()
+                            )) {
+                        selectedAppointment = currentAppointment;
+                    }
+                }
+            }
+        }
+
+        if (selectedAppointment == null) {
+            throw new IllegalArgumentException(
+                    "No completed appointment with a medical record found."
+            );
+        }
+
+        MedicalRecordToFile record = selectedAppointment.getMedicalRecord();
+        MedicalRecord medicalRecord = allocator.getBusinessEntity(record.getId());
+
+        PrescriptionToFile prescription
+                = new PrescriptionToFile(
+                        null,
+                        medicationName.trim(),
+                        dosage.trim(),
+                        frequency.trim(),
+                        durationDays,
+                        instructions.trim(),
+                        java.time.LocalDateTime.now()
+                );
+
+        allocator.assignNewId(prescription);
+        medicalRecord.getPrescriptions().add(prescription);
+        allocator.saveChanges(medicalRecord);
+    }
+
+    public void sendMedicalRequest(
+            String patientId,
+            AssessmentTypeToFile.AssessmentCategory category,
+            String remark) {
+        if (patientId == null || patientId.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Patient ID cannot be empty."
+            );
+        }
+
+        if (category == null) {
+            throw new IllegalArgumentException(
+                    "Request type cannot be empty."
+            );
+        }
+
+        if (category == AssessmentTypeToFile.AssessmentCategory.GENERAL_CHECKUP) {
+            throw new IllegalArgumentException(
+                    "Please select a specific medical request type."
+            );
+        }
+
+        if (remark == null || remark.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Remark cannot be empty."
+            );
+        }
+
+        Patient patient;
+
+        try {
+            patient = allocator.getBusinessEntity(
+                    patientId.trim()
+            );
+        } catch (Exception e) {
+            throw new IllegalArgumentException(
+                    "Patient not found."
+            );
+        }
+
+        Appointment selectedAppointment = null;
+
+        for (int i = 0; i < patient.getAppointments().size(); i++) {
+            AppointmentToFile appointment
+                    = patient.getAppointments().get(i);
+
+            if (appointment.getStatus()
+                    == AppointmentToFile.AppointmentStatus.COMPLETED) {
+                Appointment currentAppointment
+                        = allocator.getBusinessEntity(
+                                appointment.getId()
+                        );
+
+                if (currentAppointment.getMedicalRecord() != null) {
+                    if (selectedAppointment == null) {
+                        selectedAppointment = currentAppointment;
+                    } else if (currentAppointment
+                            .getSelf()
+                            .getAppointmentTime()
+                            .isAfter(
+                                    selectedAppointment
+                                            .getSelf()
+                                            .getAppointmentTime()
+                            )) {
+                        selectedAppointment = currentAppointment;
+                    }
+                }
+            }
+        }
+
+        if (selectedAppointment == null) {
+            throw new IllegalArgumentException(
+                    "No completed appointment with a medical record found."
+            );
+        }
+
+        MedicalRecordToFile record
+                = selectedAppointment.getMedicalRecord();
+
+        MedicalRecord medicalRecord
+                = allocator.getBusinessEntity(
+                        record.getId()
+                );
+
+        AssessmentType selectedAssessmentType = null;
+
+        for (BusinessEntity<?> entity
+                : allocator.getAllBusinessEntities(
+                        AssessmentTypeToFile.PREFIX
+                )) {
+            AssessmentType assessmentType
+                    = (AssessmentType) entity;
+
+            if (assessmentType.getSelf().getCategory() == category) {
+                selectedAssessmentType = assessmentType;
+                break;
+            }
+        }
+
+        if (selectedAssessmentType == null) {
+            throw new IllegalArgumentException(
+                    "Assessment type not found."
+            );
+        }
+
+        MedicalRequestToFile request
+                = new MedicalRequestToFile(
+                        null,
+                        java.time.LocalDateTime.now(),
+                        remark.trim(),
+                        MedicalRequestToFile.RequestStatus.PENDING
+                );
+
+        allocator.assignNewId(request);
+
+        MedicalRequest medicalRequest
+                = allocator.convertToBusinessEntity(
+                        request,
+                        true
+                );
+
+        medicalRequest.setMedicalRecord(record);
+
+        medicalRequest.setAssessmentType(
+                selectedAssessmentType.getSelf()
+        );
+
+        medicalRecord.getMedicalRequests().add(request);
+
+        allocator.saveChanges(medicalRecord);
+    }
+}
