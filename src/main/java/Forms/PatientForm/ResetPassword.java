@@ -22,7 +22,6 @@ public class ResetPassword extends javax.swing.JDialog {
     public ResetPassword(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-        resetBtn.addActionListener(this::resetBtnActionPerformed);
     }
 
     public boolean isSubmitted() {
@@ -75,6 +74,7 @@ public class ResetPassword extends javax.swing.JDialog {
         jLabel14.setText("Confirm Password:");
 
         resetBtn.setText("Reset");
+        resetBtn.addActionListener(this::resetBtnActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -131,7 +131,7 @@ public class ResetPassword extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void resetBtnActionPerformed(java.awt.event.ActionEvent evt) {
+    private void resetBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetBtnActionPerformed
         String enteredNewPassword = new String(newPasswordTf.getPassword());
         String enteredConfirmPassword = new String(confirmPasswordTf.getPassword());
         if (!enteredNewPassword.equals(enteredConfirmPassword)) {
@@ -146,7 +146,7 @@ public class ResetPassword extends javax.swing.JDialog {
         confirmPassword = enteredConfirmPassword;
         submitted = true;
         dispose();
-    }
+    }//GEN-LAST:event_resetBtnActionPerformed
 
     /**
      * @param args the command line arguments

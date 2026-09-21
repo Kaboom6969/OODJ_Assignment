@@ -86,9 +86,9 @@ public class PatientForm extends javax.swing.JFrame {
         populateMedicalHistoryTable();
         populateProfileTab();
         
-        jComboBox2.addActionListener(evt -> refreshDoctorList());
-        jSpinner1.addChangeListener(evt -> refreshDoctorList());
-        jList2.addListSelectionListener(evt -> {
+        departmentCb.addActionListener(evt -> refreshDoctorList());
+        dateSn.addChangeListener(evt -> refreshDoctorList());
+        doctorLs.addListSelectionListener(evt -> {
             if (!evt.getValueIsAdjusting()) {
                 refreshSlotList();
             }
@@ -106,6 +106,7 @@ public class PatientForm extends javax.swing.JFrame {
         updateAppointmentActionButtons();
     }
 
+    // Tab1: Dashboard 
     private void populateDashboard() {
         jLabel1.setText("Hi " + patient.getSelf().getName());
 
@@ -121,30 +122,35 @@ public class PatientForm extends javax.swing.JFrame {
         jLabel3.setText( doctor.getSelf().getName() + " - " + formattedTime);
     }
 
+    // Tab 2: Booking Appointment
     private void populateBookingTab() {
         departments = operation.loadAllDepartments();
-        jComboBox2.removeAllItems();
+        departmentCb.removeAllItems();
         for (Department department : departments) {
-            jComboBox2.addItem(department.getSelf().getName());
+            departmentCb.addItem(department.getSelf().getName());
         }
-
-        JSpinner.DateEditor dateEditor = new JSpinner.DateEditor(jSpinner1, "yyyy-MM-dd");
-        jSpinner1.setEditor(dateEditor);
-        jSpinner1.setValue(new java.util.Date()); // 默认显示今天
+        
+        // Custom format
+        JSpinner.DateEditor dateEditor = new JSpinner.DateEditor(dateSn, "yyyy-MM-dd");
+        dateSn.setEditor(dateEditor);
+        dateSn.setValue(new java.util.Date()); // show today (default)
         refreshDoctorList();
     }
 
     private void refreshDoctorList() {
-        System.out.println("refreshDoctorList called, date=" + jSpinner1.getValue());
-        int departmentIndex = jComboBox2.getSelectedIndex();
+        // log
+        System.out.println("refreshDoctorList called, date=" + dateSn.getValue());
+        int departmentIndex = departmentCb.getSelectedIndex();
+        
         if (departmentIndex < 0 || departmentIndex >= departments.size()) {
-            jList2.setModel(new DefaultListModel<>());
-            jList1.setModel(new DefaultListModel<>());
+            doctorLs.setModel(new DefaultListModel<>());
+            timeLs.setModel(new DefaultListModel<>());
             ratingLbl.setText("");
             return;
         }
 
-        Date selectedDate = (Date) jSpinner1.getValue();
+        Date selectedDate = (Date) dateSn.getValue();
+        // converts the old Date object into a modern Instant object.
         LocalDate date = selectedDate.toInstant()
                 .atZone(java.time.ZoneId.systemDefault()).toLocalDate();
         Department department = departments.get(departmentIndex);
@@ -155,16 +161,16 @@ public class PatientForm extends javax.swing.JFrame {
             doctorModel.addElement(option.doctor().getSelf().getName()
                     + " (" + option.availableSlots().size() + " slots)");
         }
-        jList2.setModel(doctorModel);
-        jList1.setModel(new DefaultListModel<>());
+        doctorLs.setModel(doctorModel);
+        timeLs.setModel(new DefaultListModel<>());
         ratingLbl.setText("");
     }
 
     private void refreshSlotList() {
-        int doctorIndex = jList2.getSelectedIndex();
+        int doctorIndex = doctorLs.getSelectedIndex();
         if (doctorIndex < 0 || currentDoctorOptions == null
                 || doctorIndex >= currentDoctorOptions.size()) {
-            jList1.setModel(new DefaultListModel<>());
+            timeLs.setModel(new DefaultListModel<>());
             ratingLbl.setText("");
             return;
         }
@@ -174,17 +180,23 @@ public class PatientForm extends javax.swing.JFrame {
         ratingLbl.setText(String.format("Rating: %.1f",
                 operation.loadDoctorAverageRating(doctor)));
         currentSlotOptions = doctorOption.availableSlots();
-
+        
+        // EEE: The day of the week(e.g., Mon, Tue, Wed).
+        // dd: The day of the month (e.g., 05, 12).
+        // MMM: The month (e.g., Jan, Feb, Mar).
         DateTimeFormatter slotFormatter = DateTimeFormatter.ofPattern("EEE, dd MMM — HH:mm");
         DefaultListModel<String> slotModel = new DefaultListModel<>();
         for (LocalDateTime slot : currentSlotOptions) {
             slotModel.addElement(slot.format(slotFormatter));
         }
-        jList1.setModel(slotModel);
+        timeLs.setModel(slotModel);
     }
 
+    // Tab 3: All Appoinments
     private void populateAppointmentsTable() {
         currentAppointments = operation.loadMyAppointments();
+        
+        // Can also do this at design part
         DefaultTableModel tableModel = new DefaultTableModel(
                 new Object[] {"Doctor", "Date & Time", "Facility", "Status", "My Rating"},
                 0) {
@@ -247,6 +259,7 @@ public class PatientForm extends javax.swing.JFrame {
     }
 
     private void refreshAllTabs() {
+        // Reloads the patient from the data files (get latest info)
         patient = allocator.getBusinessEntity(patient.getId());
         operation = new PatientOperation(allocator, patient);
         populateDashboard();
@@ -254,6 +267,7 @@ public class PatientForm extends javax.swing.JFrame {
         populateAppointmentsTable();
     }
 
+    // Tab 5: Profile
     private void populateProfileTab() {
         usernameTf.setText(patient.getSelf().getName());
         emailTf.setText(patient.getSelf().getEmail());
@@ -263,6 +277,7 @@ public class PatientForm extends javax.swing.JFrame {
         emailTf1.setEditable(false);
 
         InsuranceToFile insurance = operation.loadInsuranceStatus();
+        // for constructing long strings of text piece by piece.
         StringBuilder profileText = new StringBuilder();
         if (insurance == null) {
             profileText.append("No insurance on file.");
@@ -292,6 +307,7 @@ public class PatientForm extends javax.swing.JFrame {
         insuranceTextArea.setEditable(false);
     }
 
+    // Tab 4: Medical History
     private void populateMedicalHistoryTable() {
         currentMedicalHistory = operation.loadMedicalHistory();
         DefaultTableModel tableModel = new DefaultTableModel(
@@ -322,6 +338,7 @@ public class PatientForm extends javax.swing.JFrame {
         refreshPrescriptionsTable();
     }
 
+    // Tab 4: Prescriptions
     private void refreshPrescriptionsTable() {
         int selectedRow = medicalTbl.getSelectedRow();
         DefaultTableModel tableModel = new DefaultTableModel(
@@ -370,9 +387,9 @@ public class PatientForm extends javax.swing.JFrame {
         allAppBtn = new javax.swing.JButton();
         bookAppBtn = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
-        jComboBox2 = new javax.swing.JComboBox<>();
+        departmentCb = new javax.swing.JComboBox<>();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList<>();
+        timeLs = new javax.swing.JList<>();
         confirmBtn = new javax.swing.JButton();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
@@ -380,10 +397,9 @@ public class PatientForm extends javax.swing.JFrame {
         jLabel7 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
         ratingLbl = new javax.swing.JLabel();
-        jSpinner1 = new javax.swing.JSpinner();
+        dateSn = new javax.swing.JSpinner();
         jScrollPane5 = new javax.swing.JScrollPane();
-        jList2 = new javax.swing.JList<>();
-        jLabel16 = new javax.swing.JLabel();
+        doctorLs = new javax.swing.JList<>();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         appointmentTbl = new javax.swing.JTable();
@@ -503,14 +519,14 @@ public class PatientForm extends javax.swing.JFrame {
 
         jTabbedPane1.addTab("Dashboard", jPanel1);
 
-        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        departmentCb.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
-        jList1.setModel(new javax.swing.AbstractListModel<String>() {
+        timeLs.setModel(new javax.swing.AbstractListModel<String>() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
         });
-        jScrollPane1.setViewportView(jList1);
+        jScrollPane1.setViewportView(timeLs);
 
         confirmBtn.setText("Confirm Booking");
         confirmBtn.addActionListener(this::confirmBtnActionPerformed);
@@ -538,17 +554,14 @@ public class PatientForm extends javax.swing.JFrame {
         ratingLbl.setFont(new java.awt.Font("Times New Roman", 0, 14)); // NOI18N
         ratingLbl.setText("Rating");
 
-        jSpinner1.setModel(new javax.swing.SpinnerDateModel());
+        dateSn.setModel(new javax.swing.SpinnerDateModel());
 
-        jList2.setModel(new javax.swing.AbstractListModel<String>() {
+        doctorLs.setModel(new javax.swing.AbstractListModel<String>() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
         });
-        jScrollPane5.setViewportView(jList2);
-
-        jLabel16.setFont(new java.awt.Font("Tw Cen MT", 0, 14)); // NOI18N
-        jLabel16.setText("Rating:");
+        jScrollPane5.setViewportView(doctorLs);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -563,24 +576,18 @@ public class PatientForm extends javax.swing.JFrame {
                 .addComponent(confirmBtn)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(ratingLbl, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel2Layout.createSequentialGroup()
-                        .addGap(59, 59, 59)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(59, 59, 59)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 80, Short.MAX_VALUE)
+                .addGap(59, 59, 59)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(departmentCb, javax.swing.GroupLayout.PREFERRED_SIZE, 123, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(dateSn, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(59, 59, 59)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(ratingLbl, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 81, Short.MAX_VALUE)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -602,18 +609,16 @@ public class PatientForm extends javax.swing.JFrame {
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(19, 19, 19)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(ratingLbl)
-                            .addComponent(jLabel16))
-                        .addGap(36, 36, 36)
+                        .addGap(18, 18, 18)
+                        .addComponent(ratingLbl)
+                        .addGap(37, 37, 37)
                         .addComponent(confirmBtn))
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel2Layout.createSequentialGroup()
-                        .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(dateSn, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(67, 67, 67)
                         .addComponent(jLabel8)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(departmentCb, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(114, Short.MAX_VALUE))
         );
 
@@ -867,8 +872,8 @@ public class PatientForm extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void confirmBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_confirmBtnActionPerformed
-        int doctorIndex = jList2.getSelectedIndex();
-        int slotIndex = jList1.getSelectedIndex();
+        int doctorIndex = doctorLs.getSelectedIndex();
+        int slotIndex = timeLs.getSelectedIndex();
         if (doctorIndex < 0 || currentDoctorOptions == null
             || doctorIndex >= currentDoctorOptions.size()) {
             javax.swing.JOptionPane.showMessageDialog(this,
@@ -1158,7 +1163,7 @@ public class PatientForm extends javax.swing.JFrame {
                 allocator.saveChanges(testDoctor);
 
                 DoctorShiftToFile shiftData = new DoctorShiftToFile(
-                    null, LocalDate.of(2026, 9 , 20), LocalTime.of(9, 0), LocalTime.of(17, 0));
+                    null, LocalDate.of(2026, 9 , 22), LocalTime.of(9, 0), LocalTime.of(17, 0));
                 testDoctor.getDoctorShifts().add(shiftData);
                 allocator.saveChanges(testDoctor);
 
@@ -1215,12 +1220,14 @@ public class PatientForm extends javax.swing.JFrame {
     private javax.swing.JTable appointmentTbl;
     private javax.swing.JButton bookAppBtn;
     private javax.swing.JButton confirmBtn;
+    private javax.swing.JSpinner dateSn;
+    private javax.swing.JComboBox<String> departmentCb;
+    private javax.swing.JList<String> doctorLs;
     private javax.swing.JButton editProfileBtn;
     private javax.swing.JTextField emailTf;
     private javax.swing.JTextField emailTf1;
     private javax.swing.JButton feedbackBtn;
     private javax.swing.JTextArea insuranceTextArea;
-    private javax.swing.JComboBox<String> jComboBox2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -1228,7 +1235,6 @@ public class PatientForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
-    private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -1237,8 +1243,6 @@ public class PatientForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
-    private javax.swing.JList<String> jList1;
-    private javax.swing.JList<String> jList2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
@@ -1251,12 +1255,12 @@ public class PatientForm extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JScrollPane jScrollPane6;
-    private javax.swing.JSpinner jSpinner1;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JButton logOutBtn;
     private javax.swing.JTable medicalTbl;
     private javax.swing.JLabel ratingLbl;
     private javax.swing.JButton resetPwBtn;
+    private javax.swing.JList<String> timeLs;
     private javax.swing.JTextField usernameTf;
     // End of variables declaration//GEN-END:variables
 }

@@ -21,7 +21,6 @@ public class FeedbackDialog extends javax.swing.JDialog {
     public FeedbackDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-        submitBtn.addActionListener(this::submitBtnActionPerformed);
     }
 
     public boolean isSubmitted() {
@@ -61,7 +60,7 @@ public class FeedbackDialog extends javax.swing.JDialog {
 
         ratingSlider.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         ratingSlider.setMajorTickSpacing(1);
-        ratingSlider.setMaximum(10);
+        ratingSlider.setMaximum(5);
         ratingSlider.setMinimum(1);
         ratingSlider.setPaintLabels(true);
         ratingSlider.setPaintTicks(true);
@@ -77,6 +76,7 @@ public class FeedbackDialog extends javax.swing.JDialog {
         jScrollPane1.setViewportView(commentTa);
 
         submitBtn.setText("Submit");
+        submitBtn.addActionListener(this::submitBtnActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -127,12 +127,12 @@ public class FeedbackDialog extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void submitBtnActionPerformed(java.awt.event.ActionEvent evt) {
+    private void submitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_submitBtnActionPerformed
         selectedRating = ratingSlider.getValue();
         enteredComment = commentTa.getText();
         submitted = true;
         dispose();
-    }
+    }//GEN-LAST:event_submitBtnActionPerformed
 
     /**
      * @param args the command line arguments
