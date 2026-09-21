@@ -3,6 +3,7 @@ package Operations.PatientOperation;
 import Exceptions.PatientExceptions.BookingValidationException;
 import Exceptions.PatientExceptions.FeedbackValidationException;
 import Exceptions.PatientExceptions.ProfileValidationException;
+import Operations.PatientOperation.PatientOperation.DoctorAvailability;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.AppointmentToFile;
 import entities.BaseEntity.AppointmentToFile.AppointmentStatus;
@@ -35,6 +36,7 @@ public class PatientOperation
 {
     // Assumed slot length because DoctorShiftToFile and ConsultationRateToFile have no duration field.
     private static final long SLOT_DURATION_MINUTES = 30;
+    // allocator is a HospitalEntityAllocator object responsible for loading and saving hospital data.
     private final HospitalEntityAllocator allocator;
     private Patient patient;
 
@@ -92,6 +94,9 @@ public class PatientOperation
         if (email == null || !email.contains("@")) {
             throw new ProfileValidationException("Invalid email format (missing '@').");
         }
+        // \d stands for "digit" (any number from 0 to 9).
+        // + means "one or more times."
+        // \\ is needed in Java because a single backslash is an escape character in strings, so need two backslashes to pass a single one to the regex engine.
         if (phone == null || !phone.matches("\\d+")) {
             throw new ProfileValidationException("Phone number must contain digits only.");
         }
@@ -107,6 +112,7 @@ public class PatientOperation
     /** 16. Loads all departments. Department records. */
     public List<Department> loadAllDepartments()
     {
+        //PREFIX is a constant (a public static final variable) in DepartmentToFile..
         return allocator.getAllBusinessEntities(DepartmentToFile.PREFIX);
     }
 
@@ -124,14 +130,20 @@ public class PatientOperation
         for (AppointmentToFile appointmentData : doctor.getAppointments())
         {
             if (appointmentData.getStatus() != AppointmentStatus.COMPLETED) continue;
+
             Appointment appointment = allocator.getBusinessEntity(appointmentData.getId());
             FeedbackToFile feedback = appointment.getFeedback();
+
             if (feedback == null) continue;
+
             totalRating += feedback.getRating();
             ratedAppointmentCount++;
         }
-        if (ratedAppointmentCount == 0) return 0.0;
-        return (double) totalRating / ratedAppointmentCount;
+        if (ratedAppointmentCount == 0) {
+            return 0.0;
+        }else{
+            return (double) totalRating / ratedAppointmentCount;
+        }
     }
     
     /** 17. Filter all doctors available to the patient. Doctor records. */
@@ -170,9 +182,11 @@ public class PatientOperation
                 for (AppointmentToFile appointment : doctor.getAppointments())
                 {
                     if (appointment.getId().equals(excludeAppointmentId)) continue;
+
                     AppointmentStatus status = appointment.getStatus();
                     boolean blocksSlot = status == AppointmentStatus.BOOKED
                             || status == AppointmentStatus.RESCHEDULED;
+
                     if (blocksSlot && slotStart.equals(appointment.getAppointmentTime()))
                     {
                         unavailable = true;
@@ -186,6 +200,9 @@ public class PatientOperation
     }
 
     /** 18. Returns date-filtered results per doctor */
+    // generates a complete, immutable (read-only) class behind the scenes.
+    // Its purpose here is to simply bundle two pieces of data together (a specific doctor and their list of times)
+    // so they can be returned as a single unit from the loadDoctorAvailability method.
     public record DoctorAvailability(Doctor doctor, List<LocalDateTime> availableSlots) {}
 
     public List<DoctorAvailability> loadDoctorAvailability(Department department, LocalDate date)
@@ -196,12 +213,17 @@ public class PatientOperation
             List<LocalDateTime> slotsThatDay = new ArrayList<>();
             for (LocalDateTime slot : loadAvailableSlots(doctor))
             {
-                if (slot.toLocalDate().equals(date)) slotsThatDay.add(slot);
+                if (slot.toLocalDate().equals(date)) {
+                    slotsThatDay.add(slot);
+                }
             }
-            if (!slotsThatDay.isEmpty()) results.add(new DoctorAvailability(doctor, slotsThatDay));
+            if (!slotsThatDay.isEmpty()){
+                 results.add(new DoctorAvailability(doctor, slotsThatDay));
+            }
         }
         return results;
     }
+
     /** 6. Books an appointment for the patient with the selected doctor and facility. Patient -> Appointment -> Doctor/Facility. */
     public void bookAppointment(Doctor doctor, Facility facility, LocalDateTime time, String reason)
     {
@@ -210,6 +232,14 @@ public class PatientOperation
         }
         if (time.isBefore(LocalDateTime.now())) {
             throw new BookingValidationException("Appointment time cannot be in the past.");
+        }
+        // Reject blank
+        if (reason == null || reason.trim().isEmpty()) {
+            throw new BookingValidationException("Reason cannot be empty.");
+        }
+        // otherwise will crash the delimiter-based file format when saving to disk, as '|' is used as a field separator.
+        if (reason.contains("|")) {
+            throw new BookingValidationException("Reason cannot contain the '|' character.");
         }
 
         if (!loadAvailableSlots(doctor).contains(time)) {
@@ -269,6 +299,11 @@ public class PatientOperation
         }
         appointments.sort((first, second) ->
                 first.getSelf().getAppointmentTime().compareTo(second.getSelf().getAppointmentTime()));
+
+        // If first is earlier than second, it returns a negative number.
+        // If first is exactly the same time as second, it returns 0.
+        // If first is later than second, it returns a positive number.
+        // The .sort() method uses these negative/positive numbers to figure out the order
         return appointments;
     }
 
@@ -280,7 +315,9 @@ public class PatientOperation
         {
             Appointment appointment = allocator.getBusinessEntity(appointmentData.getId());
             MedicalRecordToFile medicalRecordData = appointment.getMedicalRecord();
+
             if (medicalRecordData == null) continue;
+
             medicalHistory.add(allocator.getBusinessEntity(medicalRecordData.getId()));
         }
         return medicalHistory;
@@ -308,6 +345,12 @@ public class PatientOperation
         }
         if (appointment.getFeedback() != null) {
             throw new FeedbackValidationException("Feedback already exists for this appointment.");
+        }
+        if (comment == null || comment.trim().isEmpty()) {
+            throw new FeedbackValidationException("Comment cannot be empty.");
+        }
+        if (comment.contains("|")) {
+            throw new FeedbackValidationException("Comment cannot contain the '|' character.");
         }
 
         FeedbackToFile feedbackData = new FeedbackToFile(

@@ -890,6 +890,9 @@ public class PatientForm extends javax.swing.JFrame {
             entities.BaseEntity.FacilityToFile.PREFIX).get(0);
         String reason = javax.swing.JOptionPane.showInputDialog(this,
             "Reason for appointment:");
+        if (reason == null) {
+            return;
+        }
         try {
             operation.bookAppointment(doctor, facility, slot, reason);
             javax.swing.JOptionPane.showMessageDialog(this,
