@@ -7,7 +7,9 @@ import Operations.PatientOperation.PatientOperation.DoctorAvailability;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.AppointmentToFile;
 import entities.BaseEntity.AppointmentToFile.AppointmentStatus;
+import entities.BaseEntity.BillToFile;
 import entities.BaseEntity.FeedbackToFile;
+import entities.BaseEntity.FacilityToFile;
 import entities.BaseEntity.InsuranceToFile;
 import entities.BaseEntity.MedicalRecordToFile;
 import entities.BaseEntity.PrescriptionToFile;
@@ -225,7 +227,7 @@ public class PatientOperation
     }
 
     /** 6. Books an appointment for the patient with the selected doctor and facility. Patient -> Appointment -> Doctor/Facility. */
-    public void bookAppointment(Doctor doctor, Facility facility, LocalDateTime time, String reason)
+    public void bookAppointment(Doctor doctor, LocalDateTime time, String reason)
     {
         // Only active appointments consume the patient's booking limit;
         // cancelled and completed appointments no longer count toward it.
@@ -259,6 +261,33 @@ public class PatientOperation
 
         if (!loadAvailableSlots(doctor).contains(time)) {
             throw new BookingValidationException("Appointment time is not within an available doctor shift.");
+        }
+
+        Facility facility = null;
+        for (Facility candidate : allocator.<Facility>getAllBusinessEntities(FacilityToFile.PREFIX)) {
+            if (!candidate.getSelf().isAvailable()
+                    || candidate.getSelf().getFacilityType()
+                    != FacilityToFile.FacilityType.CONSULTATION_ROOM) {
+                continue;
+            }
+
+            boolean occupied = false;
+            for (AppointmentToFile appointmentData : candidate.getAppointments()) {
+                AppointmentStatus status = appointmentData.getStatus();
+                if ((status == AppointmentStatus.BOOKED
+                        || status == AppointmentStatus.RESCHEDULED)
+                        && time.equals(appointmentData.getAppointmentTime())) {
+                    occupied = true;
+                    break;
+                }
+            }
+            if (!occupied) {
+                facility = candidate;
+                break;
+            }
+        }
+        if (facility == null) {
+            throw new BookingValidationException("No consultation rooms are available at this time.");
         }
 
         AppointmentToFile appointmentData = new AppointmentToFile(
@@ -397,6 +426,27 @@ public class PatientOperation
     public InsuranceToFile loadInsuranceStatus()
     {
         return patient.getInsurance();
+    }
+
+    // 19. Loads the patient's billing list.
+    public List<BillToFile> loadBillingList()
+    {
+        List<BillToFile> billList = new ArrayList<>();
+        for (AppointmentToFile appointmentData : patient.getAppointments())
+        {
+            Appointment appointment = allocator.getBusinessEntity(appointmentData.getId());
+            MedicalRecordToFile medicalRecordData = appointment.getMedicalRecord();
+            if (medicalRecordData != null) {
+                MedicalRecord medicalRecord = allocator.getBusinessEntity(medicalRecordData.getId());
+                if (medicalRecord != null) {
+                    BillToFile appointmentBill = medicalRecord.getBill();
+                    if (appointmentBill != null) {
+                        billList.add(appointmentBill);
+                    }
+                }
+            }
+        }
+        return billList;
     }
 
     /** 15. Loads the next upcoming appointment, or null when none exists. Patient -> Appointment. */
