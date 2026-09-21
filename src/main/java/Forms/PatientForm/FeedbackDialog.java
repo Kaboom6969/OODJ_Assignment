@@ -61,11 +61,10 @@ public class FeedbackDialog extends javax.swing.JDialog {
 
         ratingSlider.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         ratingSlider.setMajorTickSpacing(1);
-        ratingSlider.setMaximum(5);
+        ratingSlider.setMaximum(10);
         ratingSlider.setMinimum(1);
         ratingSlider.setPaintLabels(true);
         ratingSlider.setPaintTicks(true);
-        ratingSlider.setValue(3);
 
         jLabel11.setFont(new java.awt.Font("Trebuchet MS", 0, 14)); // NOI18N
         jLabel11.setText("Rating:");
