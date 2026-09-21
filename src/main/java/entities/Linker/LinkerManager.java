@@ -22,6 +22,16 @@ public class LinkerManager implements ConvertToFileData
         FIRST, SECOND, NOT_FOUND
     }
 
+    public Class<? extends BaseEntity> getClassFirst()
+    {
+        return classFirst;
+    }
+
+    public Class<? extends BaseEntity> getClassSecond()
+    {
+        return classSecond;
+    }
+
     private Class<? extends BaseEntity> classFirst;
     private Class<? extends BaseEntity> classSecond;
     private List<Linker> linkers;
