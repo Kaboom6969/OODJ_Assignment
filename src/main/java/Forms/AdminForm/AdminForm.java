@@ -4,18 +4,17 @@
 
 package Forms.AdminForm;
 
+import java.awt.event.*;
 import Operations.AdminOperation.AdminOperation;
-import Tools.EntityConvertManager;
 import Tools.HospitalEntityAllocator;
-import Tools.PrefixHandler.PrefixFinder;
 import entities.BaseEntity.Users.User;
 import entities.BaseEntity.Users.UserWithDetails;
 import entities.BusinessEntity.Admin;
+import entities.BusinessEntity.BusinessEntity;
 
 import javax.swing.*;
 import javax.swing.GroupLayout;
 import javax.swing.table.*;
-import java.util.List;
 
 /**
  * @author leezh
@@ -27,7 +26,66 @@ public class AdminForm extends JFrame {
     {
         adminOperation = new AdminOperation(hospitalEntityAllocator,admin);
         initComponents();
+        userTable.removeColumn(userTable.getColumn("User Object"));
+        clearUserTable();
         loadAllUserToTable();
+        userTable.getSelectionModel().addListSelectionListener(e -> {
+            buttonDetectForSelectListInTable();});
+        buttonDetectForSelectListInTable();
+    }
+
+    private void buttonDetectForSelectListInTable()
+    {
+        int selectedRow = userTable.getSelectedRow();
+        updateUserButton.setEnabled(selectedRow != -1);
+        deleteUserButton.setEnabled(selectedRow != -1);
+    }
+
+    private void clearUserTable()
+    {
+        DefaultTableModel model = (DefaultTableModel) userTable.getModel();
+        model.setRowCount(0);
+    }
+
+    private void reloadUser(ActionEvent e)
+    {
+        clearUserTable();
+        loadAllUserToTable();
+    }
+
+    private void addUser(ActionEvent e)
+    {
+        UserDialog userDialog = new UserDialog(this,adminOperation);
+        userDialog.setVisible(true);
+    }
+
+    private void updateUser(ActionEvent e)
+    {
+        int selectedRow = userTable.getSelectedRow();
+        if(selectedRow == -1)
+        {
+            JOptionPane.showMessageDialog(this, "Please select a user");
+            return;
+        }
+        int modelRow = userTable.convertRowIndexToModel(selectedRow);
+        BusinessEntity<? extends User> user = (BusinessEntity<? extends User>)userTable.getModel().getValueAt(modelRow, 7);
+        UserDialog userDialog = new UserDialog(this,adminOperation,user);
+        userDialog.setVisible(true);
+        reloadUser(null);
+    }
+
+    private void deleteUser(ActionEvent e)
+    {
+        int selectedRow = userTable.getSelectedRow();
+        if(selectedRow == -1)
+        {
+            JOptionPane.showMessageDialog(this, "Please select a user");
+            return;
+        }
+        int modelRow = userTable.convertRowIndexToModel(selectedRow);
+        BusinessEntity<? extends User> user = (BusinessEntity<? extends User>)userTable.getModel().getValueAt(modelRow, 7);
+        adminOperation.deleteUser(user);
+        reloadUser(null);
     }
 
     private void initComponents() {
@@ -37,6 +95,9 @@ public class AdminForm extends JFrame {
         allUserScrollPanel = new JScrollPane();
         userTable = new JTable();
         reloadUserButton = new JButton();
+        addUserButton = new JButton();
+        updateUserButton = new JButton();
+        deleteUserButton = new JButton();
 
         //======== this ========
         var contentPane = getContentPane();
@@ -55,7 +116,7 @@ public class AdminForm extends JFrame {
                         new Object[][] {
                         },
                         new String[] {
-                            "Role", "Id", "Name", "Email", "Gender", "Date Of Birth", "Phone Number"
+                            "Role", "Id", "Name", "Email", "Gender", "Date Of Birth", "Phone Number", "User Object"
                         }
                     ));
                     {
@@ -67,6 +128,19 @@ public class AdminForm extends JFrame {
 
                 //---- reloadUserButton ----
                 reloadUserButton.setText("Reload");
+                reloadUserButton.addActionListener(e -> reloadUser(e));
+
+                //---- addUserButton ----
+                addUserButton.setText("Add User");
+                addUserButton.addActionListener(e -> addUser(e));
+
+                //---- updateUserButton ----
+                updateUserButton.setText("Update User");
+                updateUserButton.addActionListener(e -> updateUser(e));
+
+                //---- deleteUserButton ----
+                deleteUserButton.setText("Delete User");
+                deleteUserButton.addActionListener(e -> deleteUser(e));
 
                 GroupLayout allUserPanelLayout = new GroupLayout(allUserPanel);
                 allUserPanel.setLayout(allUserPanelLayout);
@@ -76,15 +150,25 @@ public class AdminForm extends JFrame {
                             .addContainerGap()
                             .addComponent(allUserScrollPanel, GroupLayout.PREFERRED_SIZE, 709, GroupLayout.PREFERRED_SIZE)
                             .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(reloadUserButton, GroupLayout.PREFERRED_SIZE, 84, GroupLayout.PREFERRED_SIZE)
-                            .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(allUserPanelLayout.createParallelGroup()
+                                .addComponent(reloadUserButton, GroupLayout.PREFERRED_SIZE, 84, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(addUserButton)
+                                .addComponent(updateUserButton)
+                                .addComponent(deleteUserButton))
+                            .addContainerGap(31, Short.MAX_VALUE))
                 );
                 allUserPanelLayout.setVerticalGroup(
                     allUserPanelLayout.createParallelGroup()
                         .addGroup(allUserPanelLayout.createSequentialGroup()
                             .addGap(40, 40, 40)
                             .addComponent(reloadUserButton)
-                            .addContainerGap(363, Short.MAX_VALUE))
+                            .addGap(18, 18, 18)
+                            .addComponent(addUserButton)
+                            .addGap(18, 18, 18)
+                            .addComponent(updateUserButton)
+                            .addGap(18, 18, 18)
+                            .addComponent(deleteUserButton)
+                            .addContainerGap(207, Short.MAX_VALUE))
                         .addGroup(allUserPanelLayout.createSequentialGroup()
                             .addContainerGap()
                             .addComponent(allUserScrollPanel, GroupLayout.DEFAULT_SIZE, 425, Short.MAX_VALUE)
@@ -100,7 +184,7 @@ public class AdminForm extends JFrame {
             contentPaneLayout.createParallelGroup()
                 .addGroup(contentPaneLayout.createSequentialGroup()
                     .addContainerGap()
-                    .addComponent(adminTab, GroupLayout.DEFAULT_SIZE, 796, Short.MAX_VALUE)
+                    .addComponent(adminTab)
                     .addContainerGap())
         );
         contentPaneLayout.setVerticalGroup(
@@ -121,6 +205,9 @@ public class AdminForm extends JFrame {
     private JScrollPane allUserScrollPanel;
     private JTable userTable;
     private JButton reloadUserButton;
+    private JButton addUserButton;
+    private JButton updateUserButton;
+    private JButton deleteUserButton;
     // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
 
     private void loadAllUserToTable()
@@ -130,7 +217,7 @@ public class AdminForm extends JFrame {
         for (var user : users)
         {
             User userData = user.getSelf();
-            Object[] row = new Object[7];
+            Object[] row = new Object[8];
             row[0] = userData.getClass()
                     .getSimpleName()
                     .replace("ToFile", "");
@@ -143,6 +230,7 @@ public class AdminForm extends JFrame {
                 row[5] = userWithDetailsData.getDateOfBirth();
                 row[6] = userWithDetailsData.getPhoneNumber();
             }
+            row[7] = user;
             model.addRow(row);
         }
 

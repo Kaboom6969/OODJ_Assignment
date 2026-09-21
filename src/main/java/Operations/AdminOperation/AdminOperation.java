@@ -3,13 +3,13 @@ package Operations.AdminOperation;
 import Exceptions.EntityExceptions.EntityNotFoundException;
 import Exceptions.EntityExceptions.EntityNotMatchException;
 import Interfaces.ConvertToFileData;
+import Interfaces.Linkable;
+import Interfaces.OwnerShip;
+import Tools.EntityConvertManager;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.BaseEntity;
 import entities.BaseEntity.FacilityToFile;
-import entities.BaseEntity.Users.DoctorToFile;
-import entities.BaseEntity.Users.MedicalManagerToFile;
-import entities.BaseEntity.Users.PatientToFile;
-import entities.BaseEntity.Users.User;
+import entities.BaseEntity.Users.*;
 import entities.BusinessEntity.*;
 
 import java.util.ArrayList;
@@ -29,11 +29,20 @@ public class AdminOperation
 
     public List<BusinessEntity<? extends User>> getAllUsers()
     {
+        List<BusinessEntity<? extends User>> admins = hospitalEntityAllocator.getAllBusinessEntities(AdminToFile.PREFIX);
         List<BusinessEntity<? extends User>> patients = hospitalEntityAllocator.getAllBusinessEntities(PatientToFile.PREFIX);
         List<BusinessEntity<? extends User>> medicalManagers = hospitalEntityAllocator.getAllBusinessEntities(MedicalManagerToFile.PREFIX);
         List<BusinessEntity<? extends User>> doctors = hospitalEntityAllocator.getAllBusinessEntities(DoctorToFile.PREFIX);
         List<BusinessEntity<? extends User>> allUsers = new ArrayList<BusinessEntity<? extends User>>();
-        allUsers.addAll(patients); allUsers.addAll(medicalManagers); allUsers.addAll(doctors);
+        for (int i = 0; i<admins.size();i++)
+        {
+            if ((admins.get(i).getId().equals(admin.getId())))
+            {
+                admins.remove(i);
+                break;
+            }
+        }
+        allUsers.addAll(admins);allUsers.addAll(patients); allUsers.addAll(medicalManagers); allUsers.addAll(doctors);
         return allUsers;
     }
 
@@ -60,6 +69,31 @@ public class AdminOperation
         }
     }
 
+    public <T extends User & ConvertToFileData> CRUDInformation addUser(List<String> data,Class<?> clazz)
+    {
+        try
+        {
+            T user = constructUser(data,clazz);
+            hospitalEntityAllocator.addEntityForceNewId(user);
+            return new CRUDInformation(true,"Success");
+        } catch (RuntimeException e)
+        {
+            return new CRUDInformation(false,e.getMessage());
+        }
+
+    }
+
+    public <T extends BaseEntity & ConvertToFileData> T constructUser(List<String> data,Class<?> clazz)
+    {
+        String prefix = null;
+        return (T) EntityConvertManager.getConvertMap().get(EntityConvertManager.getPrefixMap().get(clazz)).apply(data.toArray(new String[data.size()]));
+    }
+
+    public <T extends BusinessEntity<User>> T constructUserFull(List<String> data, Class<?> clazz)
+    {
+        return hospitalEntityAllocator.convertToBusinessEntity(constructUser(data,clazz),false);
+    }
+
     public CRUDInformation addUser(BusinessEntity<? extends User> user)
     {
         try
@@ -68,6 +102,18 @@ public class AdminOperation
             return new CRUDInformation(true, "Success");
         }
         catch (RuntimeException e)
+        {
+            return new CRUDInformation(false,e.getMessage());
+        }
+    }
+
+    public<T extends BusinessEntity<?>> CRUDInformation updateUser(T user)
+    {
+        try
+        {
+            hospitalEntityAllocator.saveChanges(user);
+            return new CRUDInformation(true,"Success");
+        } catch (RuntimeException e)
         {
             return new CRUDInformation(false,e.getMessage());
         }
