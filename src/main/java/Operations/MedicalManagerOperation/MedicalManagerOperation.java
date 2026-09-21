@@ -182,11 +182,22 @@ public class MedicalManagerOperation {
     }
 
     // Delete department using allocator.removeEntity
-    public void deleteDepartment(String deptId) {
+    public void deleteDepartment(String deptId)
+    {
         if (deptId == null || deptId.trim().isEmpty()) {
             throw new IllegalArgumentException("Department ID cannot be empty.");
         }
-        allocator.deleteBusinessEntity(deptId);
+        Department dept = allocator.getBusinessEntity(deptId.trim());
+        if (dept == null) {
+            throw new IllegalArgumentException("Department ID '" + deptId + "' not found.");
+        }
+        try
+        {
+            allocator.deleteBusinessEntity(dept);
+        } catch (EntityNotMatchException| EntityNotFoundException e)
+        {
+            throw new RuntimeException("Department ID '" + deptId + "' does not exist.");
+        }
     }
 
     // Load all doctors in the hospital
@@ -301,7 +312,11 @@ public class MedicalManagerOperation {
         if (shiftId == null || shiftId.trim().isEmpty()) {
             throw new IllegalArgumentException("Shift ID cannot be empty.");
         }
-        allocator.deleteBusinessEntity(shiftId.trim());
+        try {
+            allocator.deleteBusinessEntity(shiftId.trim());
+        } catch (EntityNotMatchException | EntityNotFoundException e) {
+            throw new IllegalArgumentException("Shift ID '" + shiftId + "' not found or cannot be deleted: " + e.getMessage());
+        }
     }
 
     // Data container for aggregated hospital KPIs and tabular department metrics
