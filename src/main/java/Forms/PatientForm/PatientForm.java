@@ -900,6 +900,11 @@ public class PatientForm extends javax.swing.JFrame {
             javax.swing.JOptionPane.showMessageDialog(this,
                 exception.getMessage(), "Booking Error",
                 javax.swing.JOptionPane.ERROR_MESSAGE);
+        } catch (Exception exception) {
+            // Keep unexpected errors inside the dialog instead of crashing the window.
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Something went wrong: " + exception.getMessage(), "Booking Error",
+                javax.swing.JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_confirmBtnActionPerformed
 
@@ -939,6 +944,11 @@ public class PatientForm extends javax.swing.JFrame {
             javax.swing.JOptionPane.showMessageDialog(this,
                     exception.getMessage(), "Reschedule Error",
                     javax.swing.JOptionPane.ERROR_MESSAGE);
+        } catch (Exception exception) {
+            // Keep unexpected errors inside the dialog instead of crashing the window.
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Something went wrong: " + exception.getMessage(), "Reschedule Error",
+                javax.swing.JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_RescheduleBtnActionPerformed
 
@@ -965,6 +975,11 @@ public class PatientForm extends javax.swing.JFrame {
             javax.swing.JOptionPane.showMessageDialog(this,
                     exception.getMessage(), "Cancellation Error",
                     javax.swing.JOptionPane.ERROR_MESSAGE);
+        } catch (Exception exception) {
+            // Keep unexpected errors inside the dialog instead of crashing the window.
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Something went wrong: " + exception.getMessage(), "Cancellation Error",
+                javax.swing.JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_CancelBtnActionPerformed
 
@@ -999,6 +1014,11 @@ public class PatientForm extends javax.swing.JFrame {
             javax.swing.JOptionPane.showMessageDialog(this,
                     exception.getMessage(), "Feedback Error",
                     javax.swing.JOptionPane.ERROR_MESSAGE);
+        } catch (Exception exception) {
+            // Keep unexpected errors inside the dialog instead of crashing the window.
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Something went wrong: " + exception.getMessage(), "Feedback Error",
+                javax.swing.JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_feedbackBtnActionPerformed
 
@@ -1029,6 +1049,11 @@ public class PatientForm extends javax.swing.JFrame {
             javax.swing.JOptionPane.showMessageDialog(this,
                     exception.getMessage(), "Profile Update Error",
                     javax.swing.JOptionPane.ERROR_MESSAGE);
+        } catch (Exception exception) {
+            // Keep unexpected errors inside the dialog instead of crashing the window.
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Something went wrong: " + exception.getMessage(), "Profile Update Error",
+                javax.swing.JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_editProfileBtnActionPerformed
 
@@ -1056,6 +1081,11 @@ public class PatientForm extends javax.swing.JFrame {
             javax.swing.JOptionPane.showMessageDialog(this,
                     exception.getMessage(), "Reset Password Error",
                     javax.swing.JOptionPane.ERROR_MESSAGE);
+        } catch (Exception exception) {
+            // Keep unexpected errors inside the dialog instead of crashing the window.
+            javax.swing.JOptionPane.showMessageDialog(this,
+                "Something went wrong: " + exception.getMessage(), "Reset Password Error",
+                javax.swing.JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_resetPwBtnActionPerformed
 
