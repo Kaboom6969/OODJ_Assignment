@@ -1,0 +1,10 @@
+DP0001|General Medicine
+DP0002|Cardiology
+DP0003|Paediatrics
+DP0004|Orthopaedics
+DP0005|Dermatology
+DP0006|Neurology
+DP0007|Radiology
+DP0008|Oncology
+DP0009|Emergency
+DP0010|Pharmacy
