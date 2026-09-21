@@ -1,0 +1,10 @@
+AD0001|Admin 01|Admin@01|admin01@hospital.test
+AD0002|Admin 02|Admin@02|admin02@hospital.test
+AD0003|Admin 03|Admin@03|admin03@hospital.test
+AD0004|Admin 04|Admin@04|admin04@hospital.test
+AD0005|Admin 05|Admin@05|admin05@hospital.test
+AD0006|Admin 06|Admin@06|admin06@hospital.test
+AD0007|Admin 07|Admin@07|admin07@hospital.test
+AD0008|Admin 08|Admin@08|admin08@hospital.test
+AD0009|Admin 09|Admin@09|admin09@hospital.test
+AD0010|Admin 10|Admin@10|admin10@hospital.test

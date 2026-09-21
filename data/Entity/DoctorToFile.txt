@@ -1,0 +1,10 @@
+DT0001|Doctor 01|Doctor@01|doctor01@hospital.test|MALE|1983-01-03|012-30001
+DT0002|Doctor 02|Doctor@02|doctor02@hospital.test|FEMALE|1986-02-04|012-30002
+DT0003|Doctor 03|Doctor@03|doctor03@hospital.test|UNKNOWN|1989-03-05|012-30003
+DT0004|Doctor 04|Doctor@04|doctor04@hospital.test|MALE|1992-04-06|012-30004
+DT0005|Doctor 05|Doctor@05|doctor05@hospital.test|FEMALE|1995-05-07|012-30005
+DT0006|Doctor 06|Doctor@06|doctor06@hospital.test|UNKNOWN|1998-06-08|012-30006
+DT0007|Doctor 07|Doctor@07|doctor07@hospital.test|MALE|2001-07-09|012-30007
+DT0008|Doctor 08|Doctor@08|doctor08@hospital.test|FEMALE|2004-08-10|012-30008
+DT0009|Doctor 09|Doctor@09|doctor09@hospital.test|UNKNOWN|2007-09-11|012-30009
+DT0010|Doctor 10|Doctor@10|doctor10@hospital.test|MALE|2010-01-12|012-30010

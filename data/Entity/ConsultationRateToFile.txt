@@ -1,0 +1,10 @@
+CR0001|Consultation Rate 01|60|true
+CR0002|Consultation Rate 02|70|true
+CR0003|Consultation Rate 03|80|true
+CR0004|Consultation Rate 04|90|true
+CR0005|Consultation Rate 05|100|true
+CR0006|Consultation Rate 06|110|true
+CR0007|Consultation Rate 07|120|true
+CR0008|Consultation Rate 08|130|true
+CR0009|Consultation Rate 09|140|false
+CR0010|Consultation Rate 10|150|false

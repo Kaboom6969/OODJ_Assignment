@@ -1,0 +1,10 @@
+RS0001|Assessment result 01|Follow-up remark 01|2026-01-03T09:00:00
+RS0002|Assessment result 02|Follow-up remark 02|2026-02-04T10:00:00
+RS0003|Assessment result 03|Follow-up remark 03|2026-03-05T11:00:00
+RS0004|Assessment result 04|Follow-up remark 04|2026-04-06T12:00:00
+RS0005|Assessment result 05|Follow-up remark 05|2026-05-07T13:00:00
+RS0006|Assessment result 06|Follow-up remark 06|2026-06-08T14:00:00
+RS0007|Assessment result 07|Follow-up remark 07|2026-01-09T15:00:00
+RS0008|Assessment result 08|Follow-up remark 08|2026-02-10T16:00:00
+RS0009|Assessment result 09|Follow-up remark 09|2026-03-11T09:00:00
+RS0010|Assessment result 10|Follow-up remark 10|2026-04-12T10:00:00
