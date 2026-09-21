@@ -1,0 +1,10 @@
+FC0001|Consultation Room A|CONSULTATION_ROOM|15|true
+FC0002|North Ward|WARD|20|true
+FC0003|Main Laboratory|LABORATORY|25|true
+FC0004|Imaging Suite|IMAGING_ROOM|30|true
+FC0005|Consultation Room B|CONSULTATION_ROOM|35|true
+FC0006|South Ward|WARD|40|true
+FC0007|Pathology Laboratory|LABORATORY|45|true
+FC0008|Radiology Room|IMAGING_ROOM|50|true
+FC0009|Emergency Room|CONSULTATION_ROOM|55|true
+FC0010|Day Care Ward|WARD|60|false

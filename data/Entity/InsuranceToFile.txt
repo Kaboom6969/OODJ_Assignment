@@ -1,0 +1,10 @@
+IN0001|AIA Malaysia|50|true
+IN0002|Prudential Malaysia|55|true
+IN0003|Great Eastern|60|true
+IN0004|Allianz Malaysia|65|true
+IN0005|Etiqa Insurance|70|true
+IN0006|Zurich Malaysia|75|true
+IN0007|Tokio Marine|80|true
+IN0008|Takaful Malaysia|85|true
+IN0009|Hong Leong Assurance|90|false
+IN0010|Generali Malaysia|95|false

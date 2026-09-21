@@ -1,0 +1,10 @@
+PR0001|Amoxicillin|150 mg|1 times daily|4|Take after meal|2026-01-03T10:00:00
+PR0002|Paracetamol|200 mg|2 times daily|5|Take after meal|2026-02-04T11:00:00
+PR0003|Ibuprofen|250 mg|3 times daily|6|Take after meal|2026-03-05T12:00:00
+PR0004|Metformin|300 mg|1 times daily|7|Take after meal|2026-04-06T13:00:00
+PR0005|Amlodipine|350 mg|2 times daily|8|Take after meal|2026-05-07T14:00:00
+PR0006|Cetirizine|400 mg|3 times daily|9|Take after meal|2026-06-08T15:00:00
+PR0007|Omeprazole|450 mg|1 times daily|10|Take after meal|2026-01-09T16:00:00
+PR0008|Atorvastatin|500 mg|2 times daily|11|Take after meal|2026-02-10T17:00:00
+PR0009|Salbutamol|550 mg|3 times daily|12|Take after meal|2026-03-11T10:00:00
+PR0010|Azithromycin|600 mg|1 times daily|13|Take after meal|2026-04-12T11:00:00
