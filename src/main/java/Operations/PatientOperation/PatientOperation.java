@@ -227,6 +227,21 @@ public class PatientOperation
     /** 6. Books an appointment for the patient with the selected doctor and facility. Patient -> Appointment -> Doctor/Facility. */
     public void bookAppointment(Doctor doctor, Facility facility, LocalDateTime time, String reason)
     {
+        // Only active appointments consume the patient's booking limit;
+        // cancelled and completed appointments no longer count toward it.
+        int activeAppointmentCount = 0;
+        for (Appointment appointment : loadMyAppointments()) {
+            AppointmentStatus status = appointment.getSelf().getStatus();
+            if (status == AppointmentStatus.BOOKED
+                    || status == AppointmentStatus.RESCHEDULED) {
+                activeAppointmentCount++;
+            }
+        }
+        if (activeAppointmentCount >= 5) {
+            throw new BookingValidationException(
+                    "You already have 5 active appointments. Please cancel or complete one before booking another.");
+        }
+
         if (time == null) {
             throw new BookingValidationException("Appointment time cannot be null.");
         }
