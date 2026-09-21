@@ -1,5 +1,8 @@
 package Operations.PatientOperation;
 
+import Exceptions.PatientExceptions.BookingValidationException;
+import Exceptions.PatientExceptions.FeedbackValidationException;
+import Exceptions.PatientExceptions.ProfileValidationException;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.AppointmentToFile;
 import entities.BaseEntity.AppointmentToFile.AppointmentStatus;
@@ -51,46 +54,46 @@ public class PatientOperation
     {
         // Validate name
         if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Name cannot be empty.");
+            throw new ProfileValidationException("Name cannot be empty.");
         }
         if (!name.matches("^[a-zA-Z\\s]+$")) {
-            throw new IllegalArgumentException("Name can only contain letters and spaces.");
+            throw new ProfileValidationException("Name can only contain letters and spaces.");
         }
 
         // Validate password
         if (password == null || password.length() < 6) {
-            throw new IllegalArgumentException("Password must be at least 6 characters.");
+            throw new ProfileValidationException("Password must be at least 6 characters.");
         }
         if (!password.matches(".*[A-Z].*")) {
-            throw new IllegalArgumentException("Password must contain at least one uppercase letter.");
+            throw new ProfileValidationException("Password must contain at least one uppercase letter.");
         }
         if (!password.matches(".*[^a-zA-Z0-9].*")) {
-            throw new IllegalArgumentException("Password must contain at least one special character (e.g., !@#$%^&*).");
+            throw new ProfileValidationException("Password must contain at least one special character (e.g., !@#$%^&*).");
         }
 
         // Validate date of birth
         if (dob == null || dob.trim().isEmpty()) {
-            throw new IllegalArgumentException("Date of Birth cannot be empty.");
+            throw new ProfileValidationException("Date of Birth cannot be empty.");
         }
         if (!dob.matches("^\\d{4}-\\d{2}-\\d{2}$")) {
-            throw new IllegalArgumentException("DOB must follow the format YYYY-MM-DD (e.g., 2000-01-01).");
+            throw new ProfileValidationException("DOB must follow the format YYYY-MM-DD (e.g., 2000-01-01).");
         }
         LocalDate birthDate;
         try {
             birthDate = LocalDate.parse(dob, DateTimeFormatter.ISO_LOCAL_DATE);
         } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("Invalid calendar date. Please enter a real date.");
+            throw new ProfileValidationException("Invalid calendar date. Please enter a real date.");
         }
         if (birthDate.isAfter(LocalDate.now())) {
-            throw new IllegalArgumentException("Date of Birth cannot be in the future.");
+            throw new ProfileValidationException("Date of Birth cannot be in the future.");
         }
 
         // Validate email and phone
         if (email == null || !email.contains("@")) {
-            throw new IllegalArgumentException("Invalid email format (missing '@').");
+            throw new ProfileValidationException("Invalid email format (missing '@').");
         }
         if (phone == null || !phone.matches("\\d+")) {
-            throw new IllegalArgumentException("Phone number must contain digits only.");
+            throw new ProfileValidationException("Phone number must contain digits only.");
         }
         patient.getSelf().setName(name);
         patient.getSelf().setPassword(password);
@@ -203,14 +206,14 @@ public class PatientOperation
     public void bookAppointment(Doctor doctor, Facility facility, LocalDateTime time, String reason)
     {
         if (time == null) {
-            throw new IllegalArgumentException("Appointment time cannot be null.");
+            throw new BookingValidationException("Appointment time cannot be null.");
         }
         if (time.isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Appointment time cannot be in the past.");
+            throw new BookingValidationException("Appointment time cannot be in the past.");
         }
 
         if (!loadAvailableSlots(doctor).contains(time)) {
-            throw new IllegalArgumentException("Appointment time is not within an available doctor shift.");
+            throw new BookingValidationException("Appointment time is not within an available doctor shift.");
         }
 
         AppointmentToFile appointmentData = new AppointmentToFile(
@@ -227,18 +230,18 @@ public class PatientOperation
     public void rescheduleAppointment(Appointment appointment, LocalDateTime newTime)
     {
         if (appointment == null) {
-            throw new IllegalArgumentException("Appointment cannot be null.");
+            throw new BookingValidationException("Appointment cannot be null.");
         }
         if (newTime == null) {
-            throw new IllegalArgumentException("New appointment time cannot be null.");
+            throw new BookingValidationException("New appointment time cannot be null.");
         }
         if (newTime.isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Appointment time cannot be in the past.");
+            throw new BookingValidationException("Appointment time cannot be in the past.");
         }
 
         Doctor doctor = allocator.getBusinessEntity(appointment.getDoctor().getId());
         if (!loadAvailableSlots(doctor, appointment.getId()).contains(newTime)) {
-            throw new IllegalArgumentException("New appointment time is not within an available doctor shift.");
+            throw new BookingValidationException("New appointment time is not within an available doctor shift.");
         }
 
         appointment.getSelf().setAppointmentTime(newTime);
@@ -249,7 +252,7 @@ public class PatientOperation
     public void cancelAppointment(Appointment appointment)
     {
         if (appointment == null) {
-            throw new IllegalArgumentException("Appointment cannot be null.");
+            throw new BookingValidationException("Appointment cannot be null.");
         }
         appointment.getSelf().setStatus(AppointmentStatus.CANCELLED);
         allocator.saveChanges(appointment);
@@ -298,13 +301,13 @@ public class PatientOperation
     public void submitFeedback(Appointment appointment, int rating, String comment)
     {
         if (appointment == null) {
-            throw new IllegalArgumentException("Appointment cannot be null.");
+            throw new FeedbackValidationException("Appointment cannot be null.");
         }
         if (appointment.getSelf().getStatus() != AppointmentStatus.COMPLETED) {
-            throw new IllegalArgumentException("Feedback can only be submitted for completed appointments.");
+            throw new FeedbackValidationException("Feedback can only be submitted for completed appointments.");
         }
         if (appointment.getFeedback() != null) {
-            throw new IllegalArgumentException("Feedback already exists for this appointment.");
+            throw new FeedbackValidationException("Feedback already exists for this appointment.");
         }
 
         FeedbackToFile feedbackData = new FeedbackToFile(
