@@ -1,0 +1,10 @@
+PT0001|Patient 01|Patient@01|patient01@hospital.test|MALE|1988-01-03|012-40001
+PT0002|Patient 02|Patient@02|patient02@hospital.test|FEMALE|1991-02-04|012-40002
+PT0003|Patient 03|Patient@03|patient03@hospital.test|UNKNOWN|1994-03-05|012-40003
+PT0004|Patient 04|Patient@04|patient04@hospital.test|MALE|1997-04-06|012-40004
+PT0005|Patient 05|Patient@05|patient05@hospital.test|FEMALE|2000-05-07|012-40005
+PT0006|Patient 06|Patient@06|patient06@hospital.test|UNKNOWN|2003-06-08|012-40006
+PT0007|Patient 07|Patient@07|patient07@hospital.test|MALE|2006-07-09|012-40007
+PT0008|Patient 08|Patient@08|patient08@hospital.test|FEMALE|2009-08-10|012-40008
+PT0009|Patient 09|Patient@09|patient09@hospital.test|UNKNOWN|2012-09-11|012-40009
+PT0010|Patient 10|Patient@10|patient10@hospital.test|MALE|2015-01-12|012-40010
