@@ -227,6 +227,7 @@ public class PatientOperation implements PatientService
         return results;
     }
 
+    /** 19. Returns facility */
     private Facility findAvailableFacility(LocalDateTime time, String excludeAppointmentId)
     {
         for (Facility candidate : allocator.<Facility>getAllBusinessEntities(FacilityToFile.PREFIX)) {
