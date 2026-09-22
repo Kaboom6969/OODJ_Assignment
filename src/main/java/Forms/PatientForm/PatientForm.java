@@ -1203,32 +1203,31 @@ public class PatientForm extends javax.swing.JFrame {
             logger.log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException ex) {
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
-        }
 
         java.awt.EventQueue.invokeLater(() -> {
             try {
                 BaseEntity.setIdNumberWidth(4);
                 HospitalEntityAllocator allocator = new HospitalEntityAllocator(
-                    Path.of("data", "Linker"), Path.of("data", "Entity"));
+                        Path.of("data", "Linker"), Path.of("data", "Entity"));
 
-                Patient testPatient = allocator.getBusinessEntity("PT0001");
-                new PatientForm(allocator, testPatient).setVisible(true);
+                Patient defaultPatient = allocator.getBusinessEntity("PT0001");
+                if (defaultPatient == null) {
+                    javax.swing.JOptionPane.showMessageDialog(null,
+                            "Default patient PT0001 was not found in the data files.",
+                            "Startup Error",
+                            javax.swing.JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                new PatientForm(allocator, defaultPatient).setVisible(true);
             } catch (Exception e) {
                 e.printStackTrace();
+                javax.swing.JOptionPane.showMessageDialog(null,
+                        "Patient form failed to start: " + e.getMessage(),
+                        "Startup Error",
+                        javax.swing.JOptionPane.ERROR_MESSAGE);
             }
         });
-
-        
-        
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
