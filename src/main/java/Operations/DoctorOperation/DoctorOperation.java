@@ -141,9 +141,9 @@ public class DoctorOperation {
                     "Phone number cannot be empty."
             );
         }
-        
+
         // Validate phone number format and allow digits, +, brackets, hyphens, and spaces
-        if (!phone.matches("^[0-9+()\\-\\s]+$")) { 
+        if (!phone.matches("^[0-9+()\\-\\s]+$")) {
             throw new IllegalArgumentException(
                     "Phone number contains invalid characters."
             );
@@ -243,6 +243,7 @@ public class DoctorOperation {
 
     public void saveConsultation(
             String patientId,
+            String appointmentId,
             double temperature,
             int heartRate,
             int systolicPressure,
@@ -254,6 +255,13 @@ public class DoctorOperation {
         validateSafeText(patientId, "Patient ID");
         validateSafeText(diagnosis, "Diagnosis");
         validateSafeText(consultationNote, "Consultation note");
+        validateSafeText(appointmentId, "Appointment ID");
+
+        if (appointmentId == null || appointmentId.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Appointment ID cannot be empty."
+            );
+        }
 
         if (patientId == null || patientId.trim().isEmpty()) {
             throw new IllegalArgumentException(
@@ -304,51 +312,47 @@ public class DoctorOperation {
             );
         }
 
-        Appointment selectedAppointment = null;
+        Appointment selectedAppointment;
 
-        for (int i = 0; i < patient.getAppointments().size(); i++) {
-
-            AppointmentToFile appointment
-                    = patient.getAppointments().get(i);
-
-            if (appointment.getStatus()
-                    == AppointmentToFile.AppointmentStatus.COMPLETED) {
-
-                Appointment currentAppointment
-                        = allocator.getBusinessEntity(
-                                appointment.getId()
-                        );
-
-                // Only allow appointments belonging to the current doctor
-                if (currentAppointment.getDoctor() != null
-                        && currentAppointment.getDoctor()
-                                .getId()
-                                .equals(doctor.getId())) {
-
-                    if (selectedAppointment == null) {
-
-                        selectedAppointment = currentAppointment;
-
-                    } else if (currentAppointment
-                            .getSelf()
-                            .getAppointmentTime()
-                            .isAfter(
-                                    selectedAppointment
-                                            .getSelf()
-                                            .getAppointmentTime()
-                            )) {
-
-                        selectedAppointment = currentAppointment;
-                    }
-                }
-            }
-        }
-
-        if (selectedAppointment == null) {
+        try {
+            selectedAppointment
+                    = allocator.getBusinessEntity(
+                            appointmentId.trim()
+                    );
+        } catch (Exception e) {
             throw new IllegalArgumentException(
-                    "No completed appointment found for this patient."
+                    "Appointment not found."
             );
         }
+
+        if (selectedAppointment.getDoctor() == null
+                || !selectedAppointment.getDoctor()
+                        .getId()
+                        .equals(doctor.getId())) {
+
+            throw new IllegalArgumentException(
+                    "Appointment does not belong to this doctor."
+            );
+        }
+
+        if (selectedAppointment.getPatient() == null
+                || !selectedAppointment.getPatient()
+                        .getId()
+                        .equals(patientId.trim())) {
+
+            throw new IllegalArgumentException(
+                    "Appointment does not belong to this patient."
+            );
+        }
+
+        if (selectedAppointment.getSelf().getStatus()
+                != AppointmentToFile.AppointmentStatus.COMPLETED) {
+
+            throw new IllegalArgumentException(
+                    "Appointment must be completed before consultation."
+            );
+        }
+
 
         if (selectedAppointment.getMedicalRecord() != null) {
             throw new IllegalArgumentException(
@@ -374,6 +378,7 @@ public class DoctorOperation {
 
     public void savePrescription(
             String patientId,
+            String appointmentId,
             String medicationName,
             String dosage,
             String frequency,
@@ -386,6 +391,13 @@ public class DoctorOperation {
         validateSafeText(dosage, "Dosage");
         validateSafeText(frequency, "Frequency");
         validateSafeText(instructions, "Instructions");
+        validateSafeText(appointmentId, "Appointment ID");
+
+        if (appointmentId == null || appointmentId.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Appointment ID cannot be empty."
+            );
+        }
 
         if (patientId == null || patientId.trim().isEmpty()) {
             throw new IllegalArgumentException(
@@ -433,41 +445,50 @@ public class DoctorOperation {
             );
         }
 
-        Appointment selectedAppointment = null;
+        Appointment selectedAppointment;
 
-        for (int i = 0; i < patient.getAppointments().size(); i++) {
-
-            AppointmentToFile appointment = patient.getAppointments().get(i);
-
-            if (appointment.getStatus() == AppointmentToFile.AppointmentStatus.COMPLETED) {
-
-                Appointment currentAppointment = allocator.getBusinessEntity(appointment.getId());
-
-                if (currentAppointment.getDoctor() != null
-                        && currentAppointment.getDoctor()
-                                .getId()
-                                .equals(doctor.getId())
-                        && currentAppointment.getMedicalRecord() != null) {
-
-                    if (selectedAppointment == null) {
-                        selectedAppointment = currentAppointment;
-                    } else if (currentAppointment
-                            .getSelf()
-                            .getAppointmentTime()
-                            .isAfter(
-                                    selectedAppointment
-                                            .getSelf()
-                                            .getAppointmentTime()
-                            )) {
-                        selectedAppointment = currentAppointment;
-                    }
-                }
-            }
+        try {
+            selectedAppointment
+                    = allocator.getBusinessEntity(
+                            appointmentId.trim()
+                    );
+        } catch (Exception e) {
+            throw new IllegalArgumentException(
+                    "Appointment not found."
+            );
         }
 
-        if (selectedAppointment == null) {
+        if (selectedAppointment.getDoctor() == null
+                || !selectedAppointment.getDoctor()
+                        .getId()
+                        .equals(doctor.getId())) {
+
             throw new IllegalArgumentException(
-                    "No completed appointment with a medical record found."
+                    "Appointment does not belong to this doctor."
+            );
+        }
+
+        if (selectedAppointment.getPatient() == null
+                || !selectedAppointment.getPatient()
+                        .getId()
+                        .equals(patientId.trim())) {
+
+            throw new IllegalArgumentException(
+                    "Appointment does not belong to this patient."
+            );
+        }
+
+        if (selectedAppointment.getSelf().getStatus()
+                != AppointmentToFile.AppointmentStatus.COMPLETED) {
+
+            throw new IllegalArgumentException(
+                    "Appointment must be completed before prescription."
+            );
+        }
+
+        if (selectedAppointment.getMedicalRecord() == null) {
+            throw new IllegalArgumentException(
+                    "No medical record found for this appointment."
             );
         }
 
@@ -492,11 +513,14 @@ public class DoctorOperation {
 
     public void sendMedicalRequest(
             String patientId,
-            AssessmentTypeToFile.AssessmentCategory category,
+            String appointmentId,
+            String assessmentTypeId,
             String remark) {
 
         //validation
         validateSafeText(patientId, "Patient ID");
+        validateSafeText(appointmentId, "Appointment ID");
+        validateSafeText(assessmentTypeId, "Assessment Type ID");
         validateSafeText(remark, "Remark");
 
         if (patientId == null || patientId.trim().isEmpty()) {
@@ -505,15 +529,17 @@ public class DoctorOperation {
             );
         }
 
-        if (category == null) {
+        if (appointmentId == null || appointmentId.trim().isEmpty()) {
             throw new IllegalArgumentException(
-                    "Request type cannot be empty."
+                    "Appointment ID cannot be empty."
             );
         }
 
-        if (category == AssessmentTypeToFile.AssessmentCategory.GENERAL_CHECKUP) {
+        if (assessmentTypeId == null
+                || assessmentTypeId.trim().isEmpty()) {
+
             throw new IllegalArgumentException(
-                    "Please select a specific medical request type."
+                    "Assessment Type cannot be empty."
             );
         }
 
@@ -523,6 +549,7 @@ public class DoctorOperation {
             );
         }
 
+        // Find patient
         Patient patient;
 
         try {
@@ -535,44 +562,55 @@ public class DoctorOperation {
             );
         }
 
-        Appointment selectedAppointment = null;
+        // Find the selected appointment
+        Appointment selectedAppointment;
 
-        for (int i = 0; i < patient.getAppointments().size(); i++) {
-            AppointmentToFile appointment
-                    = patient.getAppointments().get(i);
-
-            if (appointment.getStatus()
-                    == AppointmentToFile.AppointmentStatus.COMPLETED) {
-                Appointment currentAppointment
-                        = allocator.getBusinessEntity(
-                                appointment.getId()
-                        );
-
-                if (currentAppointment.getDoctor() != null
-                        && currentAppointment.getDoctor()
-                                .getId()
-                                .equals(doctor.getId())
-                        && currentAppointment.getMedicalRecord() != null) {
-
-                    if (selectedAppointment == null) {
-                        selectedAppointment = currentAppointment;
-                    } else if (currentAppointment
-                            .getSelf()
-                            .getAppointmentTime()
-                            .isAfter(
-                                    selectedAppointment
-                                            .getSelf()
-                                            .getAppointmentTime()
-                            )) {
-                        selectedAppointment = currentAppointment;
-                    }
-                }
-            }
+        try {
+            selectedAppointment
+                    = allocator.getBusinessEntity(
+                            appointmentId.trim()
+                    );
+        } catch (Exception e) {
+            throw new IllegalArgumentException(
+                    "Appointment not found."
+            );
         }
 
-        if (selectedAppointment == null) {
+        // Make sure the appointment belongs to this doctor
+        if (selectedAppointment.getDoctor() == null
+                || !selectedAppointment.getDoctor()
+                        .getId()
+                        .equals(doctor.getId())) {
+
             throw new IllegalArgumentException(
-                    "No completed appointment with a medical record found."
+                    "Appointment does not belong to this doctor."
+            );
+        }
+
+        // Make sure the appointment belongs to the selected patient
+        if (selectedAppointment.getPatient() == null
+                || !selectedAppointment.getPatient()
+                        .getId()
+                        .equals(patientId.trim())) {
+
+            throw new IllegalArgumentException(
+                    "Appointment does not belong to this patient."
+            );
+        }
+
+        // Only completed appointments can be used
+        if (selectedAppointment.getSelf().getStatus()
+                != AppointmentToFile.AppointmentStatus.COMPLETED) {
+
+            throw new IllegalArgumentException(
+                    "Appointment must be completed before medical request."
+            );
+        }
+
+        // A medical record is required
+        if (selectedAppointment.getMedicalRecord() == null) {
+            throw new IllegalArgumentException(
+                    "No medical record found for this appointment."
             );
         }
 
@@ -584,27 +622,29 @@ public class DoctorOperation {
                         record.getId()
                 );
 
-        AssessmentType selectedAssessmentType = null;
+        // Find the exact assessment type selected by the doctor
+        AssessmentType selectedAssessmentType;
 
-        for (BusinessEntity<?> entity
-                : allocator.getAllBusinessEntities(
-                        AssessmentTypeToFile.PREFIX
-                )) {
-            AssessmentType assessmentType
-                    = (AssessmentType) entity;
-
-            if (assessmentType.getSelf().getCategory() == category) {
-                selectedAssessmentType = assessmentType;
-                break;
-            }
-        }
-
-        if (selectedAssessmentType == null) {
+        try {
+            selectedAssessmentType
+                    = allocator.getBusinessEntity(
+                            assessmentTypeId.trim()
+                    );
+        } catch (Exception e) {
             throw new IllegalArgumentException(
                     "Assessment type not found."
             );
         }
 
+        if (selectedAssessmentType.getSelf().getCategory()
+                == AssessmentTypeToFile.AssessmentCategory.GENERAL_CHECKUP) {
+
+            throw new IllegalArgumentException(
+                    "Please select a specific medical request type."
+            );
+        }
+
+        // Create medical request
         MedicalRequestToFile request
                 = new MedicalRequestToFile(
                         null,
@@ -621,12 +661,15 @@ public class DoctorOperation {
                         true
                 );
 
+        // Set Medical Record relationship
         medicalRequest.setMedicalRecord(record);
 
+        // Set exact Assessment Type selected by doctor
         medicalRequest.setAssessmentType(
                 selectedAssessmentType.getSelf()
         );
 
+        // Add request to Medical Record
         medicalRecord.getMedicalRequests().add(request);
 
         // Save Medical Request and its relationships
