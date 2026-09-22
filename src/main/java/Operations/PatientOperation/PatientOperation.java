@@ -56,25 +56,6 @@ public class PatientOperation implements PatientService
     public void updateProfile(String name, String password, UserWithDetails.Gender gender,
                               String dob, String email, String phone)
     {
-        // Validate name
-        if (name == null || name.trim().isEmpty()) {
-            throw new ProfileValidationException("Name cannot be empty.");
-        }
-        if (!name.matches("^[a-zA-Z\\s/'.-]+$")) {
-            throw new ProfileValidationException("Name contains an invalid character.");
-        }
-
-        // Validate password
-        if (password == null || password.length() < 6) {
-            throw new ProfileValidationException("Password must be at least 6 characters.");
-        }
-        if (!password.matches(".*[A-Z].*")) {
-            throw new ProfileValidationException("Password must contain at least one uppercase letter.");
-        }
-        if (!password.matches(".*[^a-zA-Z0-9].*")) {
-            throw new ProfileValidationException("Password must contain at least one special character (e.g., !@#$%^&*).");
-        }
-
         // Validate date of birth
         if (dob == null || dob.trim().isEmpty()) {
             throw new ProfileValidationException("Date of Birth cannot be empty.");
@@ -92,24 +73,20 @@ public class PatientOperation implements PatientService
             throw new ProfileValidationException("Date of Birth cannot be in the future.");
         }
 
-        // Validate email and phone
-        if (email == null || !email.contains("@")) {
-            throw new ProfileValidationException("Invalid email format (missing '@').");
+        if (email != null && (email.contains("|") || email.contains("\n") || email.contains("\r"))) {
+            throw new ProfileValidationException("Email cannot contain '|' or line breaks.");
         }
-        // \d stands for "digit" (any number from 0 to 9).
-        // + means "one or more times."
-        // \\ is needed in Java because a single backslash is an escape character in strings, so need two backslashes to pass a single one to the regex engine.
-        if (phone == null || !phone.matches("^\\d{2,3}-?\\d{4,8}$")) {
-            throw new ProfileValidationException("Phone number format is invalid."
-                    + " It should be 2-3 digits, optional hyphen, followed by 4-8 digits (e.g., 123-456789).");
+
+        try {
+            patient.getSelf().setName(name);
+            patient.getSelf().setPassword(password);
+            patient.getSelf().setGender(gender);
+            patient.getSelf().setDateOfBirth(birthDate);
+            patient.getSelf().setPhoneNumber(phone);
+            patient.getSelf().setEmail(email);
+        } catch (IllegalArgumentException e) {
+            throw new ProfileValidationException(e.getMessage());
         }
-        
-        patient.getSelf().setName(name);
-        patient.getSelf().setPassword(password);
-        patient.getSelf().setGender(gender);
-        patient.getSelf().setDateOfBirth(birthDate);
-        patient.getSelf().setPhoneNumber(phone);
-        patient.getSelf().setEmail(email);
         allocator.saveChanges(patient);
     }
 
