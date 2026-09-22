@@ -67,7 +67,7 @@ public class MedicalManagerForm extends JFrame {
     // Default manager IDfor profile update
     private String currentManagerId = "MM0001";
     // Constructor: setup main window and tabs
-    public MedicalManagerForm(HospitalEntityAllocator allocator, MedicalManager medicalManager) throws IOException {
+    public MedicalManagerForm(HospitalEntityAllocator allocator, MedicalManager medicalManager){
         this.allocator = allocator;
         this.medicalManager = medicalManager;
         this.operation = new MedicalManagerOperation(allocator, medicalManager);
@@ -777,21 +777,21 @@ public class MedicalManagerForm extends JFrame {
 
         // 1. Update KPI value labels
         if (totalRevenueVal != null) {
-            totalRevenueVal.setText(String.format("$%,.2f", metrics.totalRevenue));
+            totalRevenueVal.setText(String.format("$%,.2f", metrics.totalRevenue()));
         }
         if (appointmentsVal != null) {
-            appointmentsVal.setText(String.format("%,d", metrics.totalAppointments));
+            appointmentsVal.setText(String.format("%,d", metrics.totalAppointments()));
         }
         if (activeDoctorsVal != null) {
-            activeDoctorsVal.setText(String.valueOf(metrics.activeDoctors));
+            activeDoctorsVal.setText(String.valueOf(metrics.activeDoctors()));
         }
         if (bedOccupancyVal != null) {
-            bedOccupancyVal.setText(String.format("%.1f%%", metrics.bedOccupancyRate));
+            bedOccupancyVal.setText(String.format("%.1f%%", metrics.bedOccupancyRate()));
         }
 
         // 2. Refresh metrics table data
         metricsTableModel.setRowCount(0);
-        for (String[] row : metrics.tableRows) {
+        for (String[] row : metrics.tableRows()) {
             metricsTableModel.addRow(row);
         }
     }
@@ -878,21 +878,21 @@ public class MedicalManagerForm extends JFrame {
     }
 
     // Application entry point
-    public static void main(String[] args) {
-        BaseEntity.setIdNumberWidth(4);
-
-        HospitalEntityAllocator allocator = new HospitalEntityAllocator(
-                java.nio.file.Path.of("data/Linker"),
-                java.nio.file.Path.of("data/Entity")
-        );
-
-        SwingUtilities.invokeLater(() -> {
-            try {
-                MedicalManager manager = allocator.getBusinessEntity("MM0001");
-                new MedicalManagerForm(allocator, manager).setVisible(true);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
+//    public static void main(String[] args) {
+//        BaseEntity.setIdNumberWidth(4);
+//
+//        HospitalEntityAllocator allocator = new HospitalEntityAllocator(
+//                java.nio.file.Path.of("data/Linker"),
+//                java.nio.file.Path.of("data/Entity")
+//        );
+//
+//        SwingUtilities.invokeLater(() -> {
+//            try {
+//                MedicalManager manager = allocator.getBusinessEntity("MM0001");
+//                new MedicalManagerForm(allocator, manager).setVisible(true);
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+//        });
+//    }
 }
