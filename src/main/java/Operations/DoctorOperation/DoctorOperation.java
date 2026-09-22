@@ -39,6 +39,19 @@ public class DoctorOperation {
         this.doctor = doctor;
     }
 
+    private void validateSafeText(String value, String fieldName) {
+        if (value != null
+                && (value.contains("|")
+                || value.contains("\n")
+                || value.contains("\r"))) {
+
+            throw new IllegalArgumentException(
+                    fieldName
+                    + " cannot contain '|' or line breaks."
+            );
+        }
+    }
+
     public void updateProfile(
             String name,
             String password,
@@ -46,6 +59,13 @@ public class DoctorOperation {
             String dob,
             String email,
             String phone) {
+
+        validateSafeText(name, "Name");
+        validateSafeText(password, "Password");
+        validateSafeText(dob, "Date of Birth");
+        validateSafeText(email, "Email");
+        validateSafeText(phone, "Phone number");
+
         // Validate name
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("Name cannot be empty.");
@@ -116,9 +136,16 @@ public class DoctorOperation {
         }
 
         // Validate phone
-        if (phone == null || !phone.matches("\\d+")) {
+        if (phone == null || phone.trim().isEmpty()) {
             throw new IllegalArgumentException(
-                    "Phone number must contain digits only."
+                    "Phone number cannot be empty."
+            );
+        }
+        
+        // Validate phone number format and allow digits, +, brackets, hyphens, and spaces
+        if (!phone.matches("^[0-9+()\\-\\s]+$")) { 
+            throw new IllegalArgumentException(
+                    "Phone number contains invalid characters."
             );
         }
 
@@ -222,6 +249,12 @@ public class DoctorOperation {
             int diastolicPressure,
             String diagnosis,
             String consultationNote) {
+
+        //validation
+        validateSafeText(patientId, "Patient ID");
+        validateSafeText(diagnosis, "Diagnosis");
+        validateSafeText(consultationNote, "Consultation note");
+
         if (patientId == null || patientId.trim().isEmpty()) {
             throw new IllegalArgumentException(
                     "Patient ID cannot be empty."
@@ -346,6 +379,14 @@ public class DoctorOperation {
             String frequency,
             int durationDays,
             String instructions) {
+
+        //validation
+        validateSafeText(patientId, "Patient ID");
+        validateSafeText(medicationName, "Medication name");
+        validateSafeText(dosage, "Dosage");
+        validateSafeText(frequency, "Frequency");
+        validateSafeText(instructions, "Instructions");
+
         if (patientId == null || patientId.trim().isEmpty()) {
             throw new IllegalArgumentException(
                     "Patient ID cannot be empty."
@@ -433,7 +474,6 @@ public class DoctorOperation {
         MedicalRecordToFile record = selectedAppointment.getMedicalRecord();
         MedicalRecord medicalRecord = allocator.getBusinessEntity(record.getId());
 
-
         PrescriptionToFile prescription
                 = new PrescriptionToFile(
                         null,
@@ -454,6 +494,11 @@ public class DoctorOperation {
             String patientId,
             AssessmentTypeToFile.AssessmentCategory category,
             String remark) {
+
+        //validation
+        validateSafeText(patientId, "Patient ID");
+        validateSafeText(remark, "Remark");
+
         if (patientId == null || patientId.trim().isEmpty()) {
             throw new IllegalArgumentException(
                     "Patient ID cannot be empty."
@@ -584,6 +629,10 @@ public class DoctorOperation {
 
         medicalRecord.getMedicalRequests().add(request);
 
+        // Save Medical Request and its relationships
+        allocator.saveChanges(medicalRequest);
+
+        // Save Medical Record -> Medical Request relationship
         allocator.saveChanges(medicalRecord);
     }
 

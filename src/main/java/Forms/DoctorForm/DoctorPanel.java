@@ -813,8 +813,15 @@ public class DoctorPanel extends javax.swing.JPanel {
 
     private void submitRequestButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_submitRequestButtonActionPerformed
 
+        Object selectedItem = requestPatientComboBox.getSelectedItem();
+
+        if (selectedItem == null) {
+            JOptionPane.showMessageDialog(this,"Please select a patient.");
+            return;
+        }
+
         String selectedPatient
-                = requestPatientComboBox.getSelectedItem().toString();
+                = selectedItem.toString();
 
         String patientId
                 = selectedPatient.split(" - ")[0];
