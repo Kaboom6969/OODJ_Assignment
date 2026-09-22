@@ -1042,10 +1042,14 @@ public class DoctorPanel extends javax.swing.JPanel {
 
         try {
             doctorOperation.updateAppointmentStatus(appointmentId, status);
-            appointmentTable.setValueAt(status.name(), selectedRow, 3);
-            javax.swing.JOptionPane.showMessageDialog(this, "Appointment status updated successfully.");
+            appointmentTable.setValueAt(status.name(),selectedRow,3);
+
+            refreshAppointmentDropdowns();
+
+            JOptionPane.showMessageDialog(this,"Appointment status updated successfully.");
+
         } catch (IllegalArgumentException e) {
-            javax.swing.JOptionPane.showMessageDialog(this, e.getMessage(), "Update Failed", javax.swing.JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,e.getMessage(),"Update Failed",javax.swing.JOptionPane.ERROR_MESSAGE);
         }
 
     }//GEN-LAST:event_updateStatusButtonActionPerformed
@@ -1235,6 +1239,47 @@ public class DoctorPanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_saveButtonActionPerformed
 
+    private void refreshAppointmentDropdowns() {
+
+        // Patient Consultation
+        Object consultationPatient
+                = patientComboBox.getSelectedItem();
+
+        if (consultationPatient != null) {
+
+            String patientId
+                    = consultationPatient.toString()
+                            .split(" - ")[0];
+
+            loadConsultationAppointmentList(patientId);
+        }
+
+        // Prescription
+        Object prescriptionPatient
+                = prescriptionPatientComboBox.getSelectedItem();
+
+        if (prescriptionPatient != null) {
+
+            String patientId
+                    = prescriptionPatient.toString()
+                            .split(" - ")[0];
+
+            loadPrescriptionAppointmentList(patientId);
+        }
+
+        // Medical Request
+        Object requestPatient
+                = requestPatientComboBox.getSelectedItem();
+
+        if (requestPatient != null) {
+
+            String patientId
+                    = requestPatient.toString()
+                            .split(" - ")[0];
+
+            loadRequestAppointmentList(patientId);
+        }
+    }
     private void prescriptionPatientComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_prescriptionPatientComboBoxActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_prescriptionPatientComboBoxActionPerformed
