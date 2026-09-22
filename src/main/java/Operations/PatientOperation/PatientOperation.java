@@ -60,8 +60,8 @@ public class PatientOperation
         if (name == null || name.trim().isEmpty()) {
             throw new ProfileValidationException("Name cannot be empty.");
         }
-        if (!name.matches("^[a-zA-Z\\s]+$")) {
-            throw new ProfileValidationException("Name can only contain letters and spaces.");
+        if (!name.matches("^[a-zA-Z\\s/'.-]+$")) {
+            throw new ProfileValidationException("Name contains an invalid character.");
         }
 
         // Validate password

@@ -157,9 +157,14 @@ public class PatientForm extends javax.swing.JFrame {
         currentDoctorOptions = operation.loadDoctorAvailability(department, date);
 
         DefaultListModel<String> doctorModel = new DefaultListModel<>();
-        for (DoctorAvailability option : currentDoctorOptions) {
-            doctorModel.addElement(option.doctor().getSelf().getName()
-                    + " (" + option.availableSlots().size() + " slots)");
+        // Show a message instead of an empty list when no doctors are available for that date.
+        if (currentDoctorOptions.isEmpty()) {
+            doctorModel.addElement("No doctors available");
+        } else {
+            for (DoctorAvailability option : currentDoctorOptions) {
+                doctorModel.addElement(option.doctor().getSelf().getName()
+                        + " (" + option.availableSlots().size() + " slots)");
+            }
         }
         doctorLs.setModel(doctorModel);
         timeLs.setModel(new DefaultListModel<>());
@@ -186,8 +191,13 @@ public class PatientForm extends javax.swing.JFrame {
         // MMM: The month (e.g., Jan, Feb, Mar).
         DateTimeFormatter slotFormatter = DateTimeFormatter.ofPattern("EEE, dd MMM — HH:mm");
         DefaultListModel<String> slotModel = new DefaultListModel<>();
-        for (LocalDateTime slot : currentSlotOptions) {
-            slotModel.addElement(slot.format(slotFormatter));
+        // When a doctor has no free times, show a clear placeholder instead of an empty list.
+        if (currentSlotOptions.isEmpty()) {
+            slotModel.addElement("No time slots available");
+        } else {
+            for (LocalDateTime slot : currentSlotOptions) {
+                slotModel.addElement(slot.format(slotFormatter));
+            }
         }
         timeLs.setModel(slotModel);
     }
@@ -224,6 +234,7 @@ public class PatientForm extends javax.swing.JFrame {
         updateAppointmentActionButtons();
     }
 
+    // Enable the right action button based on the selected appointment state.
     private void updateAppointmentActionButtons() {
         int selectedRow = appointmentTbl.getSelectedRow();
         if (selectedRow < 0 || currentAppointments == null
@@ -258,6 +269,7 @@ public class PatientForm extends javax.swing.JFrame {
             return currentAppointments.get(selectedRow);
     }
 
+    // Refresh everything after a save so the screen shows the newest data from the files.
     private void refreshAllTabs() {
         // Reloads the patient from the data files (get latest info)
         patient = allocator.getBusinessEntity(patient.getId());
@@ -342,6 +354,11 @@ public class PatientForm extends javax.swing.JFrame {
             });
         }
         medicalTbl.setModel(tableModel);
+        medicalTbl.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
+        medicalTbl.getColumnModel().getColumn(0).setPreferredWidth(150); // Date
+        medicalTbl.getColumnModel().getColumn(1).setPreferredWidth(110); // Doctor
+        medicalTbl.getColumnModel().getColumn(2).setPreferredWidth(150); // Diagnosis
+        medicalTbl.getColumnModel().getColumn(3).setPreferredWidth(304); // Vitals — longest content
         refreshPrescriptionsTable();
     }
 
@@ -358,7 +375,6 @@ public class PatientForm extends javax.swing.JFrame {
         if (selectedRow < 0 || currentMedicalHistory == null
                 || currentMedicalHistory.isEmpty()
                 || selectedRow >= currentMedicalHistory.size()) {
-            PrescriptionsTbl.setModel(tableModel);
             return;
         }
 
@@ -373,6 +389,12 @@ public class PatientForm extends javax.swing.JFrame {
             });
         }
         PrescriptionsTbl.setModel(tableModel);
+        PrescriptionsTbl.setModel(tableModel);
+        PrescriptionsTbl.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
+        PrescriptionsTbl.getColumnModel().getColumn(0).setPreferredWidth(150); // Medication
+        PrescriptionsTbl.getColumnModel().getColumn(1).setPreferredWidth(110);  // Dosage
+        PrescriptionsTbl.getColumnModel().getColumn(2).setPreferredWidth(150); // Frequency
+        PrescriptionsTbl.getColumnModel().getColumn(3).setPreferredWidth(304); // Duration & Instructions
     }
 
     /**
@@ -389,7 +411,6 @@ public class PatientForm extends javax.swing.JFrame {
         jLabel1 = new javax.swing.JLabel();
         logOutBtn = new javax.swing.JButton();
         jPanel6 = new javax.swing.JPanel();
-        jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         allAppBtn = new javax.swing.JButton();
         bookAppBtn = new javax.swing.JButton();
@@ -407,7 +428,6 @@ public class PatientForm extends javax.swing.JFrame {
         dateSn = new javax.swing.JSpinner();
         jScrollPane5 = new javax.swing.JScrollPane();
         doctorLs = new javax.swing.JList<>();
-        jLabel20 = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         appointmentTbl = new javax.swing.JTable();
@@ -440,21 +460,26 @@ public class PatientForm extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jTabbedPane1.setBackground(new java.awt.Color(255, 255, 255));
+        jTabbedPane1.setBackground(new java.awt.Color(0, 0, 0));
+        jTabbedPane1.setForeground(new java.awt.Color(255, 255, 255));
+        jTabbedPane1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jTabbedPane1.setFont(new java.awt.Font("Yu Gothic UI", 1, 12)); // NOI18N
 
-        jPanel1.setBackground(new java.awt.Color(204, 204, 204));
+        jPanel1.setBackground(new java.awt.Color(241, 232, 236));
 
         jLabel1.setFont(new java.awt.Font("Times New Roman", 1, 36)); // NOI18N
         jLabel1.setText("Hi XXX");
         jLabel1.setToolTipText("");
 
-        logOutBtn.setBackground(new java.awt.Color(255, 204, 204));
-        logOutBtn.setFont(new java.awt.Font("Tw Cen MT", 0, 12)); // NOI18N
+        logOutBtn.setBackground(new java.awt.Color(244, 170, 170));
+        logOutBtn.setFont(new java.awt.Font("Tw Cen MT", 1, 12)); // NOI18N
         logOutBtn.setText("Log Out");
+        logOutBtn.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
-        jLabel2.setFont(new java.awt.Font("Tw Cen MT", 0, 12)); // NOI18N
-        jLabel2.setText("Your Next Appoinment:");
+        jPanel6.setBackground(new java.awt.Color(255, 255, 204));
+        jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Your Next Appointment:", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.ABOVE_TOP, new java.awt.Font("Tw Cen MT", 1, 20))); // NOI18N
 
+        jLabel3.setBackground(new java.awt.Color(249, 249, 228));
         jLabel3.setFont(new java.awt.Font("YouYuan", 0, 24)); // NOI18N
         jLabel3.setText("No");
 
@@ -463,28 +488,24 @@ public class PatientForm extends javax.swing.JFrame {
         jPanel6Layout.setHorizontalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel6Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(232, Short.MAX_VALUE))
-            .addGroup(jPanel6Layout.createSequentialGroup()
                 .addGap(15, 15, 15)
-                .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 346, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel6Layout.setVerticalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel6Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel2)
-                .addGap(18, 18, 18)
+                .addGap(30, 30, 30)
                 .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(37, Short.MAX_VALUE))
+                .addContainerGap(42, Short.MAX_VALUE))
         );
 
+        allAppBtn.setBackground(new java.awt.Color(241, 237, 237));
         allAppBtn.setFont(new java.awt.Font("Tw Cen MT", 0, 14)); // NOI18N
         allAppBtn.setText("See all Appoinment");
         allAppBtn.addActionListener(this::allAppBtnActionPerformed);
 
+        bookAppBtn.setBackground(new java.awt.Color(238, 234, 234));
         bookAppBtn.setFont(new java.awt.Font("Tw Cen MT", 0, 14)); // NOI18N
         bookAppBtn.setText("Book new Appoinment");
         bookAppBtn.addActionListener(this::bookAppBtnActionPerformed);
@@ -494,41 +515,41 @@ public class PatientForm extends javax.swing.JFrame {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(0, 194, Short.MAX_VALUE)
+                .addGap(184, 184, 184)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addComponent(logOutBtn)
+                        .addComponent(logOutBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(15, 15, 15))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(114, 114, 114)
-                                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 142, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jPanel6, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
                                     .addComponent(allAppBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(bookAppBtn))
-                                .addComponent(jPanel6, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                    .addComponent(bookAppBtn))))
                         .addGap(186, 186, 186))))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(14, 14, 14)
-                .addComponent(logOutBtn)
-                .addGap(18, 18, 18)
+                .addComponent(logOutBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(32, 32, 32)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(31, 31, 31)
+                .addGap(43, 43, 43)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(allAppBtn)
                     .addComponent(bookAppBtn))
-                .addContainerGap(158, Short.MAX_VALUE))
+                .addContainerGap(99, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Dashboard", jPanel1);
+
+        jPanel2.setBackground(new java.awt.Color(241, 232, 236));
 
         departmentCb.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
@@ -539,6 +560,7 @@ public class PatientForm extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(timeLs);
 
+        confirmBtn.setBackground(new java.awt.Color(252, 232, 252));
         confirmBtn.setText("Confirm Booking");
         confirmBtn.addActionListener(this::confirmBtnActionPerformed);
 
@@ -547,22 +569,22 @@ public class PatientForm extends javax.swing.JFrame {
         jLabel4.setToolTipText("");
 
         jLabel5.setBackground(new java.awt.Color(153, 153, 153));
-        jLabel5.setFont(new java.awt.Font("Sylfaen", 0, 14)); // NOI18N
+        jLabel5.setFont(new java.awt.Font("Sylfaen", 1, 14)); // NOI18N
         jLabel5.setText("Date:");
 
         jLabel6.setBackground(new java.awt.Color(153, 153, 153));
-        jLabel6.setFont(new java.awt.Font("Sylfaen", 0, 14)); // NOI18N
+        jLabel6.setFont(new java.awt.Font("Sylfaen", 1, 14)); // NOI18N
         jLabel6.setText("Time slot:");
 
         jLabel7.setBackground(new java.awt.Color(153, 153, 153));
-        jLabel7.setFont(new java.awt.Font("Sylfaen", 0, 14)); // NOI18N
+        jLabel7.setFont(new java.awt.Font("Sylfaen", 1, 14)); // NOI18N
         jLabel7.setText("Dortor:");
 
         jLabel8.setBackground(new java.awt.Color(153, 153, 153));
-        jLabel8.setFont(new java.awt.Font("Sylfaen", 0, 14)); // NOI18N
+        jLabel8.setFont(new java.awt.Font("Sylfaen", 1, 14)); // NOI18N
         jLabel8.setText("Department:");
 
-        ratingLbl.setFont(new java.awt.Font("Times New Roman", 0, 14)); // NOI18N
+        ratingLbl.setFont(new java.awt.Font("Times New Roman", 0, 18)); // NOI18N
         ratingLbl.setText("Rating");
 
         dateSn.setModel(new javax.swing.SpinnerDateModel());
@@ -573,9 +595,6 @@ public class PatientForm extends javax.swing.JFrame {
             public String getElementAt(int i) { return strings[i]; }
         });
         jScrollPane5.setViewportView(doctorLs);
-
-        jLabel20.setFont(new java.awt.Font("Times New Roman", 0, 14)); // NOI18N
-        jLabel20.setText("Rating:");
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -599,12 +618,9 @@ public class PatientForm extends javax.swing.JFrame {
                 .addGap(82, 82, 82)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                        .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(ratingLbl, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 65, Short.MAX_VALUE)
+                    .addComponent(ratingLbl, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 163, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 53, Short.MAX_VALUE)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -627,9 +643,7 @@ public class PatientForm extends javax.swing.JFrame {
                             .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(18, 18, 18)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(ratingLbl)
-                            .addComponent(jLabel20))
+                        .addComponent(ratingLbl)
                         .addGap(37, 37, 37)
                         .addComponent(confirmBtn))
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel2Layout.createSequentialGroup()
@@ -638,11 +652,14 @@ public class PatientForm extends javax.swing.JFrame {
                         .addComponent(jLabel8)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(departmentCb, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(66, Short.MAX_VALUE))
+                .addContainerGap(62, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Booking", jPanel2);
 
+        jPanel3.setBackground(new java.awt.Color(241, 232, 236));
+
+        appointmentTbl.setFont(new java.awt.Font("Tw Cen MT", 0, 14)); // NOI18N
         appointmentTbl.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
@@ -660,12 +677,15 @@ public class PatientForm extends javax.swing.JFrame {
         jLabel9.setText("Appointment Details");
         jLabel9.setToolTipText("");
 
+        RescheduleBtn.setBackground(new java.awt.Color(252, 252, 235));
         RescheduleBtn.setText("Reschedule");
         RescheduleBtn.addActionListener(this::RescheduleBtnActionPerformed);
 
+        CancelBtn.setBackground(new java.awt.Color(253, 224, 224));
         CancelBtn.setText("Cancel");
         CancelBtn.addActionListener(this::CancelBtnActionPerformed);
 
+        feedbackBtn.setBackground(new java.awt.Color(239, 239, 255));
         feedbackBtn.setText("Feedback");
         feedbackBtn.addActionListener(this::feedbackBtnActionPerformed);
 
@@ -708,6 +728,8 @@ public class PatientForm extends javax.swing.JFrame {
 
         jTabbedPane1.addTab("Appointments", jPanel3);
 
+        jPanel4.setBackground(new java.awt.Color(241, 232, 236));
+
         jLabel10.setFont(new java.awt.Font("Times New Roman", 1, 36)); // NOI18N
         jLabel10.setText("Medical Records & Presriptions");
         jLabel10.setToolTipText("");
@@ -746,13 +768,13 @@ public class PatientForm extends javax.swing.JFrame {
                 .addGap(0, 16, Short.MAX_VALUE)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                        .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 354, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 354, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(11, 11, 11))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
                         .addComponent(jLabel10)
-                        .addGap(122, 122, 122))))
+                        .addGap(122, 122, 122))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 720, Short.MAX_VALUE)
+                            .addComponent(jScrollPane3))
+                        .addGap(11, 11, 11))))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -760,14 +782,15 @@ public class PatientForm extends javax.swing.JFrame {
                 .addGap(37, 37, 37)
                 .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 352, Short.MAX_VALUE)
-                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 222, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(10, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Records", jPanel4);
 
+        jPanel7.setBackground(new java.awt.Color(241, 232, 236));
         jPanel7.setPreferredSize(new java.awt.Dimension(500, 713));
 
         jLabel12.setFont(new java.awt.Font("Times New Roman", 1, 36)); // NOI18N
@@ -777,25 +800,27 @@ public class PatientForm extends javax.swing.JFrame {
         usernameTf.setEditable(false);
         usernameTf.setText("name");
 
-        jLabel11.setFont(new java.awt.Font("Trebuchet MS", 0, 14)); // NOI18N
+        jLabel11.setFont(new java.awt.Font("Trebuchet MS", 1, 14)); // NOI18N
         jLabel11.setText("username:");
 
-        jLabel13.setFont(new java.awt.Font("Trebuchet MS", 0, 14)); // NOI18N
+        jLabel13.setFont(new java.awt.Font("Trebuchet MS", 1, 14)); // NOI18N
         jLabel13.setText("email:");
 
         emailTf.setEditable(false);
         emailTf.setText("email");
 
+        editProfileBtn.setBackground(new java.awt.Color(253, 253, 238));
         editProfileBtn.setText("Edit Profile");
         editProfileBtn.addActionListener(this::editProfileBtnActionPerformed);
 
+        resetPwBtn.setBackground(new java.awt.Color(253, 253, 241));
         resetPwBtn.setText("Reset Password");
         resetPwBtn.addActionListener(this::resetPwBtnActionPerformed);
 
-        jLabel14.setFont(new java.awt.Font("Trebuchet MS", 0, 14)); // NOI18N
+        jLabel14.setFont(new java.awt.Font("Trebuchet MS", 1, 14)); // NOI18N
         jLabel14.setText("Insurance:");
 
-        jLabel15.setFont(new java.awt.Font("Trebuchet MS", 0, 14)); // NOI18N
+        jLabel15.setFont(new java.awt.Font("Trebuchet MS", 1, 14)); // NOI18N
         jLabel15.setText("phone:");
 
         emailTf1.setEditable(false);
@@ -807,7 +832,7 @@ public class PatientForm extends javax.swing.JFrame {
         insuranceTextArea.setWrapStyleWord(true);
         jScrollPane6.setViewportView(insuranceTextArea);
 
-        jLabel16.setFont(new java.awt.Font("Trebuchet MS", 0, 14)); // NOI18N
+        jLabel16.setFont(new java.awt.Font("Trebuchet MS", 1, 14)); // NOI18N
         jLabel16.setText("Billings:");
 
         billingTb.setModel(new javax.swing.table.DefaultTableModel(
@@ -922,18 +947,23 @@ public class PatientForm extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    // Make sure the patient picked a real doctor and slot, not the placeholder message used for empty lists.
     private void confirmBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_confirmBtnActionPerformed
         int doctorIndex = doctorLs.getSelectedIndex();
         int slotIndex = timeLs.getSelectedIndex();
+        String selectedDoctor = doctorLs.getSelectedValue();
+        String selectedSlot = timeLs.getSelectedValue();
         if (doctorIndex < 0 || currentDoctorOptions == null
-            || doctorIndex >= currentDoctorOptions.size()) {
+            || doctorIndex >= currentDoctorOptions.size()
+            || "No doctors available".equals(selectedDoctor)) {
             javax.swing.JOptionPane.showMessageDialog(this,
                 "Please select a doctor.", "Booking Error",
                 javax.swing.JOptionPane.ERROR_MESSAGE);
             return;
         }
         if (slotIndex < 0 || currentSlotOptions == null
-            || slotIndex >= currentSlotOptions.size()) {
+            || slotIndex >= currentSlotOptions.size()
+            || "No time slots available".equals(selectedSlot)) {
             javax.swing.JOptionPane.showMessageDialog(this,
                 "Please select an appointment slot.", "Booking Error",
                 javax.swing.JOptionPane.ERROR_MESSAGE);
@@ -1040,6 +1070,7 @@ public class PatientForm extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_CancelBtnActionPerformed
 
+    // Show saved feedback or open the rating form when the appointment is completed and not rated yet.
     private void feedbackBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_feedbackBtnActionPerformed
         Appointment appointment = getSelectedAppointment();
         if (appointment == null) {
@@ -1079,6 +1110,7 @@ public class PatientForm extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_feedbackBtnActionPerformed
 
+    // Toggle edit mode, then save the profile only after the user clicks update.
     private void editProfileBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editProfileBtnActionPerformed
         if (!editingProfile) {
             usernameTf.setEditable(true);
@@ -1114,6 +1146,7 @@ public class PatientForm extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_editProfileBtnActionPerformed
 
+    // Check the old password first, then update only the password field with validation.
     private void resetPwBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetPwBtnActionPerformed
         ResetPassword dialog = new ResetPassword(this, true);
         dialog.setVisible(true);
@@ -1223,8 +1256,6 @@ public class PatientForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
