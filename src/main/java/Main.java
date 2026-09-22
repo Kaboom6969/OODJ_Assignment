@@ -1,7 +1,11 @@
 import Exceptions.EntityExceptions.EntityNotFoundException;
 import Exceptions.EntityExceptions.EntityNotMatchException;
 import Exceptions.EntityExceptions.EntityRepeatedException;
+import Forms.LoginForm.LoginForm;
+import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.BaseEntity;
+
+import java.nio.file.Path;
 
 public class Main {
     public static void main(String[] args) throws EntityRepeatedException, EntityNotFoundException, EntityNotMatchException {
@@ -15,5 +19,10 @@ public class Main {
                 Path.of("data/Entity")
         );
         */
+        Path linkerPath = Path.of("C:\\Users\\leezh\\IdeaProjects\\OODJ Assignment\\data\\Linker");
+        Path entityPath = Path.of("C:\\Users\\leezh\\IdeaProjects\\OODJ Assignment\\data\\Entity");
+        HospitalEntityAllocator hea = new HospitalEntityAllocator(linkerPath,entityPath);
+        LoginForm loginForm = new LoginForm(hea);
+        loginForm.setVisible(true);
     }
 }
