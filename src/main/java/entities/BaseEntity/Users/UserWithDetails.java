@@ -27,6 +27,25 @@ public abstract class UserWithDetails extends User
         return phoneNumber;
     }
 
+    public void setPhoneNumber(String phoneNumber)
+    {
+        if (phoneNumber == null || phoneNumber.isBlank()) throw new IllegalArgumentException("Phone number cannot be null or blank");
+        String cleaned = phoneNumber.replace(" ", "").replace("-", "");
+        if (cleaned.startsWith("+60"))
+        {
+            cleaned = "0" + cleaned.substring(3);
+        }
+        if (!cleaned.startsWith("01"))
+        {
+            throw new IllegalArgumentException("Phone number must start with 01");
+        }
+        if (cleaned.length() < 10 || cleaned.length() > 11)
+        {
+            throw new IllegalArgumentException("Phone number length should be 10 or 11");
+        }
+        if (!cleaned.chars().allMatch(Character::isDigit)) throw new IllegalArgumentException("Phone number must be digits only");
+        this.phoneNumber = phoneNumber;
+    }
     private String phoneNumber;
     private LocalDate dateOfBirth;
 
@@ -34,13 +53,15 @@ public abstract class UserWithDetails extends User
 
     private Gender gender;
 
+
+
     public UserWithDetails(String id) {super(id);}
     public UserWithDetails(String id,String name,String password,String email,Gender gender,LocalDate dateOfBirth,String phoneNumber)
     {
         super(id,name,password,email);
         this.gender = gender;
         this.dateOfBirth = dateOfBirth;
-        this.phoneNumber = phoneNumber;
+        setPhoneNumber(phoneNumber);
     }
 
     public UserWithDetails(String id, String name, String password,String email, Gender gender, String dateOfBirth,  String phoneNumber)
@@ -48,7 +69,7 @@ public abstract class UserWithDetails extends User
         super(id, name, password, email);
         this.gender = gender;
         this.dateOfBirth = LocalDate.parse(dateOfBirth, LocalDateParser.getDateFormatterAuto(dateOfBirth));
-        this.phoneNumber = phoneNumber;
+        setPhoneNumber(phoneNumber);
     }
     public UserWithDetails(String[] data)
     {
@@ -56,11 +77,6 @@ public abstract class UserWithDetails extends User
         this.gender = Gender.valueOf(data[4].toUpperCase().trim());
         this.dateOfBirth = LocalDate.parse(data[5],LocalDateParser.getDateFormatterAuto(data[5]));
         this.phoneNumber = data[6];
-    }
-
-    public void setPhoneNumber(String phoneNumber)
-    {
-        this.phoneNumber = phoneNumber;
     }
 
     public void setDateOfBirth(LocalDate dateOfBirth)

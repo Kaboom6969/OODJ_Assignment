@@ -6,6 +6,7 @@ package Forms.LoginForm;
 
 import java.awt.event.*;
 
+import Forms.MedicalManagerForm.MedicalManagerForm;
 import Operations.LoginOperation.LoginOperation;
 import Tools.EntityConvertManager;
 import Tools.HospitalEntityAllocator;
@@ -36,13 +37,9 @@ public class LoginForm extends JFrame
     );
     private HospitalEntityAllocator hospitalEntityAllocator;
     private LoginOperation loginOperation;
-    public LoginForm()
+    public LoginForm(HospitalEntityAllocator hospitalEntityAllocator)
     {
-        hospitalEntityAllocator = new HospitalEntityAllocator
-        (
-            Path.of("C:\\Users\\leezh\\IdeaProjects\\OODJ Assignment\\data\\Linker"),
-            Path.of("C:\\Users\\leezh\\IdeaProjects\\OODJ Assignment\\data\\Entity")
-        );
+        this.hospitalEntityAllocator = hospitalEntityAllocator;
         loginOperation = new LoginOperation(hospitalEntityAllocator);
         initComponents();
     }
@@ -63,7 +60,10 @@ public class LoginForm extends JFrame
         switch (user)
         {
             case Admin ignored: break;
-            case MedicalManager ignored: break;
+            case MedicalManager medicalManager:
+                MedicalManagerForm mmf = new MedicalManagerForm(hospitalEntityAllocator,medicalManager);
+                mmf.setVisible(true);
+                break;
             case Doctor ignored: break;
             case Patient ignored: break;
             default: break;

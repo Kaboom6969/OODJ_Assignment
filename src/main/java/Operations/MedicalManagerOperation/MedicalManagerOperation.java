@@ -2,7 +2,6 @@ package Operations.MedicalManagerOperation;
 
 import Exceptions.EntityExceptions.EntityNotFoundException;
 import Exceptions.EntityExceptions.EntityNotMatchException;
-import Exceptions.EntityExceptions.EntityRepeatedException;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.*;
 import entities.BaseEntity.Users.DoctorToFile;
@@ -10,7 +9,6 @@ import entities.BaseEntity.Users.MedicalManagerToFile;
 import entities.BaseEntity.Users.UserWithDetails;
 import entities.BusinessEntity.*;
 
-import javax.print.Doc;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -320,20 +318,18 @@ public class MedicalManagerOperation {
     }
 
     // Data container for aggregated hospital KPIs and tabular department metrics
-    public static class HospitalMetrics {
-        public double totalRevenue = 0.0;
-        public int totalAppointments = 0;
-        public int activeDoctors = 0;
-        public double bedOccupancyRate = 0.0;
-        public List<String[]> tableRows = new ArrayList<>();
-    }
+    public record HospitalMetrics (double totalRevenue, int totalAppointments, int activeDoctors, double bedOccupancyRate, List<String[]>tableRows){}
 
     public HospitalMetrics calculateMetrics(String selectedMonth) {
-        HospitalMetrics metrics = new HospitalMetrics();
 
         // 1. Parse target year and month if a specific period is selected
         Integer targetYear = null;
         Integer targetMonth = null;
+        double totalRevenue = 0;
+        int totalAppointments = 0;
+        int activeDoctors = 0;
+        double bedOccupancyRate = 0;
+        List<String[]> tableRows = new ArrayList<>();
         if (selectedMonth != null && !selectedMonth.equalsIgnoreCase("All Months")) {
             String[] parts = selectedMonth.split(" ");
             if (parts.length == 2) {
@@ -360,7 +356,6 @@ public class MedicalManagerOperation {
             deptPatientCount.put(dept.getId(), 0);
             deptRevenue.put(dept.getId(), 0.0);
         }
-
         // 3. Calculate appointment counts and patients served per department
         for (Appointment appt : appointments) {
             AppointmentToFile self = appt.getSelf();
@@ -374,7 +369,7 @@ public class MedicalManagerOperation {
                 }
             }
 
-            metrics.totalAppointments++;
+            totalAppointments++;
 
             // Map appointment to department via doctor linkage
             DoctorToFile docToFile = appt.getDoctor();
@@ -385,7 +380,9 @@ public class MedicalManagerOperation {
                     if (deptToFile != null && deptPatientCount.containsKey(deptToFile.getId())) {
                         deptPatientCount.put(deptToFile.getId(), deptPatientCount.get(deptToFile.getId()) + 1);
                     }
-                } catch (Exception ignored) {
+                } catch (Exception e)
+                {
+                    throw new RuntimeException(e);
                 }
             }
         }
@@ -404,7 +401,7 @@ public class MedicalManagerOperation {
             }
 
             double amount = self.getMoney();
-            metrics.totalRevenue += amount;
+            totalRevenue += amount;
 
             // Map bill to department via consultation rate linkage
             ConsultationRateToFile rateToFile = bill.getConsultationRate();
@@ -421,7 +418,7 @@ public class MedicalManagerOperation {
         }
 
         // 5. Total active doctors on system
-        metrics.activeDoctors = doctors.size();
+        activeDoctors = doctors.size();
 
         // 6. Calculate bed occupancy rate from ward facilities
         int totalWardCapacity = 0;
@@ -436,7 +433,7 @@ public class MedicalManagerOperation {
             }
         }
         if (totalWardCapacity > 0) {
-            metrics.bedOccupancyRate = ((double) occupiedWardBeds / totalWardCapacity) * 100.0;
+            bedOccupancyRate = ((double) occupiedWardBeds / totalWardCapacity) * 100.0;
         }
 
         // 7. Format rows for the Metrics & Revenue UI table
@@ -447,7 +444,7 @@ public class MedicalManagerOperation {
             double revenue = deptRevenue.getOrDefault(deptId, 0.0);
             String avgStay = "N/A"; // Outpatient departments typically default to N/A
 
-            metrics.tableRows.add(new String[]{
+            tableRows.add(new String[]{
                     deptId,
                     deptName,
                     String.valueOf(patientsServed),
@@ -456,7 +453,7 @@ public class MedicalManagerOperation {
             });
         }
 
-        return metrics;
+        return new HospitalMetrics(totalRevenue,totalAppointments,activeDoctors,bedOccupancyRate,tableRows);
     }
 
     // Checks if the doctor already has an active shift on the given date.
@@ -475,7 +472,7 @@ public class MedicalManagerOperation {
 
     public void exportMetricsReport(String filePath, String selectedMonth) throws IOException {
         HospitalMetrics metrics = calculateMetrics(selectedMonth);
-        try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
+/*        try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
             // Write executive summary
             writer.println("=== Hospital Revenue and Metrics Report ===");
             writer.println("Period," + (selectedMonth != null ? selectedMonth : "All Months"));
@@ -490,8 +487,32 @@ public class MedicalManagerOperation {
             for (String[] row : metrics.tableRows) {
                 // Remove commas and dollar signs from numeric values to preserve CSV column integrity
                 String cleanedRevenue = row[3].replace("$", "").replace(",", "");
-                writer.println(String.format("%s,%s,%s,%s,%s", row[0], row, row, cleanedRevenue, row[4]));
+                writer.println(String.format("%s,%s,%s,%s,%s", row[0], row[1], row[2], cleanedRevenue, row[4]));
             }
+        }*/
+        try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
+            // 1. 报告头部摘要
+            writer.println("================================================================================");
+            writer.println("                     Hospital Revenue and Metrics Report                        ");
+            writer.println("================================================================================");
+            writer.println("Period:             " + (selectedMonth != null ? selectedMonth : "All Months"));
+            writer.println(String.format("Total Revenue:      $%,.2f", metrics.totalRevenue()));
+            writer.println(String.format("Total Appointments: %,d", metrics.totalAppointments()));
+            writer.println("Active Doctors:     " + metrics.activeDoctors());
+            writer.println(String.format("Bed Occupancy Rate: %.1f%%", metrics.bedOccupancyRate()));
+            writer.println();
+
+            // 2. 科室统计详情表格（使用固定列宽对齐，记事本打开整齐美观）
+            writer.println("--------------------------------------------------------------------------------");
+            writer.printf("%-10s %-25s %-18s %-15s %-10s%n",
+                    "Dept ID", "Department Name", "Patients Served", "Revenue", "Avg Stay");
+            writer.println("--------------------------------------------------------------------------------");
+
+            for (String[] row : metrics.tableRows()) {
+                writer.printf("%-10s %-25s %-18s %-15s %-10s%n",
+                        row[0], row[1], row[2], row[3], row[4]);
+            }
+            writer.println("================================================================================");
         }
     }
 }
