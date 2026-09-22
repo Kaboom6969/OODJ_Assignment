@@ -98,6 +98,13 @@ public class AdminForm extends JFrame {
         addUserButton = new JButton();
         updateUserButton = new JButton();
         deleteUserButton = new JButton();
+        DTMMPanel = new JPanel();
+        scrollPane1 = new JScrollPane();
+        doctorTable = new JTable();
+        scrollPane2 = new JScrollPane();
+        medicalManagerTable = new JTable();
+        linkButton = new JButton();
+        unLinkButton = new JButton();
 
         //======== this ========
         var contentPane = getContentPane();
@@ -176,6 +183,80 @@ public class AdminForm extends JFrame {
                 );
             }
             adminTab.addTab("All User", allUserPanel);
+
+            //======== DTMMPanel ========
+            {
+
+                //======== scrollPane1 ========
+                {
+
+                    //---- doctorTable ----
+                    doctorTable.setModel(new DefaultTableModel(
+                        new Object[][] {
+                            {null, null, null},
+                            {null, null, null},
+                        },
+                        new String[] {
+                            "Id", "Name", "doctorObject"
+                        }
+                    ));
+                    scrollPane1.setViewportView(doctorTable);
+                }
+
+                //======== scrollPane2 ========
+                {
+
+                    //---- medicalManagerTable ----
+                    medicalManagerTable.setModel(new DefaultTableModel(
+                        new Object[][] {
+                            {null, null, null},
+                            {null, null, null},
+                        },
+                        new String[] {
+                            "Id", "Name", "medicalManagerObject"
+                        }
+                    ));
+                    scrollPane2.setViewportView(medicalManagerTable);
+                }
+
+                //---- linkButton ----
+                linkButton.setText("Link");
+
+                //---- unLinkButton ----
+                unLinkButton.setText("Unlink");
+
+                GroupLayout DTMMPanelLayout = new GroupLayout(DTMMPanel);
+                DTMMPanel.setLayout(DTMMPanelLayout);
+                DTMMPanelLayout.setHorizontalGroup(
+                    DTMMPanelLayout.createParallelGroup()
+                        .addGroup(DTMMPanelLayout.createSequentialGroup()
+                            .addGap(46, 46, 46)
+                            .addComponent(scrollPane1, GroupLayout.PREFERRED_SIZE, 295, GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 52, Short.MAX_VALUE)
+                            .addGroup(DTMMPanelLayout.createParallelGroup()
+                                .addComponent(unLinkButton)
+                                .addComponent(linkButton))
+                            .addGap(44, 44, 44)
+                            .addComponent(scrollPane2, GroupLayout.PREFERRED_SIZE, 329, GroupLayout.PREFERRED_SIZE)
+                            .addGap(22, 22, 22))
+                );
+                DTMMPanelLayout.setVerticalGroup(
+                    DTMMPanelLayout.createParallelGroup()
+                        .addGroup(DTMMPanelLayout.createSequentialGroup()
+                            .addGap(56, 56, 56)
+                            .addGroup(DTMMPanelLayout.createParallelGroup()
+                                .addComponent(scrollPane2, GroupLayout.DEFAULT_SIZE, 375, Short.MAX_VALUE)
+                                .addComponent(scrollPane1, GroupLayout.DEFAULT_SIZE, 375, Short.MAX_VALUE))
+                            .addContainerGap())
+                        .addGroup(DTMMPanelLayout.createSequentialGroup()
+                            .addGap(170, 170, 170)
+                            .addComponent(linkButton)
+                            .addGap(41, 41, 41)
+                            .addComponent(unLinkButton)
+                            .addContainerGap(158, Short.MAX_VALUE))
+                );
+            }
+            adminTab.addTab("Allocate Doctor to Manger", DTMMPanel);
         }
 
         GroupLayout contentPaneLayout = new GroupLayout(contentPane);
@@ -208,6 +289,13 @@ public class AdminForm extends JFrame {
     private JButton addUserButton;
     private JButton updateUserButton;
     private JButton deleteUserButton;
+    private JPanel DTMMPanel;
+    private JScrollPane scrollPane1;
+    private JTable doctorTable;
+    private JScrollPane scrollPane2;
+    private JTable medicalManagerTable;
+    private JButton linkButton;
+    private JButton unLinkButton;
     // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
 
     private void loadAllUserToTable()
