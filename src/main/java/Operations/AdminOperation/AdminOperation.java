@@ -119,7 +119,23 @@ public class AdminOperation
         }
     }
 
+    public List<Doctor> getAllDoctors()
+    {
+        return hospitalEntityAllocator.getAllBusinessEntities(DoctorToFile.PREFIX);
+    }
+
+    public List<MedicalManager> getAllMedicalManagers()
+    {
+        return hospitalEntityAllocator.getAllBusinessEntities(MedicalManagerToFile.PREFIX);
+    }
+
     public void allocateDoctorToMedicalManager(Doctor doctor,MedicalManager medicalManager)
+    {
+        doctor.setBelongsToMedicalManager(medicalManager.getSelf());
+        hospitalEntityAllocator.saveChanges(doctor);
+    }
+
+    public void allocateDoctorToMedicalManager(MedicalManager medicalManager,Doctor doctor)
     {
         doctor.setBelongsToMedicalManager(medicalManager.getSelf());
         hospitalEntityAllocator.saveChanges(doctor);

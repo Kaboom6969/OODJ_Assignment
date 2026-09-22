@@ -5,6 +5,8 @@
 package Forms.AdminForm;
 
 import java.awt.event.*;
+import java.util.List;
+
 import Operations.AdminOperation.AdminOperation;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.Users.User;
@@ -26,12 +28,42 @@ public class AdminForm extends JFrame {
     {
         adminOperation = new AdminOperation(hospitalEntityAllocator,admin);
         initComponents();
+        userPanelInit();
+        allocateDoctorToManagerPanelInit();
+    }
+
+    private void userPanelInit()
+    {
         userTable.removeColumn(userTable.getColumn("User Object"));
-        clearUserTable();
-        loadAllUserToTable();
+        clearTable(userTable);
+        loadAllUserToUserTable();
         userTable.getSelectionModel().addListSelectionListener(e -> {
             buttonDetectForSelectListInTable();});
         buttonDetectForSelectListInTable();
+    }
+
+    private void allocateDoctorToManagerPanelInit()
+    {
+        doctorTable.removeColumn(doctorTable.getColumn("doctorObject"));
+        medicalManagerTable.removeColumn(medicalManagerTable.getColumn("medicalManagerObject"));
+        clearTable(medicalManagerTable);
+        clearTable(doctorTable);
+        loadDataToTableADTMVer(doctorTable,adminOperation.getAllDoctors());
+        loadDataToTableADTMVer(medicalManagerTable,adminOperation.getAllMedicalManagers());
+    }
+
+    private void loadDataToTableADTMVer(JTable table, List<? extends BusinessEntity<? extends User>> users)
+    {
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+        for (var user : users)
+        {
+            User userData = user.getSelf();
+            Object[] row = new Object[3];
+            row[0] = user.getId();
+            row[1] = user.getSelf().getName();
+            row[2] = user;
+            model.addRow(row);
+        }
     }
 
     private void buttonDetectForSelectListInTable()
@@ -41,16 +73,16 @@ public class AdminForm extends JFrame {
         deleteUserButton.setEnabled(selectedRow != -1);
     }
 
-    private void clearUserTable()
+    private void clearTable(JTable table)
     {
-        DefaultTableModel model = (DefaultTableModel) userTable.getModel();
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
         model.setRowCount(0);
     }
 
     private void reloadUser(ActionEvent e)
     {
-        clearUserTable();
-        loadAllUserToTable();
+        clearTable(userTable);
+        loadAllUserToUserTable();
     }
 
     private void addUser(ActionEvent e)
@@ -105,6 +137,7 @@ public class AdminForm extends JFrame {
         medicalManagerTable = new JTable();
         linkButton = new JButton();
         unLinkButton = new JButton();
+        saveButton = new JButton();
 
         //======== this ========
         var contentPane = getContentPane();
@@ -225,6 +258,9 @@ public class AdminForm extends JFrame {
                 //---- unLinkButton ----
                 unLinkButton.setText("Unlink");
 
+                //---- saveButton ----
+                saveButton.setText("Save");
+
                 GroupLayout DTMMPanelLayout = new GroupLayout(DTMMPanel);
                 DTMMPanel.setLayout(DTMMPanelLayout);
                 DTMMPanelLayout.setHorizontalGroup(
@@ -234,8 +270,9 @@ public class AdminForm extends JFrame {
                             .addComponent(scrollPane1, GroupLayout.PREFERRED_SIZE, 295, GroupLayout.PREFERRED_SIZE)
                             .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 52, Short.MAX_VALUE)
                             .addGroup(DTMMPanelLayout.createParallelGroup()
+                                .addComponent(linkButton)
                                 .addComponent(unLinkButton)
-                                .addComponent(linkButton))
+                                .addComponent(saveButton))
                             .addGap(44, 44, 44)
                             .addComponent(scrollPane2, GroupLayout.PREFERRED_SIZE, 329, GroupLayout.PREFERRED_SIZE)
                             .addGap(22, 22, 22))
@@ -251,9 +288,11 @@ public class AdminForm extends JFrame {
                         .addGroup(DTMMPanelLayout.createSequentialGroup()
                             .addGap(170, 170, 170)
                             .addComponent(linkButton)
-                            .addGap(41, 41, 41)
+                            .addGap(18, 18, 18)
                             .addComponent(unLinkButton)
-                            .addContainerGap(158, Short.MAX_VALUE))
+                            .addGap(18, 18, 18)
+                            .addComponent(saveButton)
+                            .addContainerGap(129, Short.MAX_VALUE))
                 );
             }
             adminTab.addTab("Allocate Doctor to Manger", DTMMPanel);
@@ -296,9 +335,10 @@ public class AdminForm extends JFrame {
     private JTable medicalManagerTable;
     private JButton linkButton;
     private JButton unLinkButton;
+    private JButton saveButton;
     // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
 
-    private void loadAllUserToTable()
+    private void loadAllUserToUserTable()
     {
         DefaultTableModel model = (DefaultTableModel) userTable.getModel();
         var users = adminOperation.getAllUsers();
