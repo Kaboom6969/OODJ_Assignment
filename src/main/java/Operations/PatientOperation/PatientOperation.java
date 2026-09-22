@@ -99,8 +99,9 @@ public class PatientOperation implements PatientService
         // \d stands for "digit" (any number from 0 to 9).
         // + means "one or more times."
         // \\ is needed in Java because a single backslash is an escape character in strings, so need two backslashes to pass a single one to the regex engine.
-        if (phone == null || !phone.matches("\\d{10,11}")) {
-            throw new ProfileValidationException("Phone number must contain 10-11 digits only.");
+        if (phone == null || !phone.matches("^\\d{2,3}-?\\d{4,8}$")) {
+            throw new ProfileValidationException("Phone number format is invalid."
+                    + " It should be 2-3 digits, optional hyphen, followed by 4-8 digits (e.g., 123-456789).");
         }
         
         patient.getSelf().setName(name);
