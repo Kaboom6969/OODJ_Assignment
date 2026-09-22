@@ -24,6 +24,101 @@ import javax.swing.table.*;
 public class AdminForm extends JFrame {
     private AdminOperation adminOperation;
 
+    private enum ADTMStatus
+    {
+        NONE_SELECTED,
+        DOCTOR_SELECTED,
+        MEDICAL_MANAGER_SELECTED,
+
+        LINKING_BUT_NOT_CONNECTED,
+        LINKING_AND_CONNECTED,
+        DOCTOR_LINKING_BUT_NOT_CONNECTED,
+        DOCTOR_LINKING_AND_CONNECTED,
+        MEDICAL_MANAGER_LINKING_BUT_NOT_CONNECTED,
+        MEDICAL_MANAGER_LINKING_AND_CONNECTED,
+
+        UNLINKING_BUT_NOT_CONNECTED,
+        UNLINKING_AND_CONNECTED,
+        DOCTOR_UNLINKING_BUT_NOT_CONNECTED,
+        DOCTOR_UNLINKING_AND_CONNECTED,
+        MEDICAL_MANAGER_UNLINKING_BUT_NOT_CONNECTED,
+        MEDICAL_MANAGER_UNLINKING_AND_CONNECTED,
+    }
+
+    private ADTMStatus adtmStatus;
+
+    private void setAdtmStatus(ADTMStatus adtmStatus)
+    {
+        switch (adtmStatus)
+        {
+            case NONE_SELECTED:
+                linkButton.setText("Link");
+                unLinkButton.setText("Unlink");
+                linkButton.setEnabled(false);
+                unLinkButton.setEnabled(false);
+                this.adtmStatus = adtmStatus;
+                break;
+            case DOCTOR_SELECTED:
+                linkButton.setText("Link");
+                unLinkButton.setText("Unlink");
+                linkButton.setEnabled(true);
+                unLinkButton.setEnabled(true);
+                medicalManagerTable.clearSelection();
+                this.adtmStatus = adtmStatus;
+                break;
+            case MEDICAL_MANAGER_SELECTED:
+                linkButton.setText("Link");
+                unLinkButton.setText("Unlink");
+                linkButton.setEnabled(true);
+                unLinkButton.setEnabled(true);
+                doctorTable.clearSelection();
+                this.adtmStatus = adtmStatus;
+            case LINKING_BUT_NOT_CONNECTED:
+                if (this.adtmStatus == ADTMStatus.NONE_SELECTED)
+                    throw new IllegalStateException("In Linking Status,original state cannot be NONE_SELECTED");
+                if (this.adtmStatus == ADTMStatus.DOCTOR_SELECTED) this.adtmStatus = ADTMStatus.DOCTOR_LINKING_BUT_NOT_CONNECTED;
+                if (this.adtmStatus == ADTMStatus.MEDICAL_MANAGER_SELECTED) this.adtmStatus = ADTMStatus.MEDICAL_MANAGER_LINKING_BUT_NOT_CONNECTED;
+                linkButton.setText("Confirm");
+                unLinkButton.setText("Cancel");
+                linkButton.setEnabled(false);
+                unLinkButton.setEnabled(true);
+                break;
+            case UNLINKING_BUT_NOT_CONNECTED:
+                if (this.adtmStatus == ADTMStatus.NONE_SELECTED)
+                    throw new IllegalStateException("In Unlinking Status,original state cannot be NONE_SELECTED");
+                if (this.adtmStatus == ADTMStatus.DOCTOR_SELECTED) this.adtmStatus = ADTMStatus.DOCTOR_UNLINKING_BUT_NOT_CONNECTED;
+                if (this.adtmStatus == ADTMStatus.MEDICAL_MANAGER_SELECTED) this.adtmStatus = ADTMStatus.MEDICAL_MANAGER_UNLINKING_BUT_NOT_CONNECTED;
+                linkButton.setText("Confirm");
+                unLinkButton.setText("Cancel");
+                linkButton.setEnabled(false);
+                unLinkButton.setEnabled(true);
+                break;
+
+            case LINKING_AND_CONNECTED:
+                if (this.adtmStatus == ADTMStatus.NONE_SELECTED)
+                    throw new IllegalStateException("In Linking Status,original state cannot be NONE_SELECTED");
+                if (this.adtmStatus == ADTMStatus.DOCTOR_SELECTED) this.adtmStatus = ADTMStatus.DOCTOR_LINKING_AND_CONNECTED;
+                if (this.adtmStatus == ADTMStatus.MEDICAL_MANAGER_SELECTED) this.adtmStatus = ADTMStatus.MEDICAL_MANAGER_LINKING_AND_CONNECTED;
+                linkButton.setText("Confirm");
+                unLinkButton.setText("Cancel");
+                linkButton.setEnabled(true);
+                unLinkButton.setEnabled(true);
+                break;
+            case UNLINKING_AND_CONNECTED:
+                if (this.adtmStatus == ADTMStatus.NONE_SELECTED)
+                    throw new IllegalStateException("In unLinking Status,original state cannot be NONE_SELECTED");
+                if (this.adtmStatus == ADTMStatus.DOCTOR_SELECTED) this.adtmStatus = ADTMStatus.DOCTOR_UNLINKING_AND_CONNECTED;
+                if (this.adtmStatus == ADTMStatus.MEDICAL_MANAGER_SELECTED) this.adtmStatus = ADTMStatus.MEDICAL_MANAGER_UNLINKING_AND_CONNECTED;
+                linkButton.setText("Confirm");
+                unLinkButton.setText("Cancel");
+                linkButton.setEnabled(true);
+                unLinkButton.setEnabled(true);
+                break;
+
+        }
+
+    }
+
     public AdminForm(Admin admin, HospitalEntityAllocator hospitalEntityAllocator)
     {
         adminOperation = new AdminOperation(hospitalEntityAllocator,admin);
@@ -38,8 +133,8 @@ public class AdminForm extends JFrame {
         clearTable(userTable);
         loadAllUserToUserTable();
         userTable.getSelectionModel().addListSelectionListener(e -> {
-            buttonDetectForSelectListInTable();});
-        buttonDetectForSelectListInTable();
+            buttonDetectForSelectListInAllUserTable();});
+        buttonDetectForSelectListInAllUserTable();
     }
 
     private void allocateDoctorToManagerPanelInit()
@@ -50,6 +145,7 @@ public class AdminForm extends JFrame {
         clearTable(doctorTable);
         loadDataToTableADTMVer(doctorTable,adminOperation.getAllDoctors());
         loadDataToTableADTMVer(medicalManagerTable,adminOperation.getAllMedicalManagers());
+        setAdtmStatus(ADTMStatus.NONE_SELECTED);
     }
 
     private void loadDataToTableADTMVer(JTable table, List<? extends BusinessEntity<? extends User>> users)
@@ -65,8 +161,30 @@ public class AdminForm extends JFrame {
             model.addRow(row);
         }
     }
+    private void functionForSelectListInTableOfADTMPanel()
+    {
+        int selectedRowDoctor = doctorTable.getSelectedRow();
+        int selectedRowMedicalManager = medicalManagerTable.getSelectedRow();
+        switch(adtmStatus)
+        {
+            case NONE_SELECTED:
 
-    private void buttonDetectForSelectListInTable()
+                if (selectedRowDoctor == -1 && selectedRowMedicalManager == -1) setAdtmStatus(ADTMStatus.NONE_SELECTED);
+                if (selectedRowDoctor != -1 && selectedRowMedicalManager != -1)
+                    throw new IllegalStateException("Doctor and MedicalManager can't be both selected In NONE_SELECTED state");
+                if (selectedRowDoctor != -1) setAdtmStatus(ADTMStatus.DOCTOR_SELECTED);
+                if (selectedRowMedicalManager != -1) setAdtmStatus(ADTMStatus.MEDICAL_MANAGER_SELECTED);
+                break;
+            case DOCTOR_SELECTED, MEDICAL_MANAGER_SELECTED:
+                if (selectedRowDoctor == -1 && selectedRowMedicalManager == -1) setAdtmStatus(ADTMStatus.NONE_SELECTED);
+                if (selectedRowMedicalManager != -1) setAdtmStatus(ADTMStatus.MEDICAL_MANAGER_SELECTED);
+                if (selectedRowDoctor != -1) setAdtmStatus(ADTMStatus.DOCTOR_SELECTED);
+                break;
+
+        }
+    }
+
+    private void buttonDetectForSelectListInAllUserTable()
     {
         int selectedRow = userTable.getSelectedRow();
         updateUserButton.setEnabled(selectedRow != -1);
