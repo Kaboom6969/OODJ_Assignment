@@ -34,7 +34,7 @@ import java.util.List;
  * Patient-facing operations. Implementations must use HospitalEntityAllocator
  * for persistence and business-entity loading.
  */
-public class PatientOperation
+public class PatientOperation implements PatientService
 {
     // Assumed slot length because DoctorShiftToFile and ConsultationRateToFile have no duration field.
     private static final long SLOT_DURATION_MINUTES = 30;
