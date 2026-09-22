@@ -227,6 +227,34 @@ public class PatientOperation implements PatientService
         return results;
     }
 
+    private Facility findAvailableFacility(LocalDateTime time, String excludeAppointmentId)
+    {
+        for (Facility candidate : allocator.<Facility>getAllBusinessEntities(FacilityToFile.PREFIX)) {
+            if (!candidate.getSelf().isAvailable()
+                    || candidate.getSelf().getFacilityType()
+                    != FacilityToFile.FacilityType.CONSULTATION_ROOM) {
+                continue;
+            }
+
+            boolean occupied = false;
+            for (AppointmentToFile appointmentData : candidate.getAppointments()) {
+                if (appointmentData.getId().equals(excludeAppointmentId)) continue;
+
+                AppointmentStatus status = appointmentData.getStatus();
+                if ((status == AppointmentStatus.BOOKED
+                        || status == AppointmentStatus.RESCHEDULED)
+                        && time.equals(appointmentData.getAppointmentTime())) {
+                    occupied = true;
+                    break;
+                }
+            }
+            if (!occupied) {
+                return candidate;
+            }
+        }
+        return null;
+    }
+
     /** 6. Books an appointment for the patient with the selected doctor and facility. Patient -> Appointment -> Doctor/Facility. */
     public void bookAppointment(Doctor doctor, LocalDateTime time, String reason)
     {
@@ -264,29 +292,7 @@ public class PatientOperation implements PatientService
             throw new BookingValidationException("Appointment time is not within an available doctor shift.");
         }
 
-        Facility facility = null;
-        for (Facility candidate : allocator.<Facility>getAllBusinessEntities(FacilityToFile.PREFIX)) {
-            if (!candidate.getSelf().isAvailable()
-                    || candidate.getSelf().getFacilityType()
-                    != FacilityToFile.FacilityType.CONSULTATION_ROOM) {
-                continue;
-            }
-
-            boolean occupied = false;
-            for (AppointmentToFile appointmentData : candidate.getAppointments()) {
-                AppointmentStatus status = appointmentData.getStatus();
-                if ((status == AppointmentStatus.BOOKED
-                        || status == AppointmentStatus.RESCHEDULED)
-                        && time.equals(appointmentData.getAppointmentTime())) {
-                    occupied = true;
-                    break;
-                }
-            }
-            if (!occupied) {
-                facility = candidate;
-                break;
-            }
-        }
+        Facility facility = findAvailableFacility(time, null);
         if (facility == null) {
             throw new BookingValidationException("No consultation rooms are available at this time.");
         }
@@ -319,7 +325,13 @@ public class PatientOperation implements PatientService
             throw new BookingValidationException("New appointment time is not within an available doctor shift.");
         }
 
+        Facility facility = findAvailableFacility(newTime, appointment.getId());
+        if (facility == null) {
+            throw new BookingValidationException("No consultation rooms are available at the new time.");
+        }
+
         appointment.getSelf().setAppointmentTime(newTime);
+        appointment.setFacility(facility.getSelf());
         allocator.saveChanges(appointment);
     }
 
