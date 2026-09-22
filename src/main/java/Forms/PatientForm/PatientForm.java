@@ -364,7 +364,6 @@ public class PatientForm extends javax.swing.JFrame {
 
     // Tab 4: Prescriptions
     private void refreshPrescriptionsTable() {
-        int selectedRow = medicalTbl.getSelectedRow();
         DefaultTableModel tableModel = new DefaultTableModel(
                 new Object[] {"Medication", "Dosage", "Frequency", "Duration & Instructions"}, 0) {
             @Override
@@ -372,6 +371,15 @@ public class PatientForm extends javax.swing.JFrame {
                 return false;
             }
         };
+        PrescriptionsTbl.setModel(tableModel);
+
+        PrescriptionsTbl.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
+        PrescriptionsTbl.getColumnModel().getColumn(0).setPreferredWidth(150); // Medication
+        PrescriptionsTbl.getColumnModel().getColumn(1).setPreferredWidth(110);  // Dosage
+        PrescriptionsTbl.getColumnModel().getColumn(2).setPreferredWidth(150); // Frequency
+        PrescriptionsTbl.getColumnModel().getColumn(3).setPreferredWidth(304); // Duration & Instructions
+
+        int selectedRow = medicalTbl.getSelectedRow();
         if (selectedRow < 0 || currentMedicalHistory == null
                 || currentMedicalHistory.isEmpty()
                 || selectedRow >= currentMedicalHistory.size()) {
@@ -388,13 +396,6 @@ public class PatientForm extends javax.swing.JFrame {
                 prescription.getDurationDays() + " days — " + prescription.getInstructions()
             });
         }
-        PrescriptionsTbl.setModel(tableModel);
-        PrescriptionsTbl.setModel(tableModel);
-        PrescriptionsTbl.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
-        PrescriptionsTbl.getColumnModel().getColumn(0).setPreferredWidth(150); // Medication
-        PrescriptionsTbl.getColumnModel().getColumn(1).setPreferredWidth(110);  // Dosage
-        PrescriptionsTbl.getColumnModel().getColumn(2).setPreferredWidth(150); // Frequency
-        PrescriptionsTbl.getColumnModel().getColumn(3).setPreferredWidth(304); // Duration & Instructions
     }
 
     /**
