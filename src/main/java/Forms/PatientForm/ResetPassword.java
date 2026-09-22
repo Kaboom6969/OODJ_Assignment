@@ -57,6 +57,9 @@ public class ResetPassword extends javax.swing.JDialog {
         newPasswordTf = new javax.swing.JPasswordField();
         confirmPasswordTf = new javax.swing.JPasswordField();
         resetBtn = new javax.swing.JButton();
+        oldPasswordCb = new javax.swing.JCheckBox();
+        newPasswordCb = new javax.swing.JCheckBox();
+        confirmPasswordCb = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -76,56 +79,76 @@ public class ResetPassword extends javax.swing.JDialog {
         resetBtn.setText("Reset");
         resetBtn.addActionListener(this::resetBtnActionPerformed);
 
+        oldPasswordCb.setText("show");
+        oldPasswordCb.addActionListener(this::oldPasswordCbActionPerformed);
+
+        newPasswordCb.setText("show");
+        newPasswordCb.addActionListener(this::newPasswordCbActionPerformed);
+
+        confirmPasswordCb.setText("show");
+        confirmPasswordCb.addActionListener(this::confirmPasswordCbActionPerformed);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addGap(31, 31, 31)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(79, 79, 79)
-                        .addComponent(jLabel12))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(31, 31, 31)
+                        .addGap(24, 24, 24)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel13)
+                            .addComponent(jLabel11))
+                        .addGap(18, 18, 18)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(24, 24, 24)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(jLabel13)
-                                    .addComponent(jLabel11))
+                                .addComponent(newPasswordTf, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(oldPasswordTf, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(newPasswordTf, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(newPasswordCb))
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel14)
+                                .addComponent(oldPasswordTf, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
-                                .addComponent(confirmPasswordTf, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addComponent(oldPasswordCb))))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(148, 148, 148)
-                        .addComponent(resetBtn)))
-                .addContainerGap(67, Short.MAX_VALUE))
+                        .addComponent(jLabel14)
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(resetBtn)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(confirmPasswordTf, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(confirmPasswordCb))))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(jLabel12)
+                        .addGap(68, 68, 68)))
+                .addGap(0, 15, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(29, 29, 29)
+                .addGap(20, 20, 20)
                 .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addGap(27, 27, 27)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel11)
-                    .addComponent(oldPasswordTf, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(oldPasswordTf, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(oldPasswordCb))
                 .addGap(29, 29, 29)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel13)
-                    .addComponent(newPasswordTf, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(newPasswordTf, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(newPasswordCb)))
                 .addGap(26, 26, 26)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel14)
-                    .addComponent(confirmPasswordTf, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 35, Short.MAX_VALUE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(confirmPasswordTf, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(confirmPasswordCb)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 38, Short.MAX_VALUE)
                 .addComponent(resetBtn)
-                .addGap(23, 23, 23))
+                .addGap(20, 20, 20))
         );
 
         pack();
@@ -147,6 +170,21 @@ public class ResetPassword extends javax.swing.JDialog {
         submitted = true;
         dispose();
     }//GEN-LAST:event_resetBtnActionPerformed
+
+    private void oldPasswordCbActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_oldPasswordCbActionPerformed
+        // Echo char 0 shows the password; the normal echo char hides it again.
+        oldPasswordTf.setEchoChar(oldPasswordCb.isSelected() ? (char) 0 : '*');
+    }//GEN-LAST:event_oldPasswordCbActionPerformed
+
+    private void newPasswordCbActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newPasswordCbActionPerformed
+        // Echo char 0 shows the password; the normal echo char hides it again.
+        newPasswordTf.setEchoChar(newPasswordCb.isSelected() ? (char) 0 : '*');
+    }//GEN-LAST:event_newPasswordCbActionPerformed
+
+    private void confirmPasswordCbActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_confirmPasswordCbActionPerformed
+        // Echo char 0 shows the password; the normal echo char hides it again.
+        confirmPasswordTf.setEchoChar(confirmPasswordCb.isSelected() ? (char) 0 : '*');
+    }//GEN-LAST:event_confirmPasswordCbActionPerformed
 
     /**
      * @param args the command line arguments
@@ -186,12 +224,15 @@ public class ResetPassword extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox confirmPasswordCb;
     private javax.swing.JPasswordField confirmPasswordTf;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
+    private javax.swing.JCheckBox newPasswordCb;
     private javax.swing.JPasswordField newPasswordTf;
+    private javax.swing.JCheckBox oldPasswordCb;
     private javax.swing.JPasswordField oldPasswordTf;
     private javax.swing.JButton resetBtn;
     // End of variables declaration//GEN-END:variables
