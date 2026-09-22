@@ -10,5 +10,6 @@
         <module name="hospital-management-system (1)" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel target="25" />
   </component>
 </project>
