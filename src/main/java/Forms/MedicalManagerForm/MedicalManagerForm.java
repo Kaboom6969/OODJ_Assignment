@@ -68,6 +68,7 @@ public class MedicalManagerForm extends JFrame {
     private String currentManagerId = "MM0001";
     // Constructor: setup main window and tabs
     public MedicalManagerForm(HospitalEntityAllocator allocator, MedicalManager medicalManager){
+        UIManager.put("Button.disabledText", new Color(190, 190, 190));
         this.allocator = allocator;
         this.medicalManager = medicalManager;
         this.operation = new MedicalManagerOperation(allocator, medicalManager);
@@ -116,7 +117,12 @@ public class MedicalManagerForm extends JFrame {
         // Export Report Button action
         exportReportBtn.addActionListener(e -> {
             String selectedMonth = (String) monthFilterBox.getSelectedItem();
-            String exportFileName = "Revenue_Report.csv";
+
+            java.io.File reportDir = new java.io.File("data/Report");
+            if (!reportDir.exists()) {
+                reportDir.mkdirs();
+            }
+            String exportFileName = "data/Report/Revenue_Report.txt";
             try {
                 operation.exportMetricsReport(exportFileName, selectedMonth);
                 JOptionPane.showMessageDialog(
@@ -165,6 +171,7 @@ public class MedicalManagerForm extends JFrame {
         dobField.setText("YYYY-MM-DD");
         dobField.setForeground(Color.GRAY);
         saveBtn = new JButton("Save Changes");
+        setButtonState(saveBtn, true);
 
         // Handle placeholder text for DOB field
         dobField.addFocusListener(new java.awt.event.FocusAdapter() {
@@ -270,6 +277,8 @@ public class MedicalManagerForm extends JFrame {
             if (!e.getValueIsAdjusting()) {
                 int selectedRow = deptTable.getSelectedRow();
                 if (selectedRow != -1) {
+                    setButtonState(updateDeptBtn, true);
+                    setButtonState(deleteDeptBtn, true);
                     try {
                         String id = deptTable.getValueAt(selectedRow, deptTable.getColumnModel().getColumnIndex("Department Id")).toString();
                         String name = deptTable.getValueAt(selectedRow, deptTable.getColumnModel().getColumnIndex("Department Name")).toString();
@@ -479,6 +488,17 @@ public class MedicalManagerForm extends JFrame {
         });
     }
 
+    private void setButtonState(JButton btn, boolean enabled) {
+        btn.setEnabled(enabled);
+        if (enabled) {
+            btn.setBackground(Color.WHITE);
+            btn.setForeground(Color.BLACK);
+        } else {
+            btn.setBackground(new Color(224, 224, 224));
+            btn.setForeground(new Color(166, 166, 166));
+        }
+    }
+
     // Create the Department Management panel
     public JPanel createDepartmentPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
@@ -513,12 +533,12 @@ public class MedicalManagerForm extends JFrame {
         updateDeptBtn = new JButton("Update");
         deleteDeptBtn = new JButton("Delete");
         clearDeptBtn = new JButton("Clear");
-        JButton[] buttons = {addDeptBtn, updateDeptBtn, deleteDeptBtn, clearDeptBtn};
-        for (JButton btn : buttons) {
-            btn.setBackground(Color.decode("#4EBC97"));
-            btn.setForeground(Color.BLACK);
-            btn.setFocusPainted(false);
-        }
+
+        setButtonState(addDeptBtn, true);
+        setButtonState(clearDeptBtn, true);
+
+        setButtonState(updateDeptBtn, false);
+        setButtonState(deleteDeptBtn, false);
 
         // Row 0: Dept ID
         gbc.gridx = 0;
@@ -618,9 +638,7 @@ public class MedicalManagerForm extends JFrame {
 
         JButton[] buttons = {assignShiftBtn, deleteShiftBtn, clearShiftBtn};
         for (JButton btn : buttons) {
-            btn.setBackground(Color.decode("#4EBC97"));
-            btn.setForeground(Color.BLACK);
-            btn.setFocusPainted(false);
+            setButtonState(btn, true);
         }
 
         // Row 0: Doctor Dropdown
@@ -722,9 +740,7 @@ public class MedicalManagerForm extends JFrame {
 
         JButton[] buttons = {refreshMetricsBtn, exportReportBtn};
         for (JButton btn : buttons) {
-            btn.setBackground(Color.decode("#4EBC97"));
-            btn.setForeground(Color.BLACK);
-            btn.setFocusPainted(false);
+            setButtonState(btn, true);
         }
 
         bottomPanel.add(new JLabel("Period:"));
@@ -834,6 +850,8 @@ public class MedicalManagerForm extends JFrame {
     private void resetToNewDeptMode() {
         deptIdField.setText(operation.generateNextDeptId());
         deptNameField.setText("");
+        setButtonState(updateDeptBtn, false);
+        setButtonState(deleteDeptBtn, false);
     }
 
     // Refresh Department Table directly from data
@@ -878,21 +896,17 @@ public class MedicalManagerForm extends JFrame {
     }
 
     // Application entry point
-//    public static void main(String[] args) {
-//        BaseEntity.setIdNumberWidth(4);
-//
-//        HospitalEntityAllocator allocator = new HospitalEntityAllocator(
-//                java.nio.file.Path.of("data/Linker"),
-//                java.nio.file.Path.of("data/Entity")
-//        );
-//
-//        SwingUtilities.invokeLater(() -> {
-//            try {
-//                MedicalManager manager = allocator.getBusinessEntity("MM0001");
-//                new MedicalManagerForm(allocator, manager).setVisible(true);
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//        });
-//    }
+/*    public static void main(String[] args) {
+        BaseEntity.setIdNumberWidth(4);
+
+        HospitalEntityAllocator allocator = new HospitalEntityAllocator(
+                java.nio.file.Path.of("data/Linker"),
+                java.nio.file.Path.of("data/Entity")
+        );
+
+        SwingUtilities.invokeLater(() -> {
+            MedicalManager manager = allocator.getBusinessEntity("MM0001");
+            new MedicalManagerForm(allocator, manager).setVisible(true);
+        });
+    }*/
 }

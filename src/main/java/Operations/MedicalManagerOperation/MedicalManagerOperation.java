@@ -472,7 +472,7 @@ public class MedicalManagerOperation {
 
     public void exportMetricsReport(String filePath, String selectedMonth) throws IOException {
         HospitalMetrics metrics = calculateMetrics(selectedMonth);
-        try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
+/*        try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
             // Write executive summary
             writer.println("=== Hospital Revenue and Metrics Report ===");
             writer.println("Period," + (selectedMonth != null ? selectedMonth : "All Months"));
@@ -489,6 +489,30 @@ public class MedicalManagerOperation {
                 String cleanedRevenue = row[3].replace("$", "").replace(",", "");
                 writer.println(String.format("%s,%s,%s,%s,%s", row[0], row[1], row[2], cleanedRevenue, row[4]));
             }
+        }*/
+        try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
+            // 1. 报告头部摘要
+            writer.println("================================================================================");
+            writer.println("                     Hospital Revenue and Metrics Report                        ");
+            writer.println("================================================================================");
+            writer.println("Period:             " + (selectedMonth != null ? selectedMonth : "All Months"));
+            writer.println(String.format("Total Revenue:      $%,.2f", metrics.totalRevenue()));
+            writer.println(String.format("Total Appointments: %,d", metrics.totalAppointments()));
+            writer.println("Active Doctors:     " + metrics.activeDoctors());
+            writer.println(String.format("Bed Occupancy Rate: %.1f%%", metrics.bedOccupancyRate()));
+            writer.println();
+
+            // 2. 科室统计详情表格（使用固定列宽对齐，记事本打开整齐美观）
+            writer.println("--------------------------------------------------------------------------------");
+            writer.printf("%-10s %-25s %-18s %-15s %-10s%n",
+                    "Dept ID", "Department Name", "Patients Served", "Revenue", "Avg Stay");
+            writer.println("--------------------------------------------------------------------------------");
+
+            for (String[] row : metrics.tableRows()) {
+                writer.printf("%-10s %-25s %-18s %-15s %-10s%n",
+                        row[0], row[1], row[2], row[3], row[4]);
+            }
+            writer.println("================================================================================");
         }
     }
 }
