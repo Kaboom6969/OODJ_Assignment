@@ -23,6 +23,10 @@ import entities.BusinessEntity.Patient;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 public class DoctorOperation {
 
@@ -36,20 +40,20 @@ public class DoctorOperation {
     }
 
     public void updateProfile(
-            String name, 
-            String password, 
-            UserWithDetails.Gender gender, 
-            String dob, 
-            String email, 
+            String name,
+            String password,
+            UserWithDetails.Gender gender,
+            String dob,
+            String email,
             String phone) {
         // Validate name
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("Name cannot be empty.");
         }
 
-        if (!name.matches("^[a-zA-Z\\s]+$")) {
+        if (!name.matches("^[a-zA-Z0-9\\s]+$")) {
             throw new IllegalArgumentException(
-                    "Name can only contain letters and spaces."
+                    "Name can only contain letters, number and spaces."
             );
         }
 
@@ -188,7 +192,21 @@ public class DoctorOperation {
             Appointment appointment
                     = allocator.getBusinessEntity(appointmentId.trim());
 
+            if (appointment.getDoctor() == null
+                    || !appointment.getDoctor()
+                            .getId()
+                            .equals(doctor.getId())) {
+
+                throw new IllegalArgumentException(
+                        "Appointment does not belong to this doctor."
+                );
+            }
+
             return appointment.getPatient();
+
+        } catch (IllegalArgumentException e) {
+            throw e;
+
         } catch (Exception e) {
             throw new IllegalArgumentException(
                     "Patient not found for this appointment."
@@ -256,23 +274,29 @@ public class DoctorOperation {
         Appointment selectedAppointment = null;
 
         for (int i = 0; i < patient.getAppointments().size(); i++) {
+
             AppointmentToFile appointment
                     = patient.getAppointments().get(i);
 
             if (appointment.getStatus()
                     == AppointmentToFile.AppointmentStatus.COMPLETED) {
-                if (selectedAppointment == null) {
-                    selectedAppointment
-                            = allocator.getBusinessEntity(
-                                    appointment.getId()
-                            );
-                } else {
-                    Appointment currentAppointment
-                            = allocator.getBusinessEntity(
-                                    appointment.getId()
-                            );
 
-                    if (currentAppointment
+                Appointment currentAppointment
+                        = allocator.getBusinessEntity(
+                                appointment.getId()
+                        );
+
+                // Only allow appointments belonging to the current doctor
+                if (currentAppointment.getDoctor() != null
+                        && currentAppointment.getDoctor()
+                                .getId()
+                                .equals(doctor.getId())) {
+
+                    if (selectedAppointment == null) {
+
+                        selectedAppointment = currentAppointment;
+
+                    } else if (currentAppointment
                             .getSelf()
                             .getAppointmentTime()
                             .isAfter(
@@ -280,6 +304,7 @@ public class DoctorOperation {
                                             .getSelf()
                                             .getAppointmentTime()
                             )) {
+
                         selectedAppointment = currentAppointment;
                     }
                 }
@@ -289,6 +314,12 @@ public class DoctorOperation {
         if (selectedAppointment == null) {
             throw new IllegalArgumentException(
                     "No completed appointment found for this patient."
+            );
+        }
+
+        if (selectedAppointment.getMedicalRecord() != null) {
+            throw new IllegalArgumentException(
+                    "A medical record already exists for this appointment."
             );
         }
 
@@ -364,12 +395,19 @@ public class DoctorOperation {
         Appointment selectedAppointment = null;
 
         for (int i = 0; i < patient.getAppointments().size(); i++) {
+
             AppointmentToFile appointment = patient.getAppointments().get(i);
 
             if (appointment.getStatus() == AppointmentToFile.AppointmentStatus.COMPLETED) {
+
                 Appointment currentAppointment = allocator.getBusinessEntity(appointment.getId());
 
-                if (currentAppointment.getMedicalRecord() != null) {
+                if (currentAppointment.getDoctor() != null
+                        && currentAppointment.getDoctor()
+                                .getId()
+                                .equals(doctor.getId())
+                        && currentAppointment.getMedicalRecord() != null) {
+
                     if (selectedAppointment == null) {
                         selectedAppointment = currentAppointment;
                     } else if (currentAppointment
@@ -394,6 +432,7 @@ public class DoctorOperation {
 
         MedicalRecordToFile record = selectedAppointment.getMedicalRecord();
         MedicalRecord medicalRecord = allocator.getBusinessEntity(record.getId());
+
 
         PrescriptionToFile prescription
                 = new PrescriptionToFile(
@@ -464,7 +503,12 @@ public class DoctorOperation {
                                 appointment.getId()
                         );
 
-                if (currentAppointment.getMedicalRecord() != null) {
+                if (currentAppointment.getDoctor() != null
+                        && currentAppointment.getDoctor()
+                                .getId()
+                                .equals(doctor.getId())
+                        && currentAppointment.getMedicalRecord() != null) {
+
                     if (selectedAppointment == null) {
                         selectedAppointment = currentAppointment;
                     } else if (currentAppointment
@@ -541,5 +585,41 @@ public class DoctorOperation {
         medicalRecord.getMedicalRequests().add(request);
 
         allocator.saveChanges(medicalRecord);
+    }
+
+    public List<PatientToFile> getMyPatients() {
+        Set<String> patientIds = new LinkedHashSet<>();
+
+        for (AppointmentToFile appointmentFile : doctor.getAppointments()) {
+            Appointment appointment
+                    = allocator.getBusinessEntity(appointmentFile.getId());
+
+            PatientToFile patient = appointment.getPatient();
+
+            if (patient != null) {
+                patientIds.add(patient.getId());
+            }
+        }
+
+        List<PatientToFile> patients = new ArrayList<>();
+
+        for (String patientId : patientIds) {
+            Patient patient
+                    = allocator.getBusinessEntity(patientId);
+
+            patients.add(patient.getSelf());
+        }
+
+        return patients;
+    }
+
+    public List<AppointmentToFile> getMyAppointments() {
+        List<AppointmentToFile> appointments = new ArrayList<>();
+
+        for (AppointmentToFile appointment : doctor.getAppointments()) {
+            appointments.add(appointment);
+        }
+
+        return appointments;
     }
 }
