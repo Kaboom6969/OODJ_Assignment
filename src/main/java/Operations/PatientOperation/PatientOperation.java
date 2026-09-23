@@ -256,7 +256,26 @@ public class PatientOperation implements PatientService
         return null;
     }
 
-    // 6. Books an appointment for the patient with the selected doctor and facility. Patient -> Appointment -> Doctor/Facility.
+    // 6. Checks if the patient has an active appointment at the specified time.
+    private boolean hasActiveAppointmentAtTime(LocalDateTime time, String excludeAppointmentId)
+    {
+        for (Appointment existingAppointment : loadMyAppointments()) {
+            if (existingAppointment.getId().equals(excludeAppointmentId)) {
+                continue;
+            }
+
+            AppointmentStatus existingStatus = existingAppointment.getSelf().getStatus();
+            // Only check conflicts for booked or rescheduled appointments
+            if ((existingStatus == AppointmentStatus.BOOKED
+                    || existingStatus == AppointmentStatus.RESCHEDULED)
+                    && time.equals(existingAppointment.getSelf().getAppointmentTime())) {
+                return true; // Conflict found: patient already has an active appointment at this time.
+            }
+        }
+        return false; // Free to book
+    }
+
+    // 8. Books an appointment for the patient with the selected doctor and facility. Patient -> Appointment -> Doctor/Facility.
     @Override 
     public void bookAppointment(Doctor doctor, LocalDateTime time, String reason)
     {
@@ -280,6 +299,10 @@ public class PatientOperation implements PatientService
         }
         if (time.isBefore(LocalDateTime.now())) {
             throw new BookingValidationException("Appointment time cannot be in the past.");
+        }
+        if (hasActiveAppointmentAtTime(time, null)) {
+            throw new BookingValidationException(
+                    "You already have an appointment scheduled at this exact time.");
         }
         // Reject blank
         if (reason == null || reason.trim().isEmpty()) {
@@ -309,7 +332,7 @@ public class PatientOperation implements PatientService
         allocator.saveChanges(appointment);
     }
 
-    // 7. Reschedules an existing appointment to a new time. Appointment -> AppointmentToFile.
+    // 9. Reschedules an existing appointment to a new time. Appointment -> AppointmentToFile.
     @Override 
     public void rescheduleAppointment(Appointment appointment, LocalDateTime newTime)
     {
@@ -328,6 +351,10 @@ public class PatientOperation implements PatientService
         if (newTime.isBefore(LocalDateTime.now())) {
             throw new BookingValidationException("Appointment time cannot be in the past.");
         }
+        if (hasActiveAppointmentAtTime(newTime, appointment.getId())) {
+            throw new BookingValidationException(
+                    "You already have an appointment scheduled at this exact time.");
+        }
 
         Doctor doctor = allocator.getBusinessEntity(appointment.getDoctor().getId());
         if (!loadAvailableSlots(doctor, appointment.getId()).contains(newTime)) {
@@ -344,7 +371,7 @@ public class PatientOperation implements PatientService
         allocator.saveChanges(appointment);
     }
 
-    /** 8. Cancels an appointment while preserving its linked medical record and feedback. Appointment -> AppointmentToFile. */
+    //10. Cancels an appointment while preserving its linked medical record and feedback. Appointment -> AppointmentToFile. 
     @Override
     public void cancelAppointment(Appointment appointment)
     {
@@ -361,7 +388,7 @@ public class PatientOperation implements PatientService
         allocator.saveChanges(appointment);
     }
 
-    // 9. Loads the patient's upcoming and past appointments, including their statuses. Patient -> Appointment.
+    // 11. Loads the patient's upcoming and past appointments, including their statuses. Patient -> Appointment.
     public List<Appointment> loadMyAppointments()
     {
         List<Appointment> appointments = new ArrayList<>();
