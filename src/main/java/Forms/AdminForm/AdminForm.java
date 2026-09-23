@@ -4,15 +4,22 @@
 
 package Forms.AdminForm;
 
+import java.awt.*;
 import java.awt.event.*;
+import java.util.*;
 import java.util.List;
 
 import Operations.AdminOperation.AdminOperation;
 import Tools.HospitalEntityAllocator;
+import entities.BaseEntity.Users.DoctorToFile;
+import entities.BaseEntity.Users.MedicalManagerToFile;
 import entities.BaseEntity.Users.User;
 import entities.BaseEntity.Users.UserWithDetails;
 import entities.BusinessEntity.Admin;
 import entities.BusinessEntity.BusinessEntity;
+import entities.BusinessEntity.Doctor;
+import entities.BusinessEntity.MedicalManager;
+import entities.LazyEntity.LazyEntityList;
 
 import javax.swing.*;
 import javax.swing.GroupLayout;
@@ -23,173 +30,44 @@ import javax.swing.table.*;
  */
 public class AdminForm extends JFrame {
     private AdminOperation adminOperation;
+    private AllocateDoctorToMedicalManagerPanel allocateDoctorToMedicalManagerPanel;
 
-    private enum ADTMStatus
-    {
-        NONE_SELECTED,
-        DOCTOR_SELECTED,
-        MEDICAL_MANAGER_SELECTED,
 
-        LINKING_BUT_NOT_CONNECTED,
-        LINKING_AND_CONNECTED,
-        DOCTOR_LINKING_BUT_NOT_CONNECTED,
-        DOCTOR_LINKING_AND_CONNECTED,
-        MEDICAL_MANAGER_LINKING_BUT_NOT_CONNECTED,
-        MEDICAL_MANAGER_LINKING_AND_CONNECTED,
-
-        UNLINKING_BUT_NOT_CONNECTED,
-        UNLINKING_AND_CONNECTED,
-        DOCTOR_UNLINKING_BUT_NOT_CONNECTED,
-        DOCTOR_UNLINKING_AND_CONNECTED,
-        MEDICAL_MANAGER_UNLINKING_BUT_NOT_CONNECTED,
-        MEDICAL_MANAGER_UNLINKING_AND_CONNECTED,
-    }
-
-    private ADTMStatus adtmStatus;
-
-    private void setAdtmStatus(ADTMStatus adtmStatus)
-    {
-        switch (adtmStatus)
-        {
-            case NONE_SELECTED:
-                linkButton.setText("Link");
-                unLinkButton.setText("Unlink");
-                linkButton.setEnabled(false);
-                unLinkButton.setEnabled(false);
-                this.adtmStatus = adtmStatus;
-                break;
-            case DOCTOR_SELECTED:
-                linkButton.setText("Link");
-                unLinkButton.setText("Unlink");
-                linkButton.setEnabled(true);
-                unLinkButton.setEnabled(true);
-                medicalManagerTable.clearSelection();
-                this.adtmStatus = adtmStatus;
-                break;
-            case MEDICAL_MANAGER_SELECTED:
-                linkButton.setText("Link");
-                unLinkButton.setText("Unlink");
-                linkButton.setEnabled(true);
-                unLinkButton.setEnabled(true);
-                doctorTable.clearSelection();
-                this.adtmStatus = adtmStatus;
-            case LINKING_BUT_NOT_CONNECTED:
-                if (this.adtmStatus == ADTMStatus.NONE_SELECTED)
-                    throw new IllegalStateException("In Linking Status,original state cannot be NONE_SELECTED");
-                if (this.adtmStatus == ADTMStatus.DOCTOR_SELECTED) this.adtmStatus = ADTMStatus.DOCTOR_LINKING_BUT_NOT_CONNECTED;
-                if (this.adtmStatus == ADTMStatus.MEDICAL_MANAGER_SELECTED) this.adtmStatus = ADTMStatus.MEDICAL_MANAGER_LINKING_BUT_NOT_CONNECTED;
-                linkButton.setText("Confirm");
-                unLinkButton.setText("Cancel");
-                linkButton.setEnabled(false);
-                unLinkButton.setEnabled(true);
-                break;
-            case UNLINKING_BUT_NOT_CONNECTED:
-                if (this.adtmStatus == ADTMStatus.NONE_SELECTED)
-                    throw new IllegalStateException("In Unlinking Status,original state cannot be NONE_SELECTED");
-                if (this.adtmStatus == ADTMStatus.DOCTOR_SELECTED) this.adtmStatus = ADTMStatus.DOCTOR_UNLINKING_BUT_NOT_CONNECTED;
-                if (this.adtmStatus == ADTMStatus.MEDICAL_MANAGER_SELECTED) this.adtmStatus = ADTMStatus.MEDICAL_MANAGER_UNLINKING_BUT_NOT_CONNECTED;
-                linkButton.setText("Confirm");
-                unLinkButton.setText("Cancel");
-                linkButton.setEnabled(false);
-                unLinkButton.setEnabled(true);
-                break;
-
-            case LINKING_AND_CONNECTED:
-                if (this.adtmStatus == ADTMStatus.NONE_SELECTED)
-                    throw new IllegalStateException("In Linking Status,original state cannot be NONE_SELECTED");
-                if (this.adtmStatus == ADTMStatus.DOCTOR_SELECTED) this.adtmStatus = ADTMStatus.DOCTOR_LINKING_AND_CONNECTED;
-                if (this.adtmStatus == ADTMStatus.MEDICAL_MANAGER_SELECTED) this.adtmStatus = ADTMStatus.MEDICAL_MANAGER_LINKING_AND_CONNECTED;
-                linkButton.setText("Confirm");
-                unLinkButton.setText("Cancel");
-                linkButton.setEnabled(true);
-                unLinkButton.setEnabled(true);
-                break;
-            case UNLINKING_AND_CONNECTED:
-                if (this.adtmStatus == ADTMStatus.NONE_SELECTED)
-                    throw new IllegalStateException("In unLinking Status,original state cannot be NONE_SELECTED");
-                if (this.adtmStatus == ADTMStatus.DOCTOR_SELECTED) this.adtmStatus = ADTMStatus.DOCTOR_UNLINKING_AND_CONNECTED;
-                if (this.adtmStatus == ADTMStatus.MEDICAL_MANAGER_SELECTED) this.adtmStatus = ADTMStatus.MEDICAL_MANAGER_UNLINKING_AND_CONNECTED;
-                linkButton.setText("Confirm");
-                unLinkButton.setText("Cancel");
-                linkButton.setEnabled(true);
-                unLinkButton.setEnabled(true);
-                break;
-
-        }
-
-    }
 
     public AdminForm(Admin admin, HospitalEntityAllocator hospitalEntityAllocator)
     {
         adminOperation = new AdminOperation(hospitalEntityAllocator,admin);
         initComponents();
+        userTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        userTable.setDefaultEditor(Object.class, null);
+        allocateDoctorToMedicalManagerPanel = new AllocateDoctorToMedicalManagerPanel(adminOperation);
+        DTMMPanel.add(allocateDoctorToMedicalManagerPanel,BorderLayout.CENTER);
         userPanelInit();
-        allocateDoctorToManagerPanelInit();
+
     }
+
+
 
     private void userPanelInit()
     {
         userTable.removeColumn(userTable.getColumn("User Object"));
         clearTable(userTable);
         loadAllUserToUserTable();
-        userTable.getSelectionModel().addListSelectionListener(e -> {
-            buttonDetectForSelectListInAllUserTable();});
+        userTable.getSelectionModel().addListSelectionListener(e ->
+        {
+            if (e.getValueIsAdjusting()) return;
+            buttonDetectForSelectListInAllUserTable();
+        });
         buttonDetectForSelectListInAllUserTable();
     }
-
-    private void allocateDoctorToManagerPanelInit()
-    {
-        doctorTable.removeColumn(doctorTable.getColumn("doctorObject"));
-        medicalManagerTable.removeColumn(medicalManagerTable.getColumn("medicalManagerObject"));
-        clearTable(medicalManagerTable);
-        clearTable(doctorTable);
-        loadDataToTableADTMVer(doctorTable,adminOperation.getAllDoctors());
-        loadDataToTableADTMVer(medicalManagerTable,adminOperation.getAllMedicalManagers());
-        setAdtmStatus(ADTMStatus.NONE_SELECTED);
-    }
-
-    private void loadDataToTableADTMVer(JTable table, List<? extends BusinessEntity<? extends User>> users)
-    {
-        DefaultTableModel model = (DefaultTableModel) table.getModel();
-        for (var user : users)
-        {
-            User userData = user.getSelf();
-            Object[] row = new Object[3];
-            row[0] = user.getId();
-            row[1] = user.getSelf().getName();
-            row[2] = user;
-            model.addRow(row);
-        }
-    }
-    private void functionForSelectListInTableOfADTMPanel()
-    {
-        int selectedRowDoctor = doctorTable.getSelectedRow();
-        int selectedRowMedicalManager = medicalManagerTable.getSelectedRow();
-        switch(adtmStatus)
-        {
-            case NONE_SELECTED:
-
-                if (selectedRowDoctor == -1 && selectedRowMedicalManager == -1) setAdtmStatus(ADTMStatus.NONE_SELECTED);
-                if (selectedRowDoctor != -1 && selectedRowMedicalManager != -1)
-                    throw new IllegalStateException("Doctor and MedicalManager can't be both selected In NONE_SELECTED state");
-                if (selectedRowDoctor != -1) setAdtmStatus(ADTMStatus.DOCTOR_SELECTED);
-                if (selectedRowMedicalManager != -1) setAdtmStatus(ADTMStatus.MEDICAL_MANAGER_SELECTED);
-                break;
-            case DOCTOR_SELECTED, MEDICAL_MANAGER_SELECTED:
-                if (selectedRowDoctor == -1 && selectedRowMedicalManager == -1) setAdtmStatus(ADTMStatus.NONE_SELECTED);
-                if (selectedRowMedicalManager != -1) setAdtmStatus(ADTMStatus.MEDICAL_MANAGER_SELECTED);
-                if (selectedRowDoctor != -1) setAdtmStatus(ADTMStatus.DOCTOR_SELECTED);
-                break;
-
-        }
-    }
-
     private void buttonDetectForSelectListInAllUserTable()
     {
         int selectedRow = userTable.getSelectedRow();
         updateUserButton.setEnabled(selectedRow != -1);
         deleteUserButton.setEnabled(selectedRow != -1);
     }
+
+
 
     private void clearTable(JTable table)
     {
@@ -207,21 +85,22 @@ public class AdminForm extends JFrame {
     {
         UserDialog userDialog = new UserDialog(this,adminOperation);
         userDialog.setVisible(true);
+        reloadUser(null);
+        allocateDoctorToMedicalManagerPanel.reload();
     }
 
     private void updateUser(ActionEvent e)
     {
-        int selectedRow = userTable.getSelectedRow();
-        if(selectedRow == -1)
+        BusinessEntity<? extends User> user = getObjectFromCurrentSelectedRow(userTable,7);
+        if(user == null)
         {
             JOptionPane.showMessageDialog(this, "Please select a user");
             return;
         }
-        int modelRow = userTable.convertRowIndexToModel(selectedRow);
-        BusinessEntity<? extends User> user = (BusinessEntity<? extends User>)userTable.getModel().getValueAt(modelRow, 7);
         UserDialog userDialog = new UserDialog(this,adminOperation,user);
         userDialog.setVisible(true);
         reloadUser(null);
+        allocateDoctorToMedicalManagerPanel.reload();
     }
 
     private void deleteUser(ActionEvent e)
@@ -234,9 +113,34 @@ public class AdminForm extends JFrame {
         }
         int modelRow = userTable.convertRowIndexToModel(selectedRow);
         BusinessEntity<? extends User> user = (BusinessEntity<? extends User>)userTable.getModel().getValueAt(modelRow, 7);
-        adminOperation.deleteUser(user);
-        reloadUser(null);
+        AdminOperation.CRUDInformation crudInformation = adminOperation.deleteUser(user);
+        if (crudInformation.isSuccess())
+        {
+            reloadUser(null);
+            allocateDoctorToMedicalManagerPanel.reload();
+            JOptionPane.showMessageDialog(this, "User has been deleted");
+        }
+        else
+        {
+            JOptionPane.showMessageDialog(this, crudInformation.message());
+        }
     }
+
+    private <T> T getObjectFromCurrentSelectedRow(JTable table, int column)
+    {
+        int selectedRow = table.getSelectedRow();
+        if(selectedRow == -1)
+        {
+           return null;
+        }
+        selectedRow = table.convertRowIndexToModel(selectedRow);
+        return getObjectFromRow(table,selectedRow,column);
+    }
+    private <T> T getObjectFromRow(JTable table, int modelRow, int column)
+    {
+        return (T)table.getModel().getValueAt(modelRow, column);
+    }
+
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
@@ -249,13 +153,6 @@ public class AdminForm extends JFrame {
         updateUserButton = new JButton();
         deleteUserButton = new JButton();
         DTMMPanel = new JPanel();
-        scrollPane1 = new JScrollPane();
-        doctorTable = new JTable();
-        scrollPane2 = new JScrollPane();
-        medicalManagerTable = new JTable();
-        linkButton = new JButton();
-        unLinkButton = new JButton();
-        saveButton = new JButton();
 
         //======== this ========
         var contentPane = getContentPane();
@@ -337,81 +234,7 @@ public class AdminForm extends JFrame {
 
             //======== DTMMPanel ========
             {
-
-                //======== scrollPane1 ========
-                {
-
-                    //---- doctorTable ----
-                    doctorTable.setModel(new DefaultTableModel(
-                        new Object[][] {
-                            {null, null, null},
-                            {null, null, null},
-                        },
-                        new String[] {
-                            "Id", "Name", "doctorObject"
-                        }
-                    ));
-                    scrollPane1.setViewportView(doctorTable);
-                }
-
-                //======== scrollPane2 ========
-                {
-
-                    //---- medicalManagerTable ----
-                    medicalManagerTable.setModel(new DefaultTableModel(
-                        new Object[][] {
-                            {null, null, null},
-                            {null, null, null},
-                        },
-                        new String[] {
-                            "Id", "Name", "medicalManagerObject"
-                        }
-                    ));
-                    scrollPane2.setViewportView(medicalManagerTable);
-                }
-
-                //---- linkButton ----
-                linkButton.setText("Link");
-
-                //---- unLinkButton ----
-                unLinkButton.setText("Unlink");
-
-                //---- saveButton ----
-                saveButton.setText("Save");
-
-                GroupLayout DTMMPanelLayout = new GroupLayout(DTMMPanel);
-                DTMMPanel.setLayout(DTMMPanelLayout);
-                DTMMPanelLayout.setHorizontalGroup(
-                    DTMMPanelLayout.createParallelGroup()
-                        .addGroup(DTMMPanelLayout.createSequentialGroup()
-                            .addGap(46, 46, 46)
-                            .addComponent(scrollPane1, GroupLayout.PREFERRED_SIZE, 295, GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 52, Short.MAX_VALUE)
-                            .addGroup(DTMMPanelLayout.createParallelGroup()
-                                .addComponent(linkButton)
-                                .addComponent(unLinkButton)
-                                .addComponent(saveButton))
-                            .addGap(44, 44, 44)
-                            .addComponent(scrollPane2, GroupLayout.PREFERRED_SIZE, 329, GroupLayout.PREFERRED_SIZE)
-                            .addGap(22, 22, 22))
-                );
-                DTMMPanelLayout.setVerticalGroup(
-                    DTMMPanelLayout.createParallelGroup()
-                        .addGroup(DTMMPanelLayout.createSequentialGroup()
-                            .addGap(56, 56, 56)
-                            .addGroup(DTMMPanelLayout.createParallelGroup()
-                                .addComponent(scrollPane2, GroupLayout.DEFAULT_SIZE, 375, Short.MAX_VALUE)
-                                .addComponent(scrollPane1, GroupLayout.DEFAULT_SIZE, 375, Short.MAX_VALUE))
-                            .addContainerGap())
-                        .addGroup(DTMMPanelLayout.createSequentialGroup()
-                            .addGap(170, 170, 170)
-                            .addComponent(linkButton)
-                            .addGap(18, 18, 18)
-                            .addComponent(unLinkButton)
-                            .addGap(18, 18, 18)
-                            .addComponent(saveButton)
-                            .addContainerGap(129, Short.MAX_VALUE))
-                );
+                DTMMPanel.setLayout(new BorderLayout());
             }
             adminTab.addTab("Allocate Doctor to Manger", DTMMPanel);
         }
@@ -447,13 +270,6 @@ public class AdminForm extends JFrame {
     private JButton updateUserButton;
     private JButton deleteUserButton;
     private JPanel DTMMPanel;
-    private JScrollPane scrollPane1;
-    private JTable doctorTable;
-    private JScrollPane scrollPane2;
-    private JTable medicalManagerTable;
-    private JButton linkButton;
-    private JButton unLinkButton;
-    private JButton saveButton;
     // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
 
     private void loadAllUserToUserTable()

@@ -67,12 +67,12 @@ public class Doctor extends BusinessEntity<DoctorToFile> implements OwnEntity, O
         boolean requireOne = !isJustConstruct;
         belongsToDepartment = new LazyEntity<DepartmentToFile>
         (
-            linkerManagerHashMap.get(DepartmentToFile.PREFIX).findBasedOnKeyOneResult(selfId, requireOne),
+            linkerManagerHashMap.get(DepartmentToFile.PREFIX).findBasedOnKeyOneResult(selfId,false),
             new EntityHandler(fileDataHandlerHashMap.get(DepartmentToFile.PREFIX))
         );
         belongsToMedicalManager = new LazyEntity<MedicalManagerToFile>
         (
-                linkerManagerHashMap.get(MedicalManagerToFile.PREFIX).findBasedOnKeyOneResult(selfId, requireOne),
+                linkerManagerHashMap.get(MedicalManagerToFile.PREFIX).findBasedOnKeyOneResult(selfId,false),
                 new EntityHandler(fileDataHandlerHashMap.get(MedicalManagerToFile.PREFIX))
         );
         doctorShifts = new LazyEntityList<DoctorShiftToFile>
@@ -85,23 +85,6 @@ public class Doctor extends BusinessEntity<DoctorToFile> implements OwnEntity, O
                 linkerManagerHashMap.get(AppointmentToFile.PREFIX).findBasedOnKey(selfId),
                 new EntityHandler(fileDataHandlerHashMap.get(AppointmentToFile.PREFIX))
         );
-    }
-    @Override
-    public List<LinkerManager> getLinkerManager()
-    {
-        List<LinkerManager> linkerManagers = getLinkerManagerWithoutValidate();
-        for (LinkerManager linkerManager : linkerManagers)
-        {
-            if
-            (
-                linkerManager.includeClass(DepartmentToFile.class) ||
-                linkerManager.includeClass(MedicalManagerToFile.class)
-            )
-            {
-                if (!linkerManager.isThisRequireOne()) throw new LinkerRequireOneOnlyException();
-            }
-        }
-        return linkerManagers;
     }
 
 }

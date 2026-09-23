@@ -26,6 +26,20 @@ public class AdminOperation
         this.admin = admin;
         this.hospitalEntityAllocator = hospitalEntityAllocator;
     }
+    private CRUDInformation failure(Throwable throwable)
+    {
+        Throwable rootCause = throwable;
+        while (rootCause.getCause() != null && rootCause.getCause() != rootCause)
+        {
+            rootCause = rootCause.getCause();
+        }
+        String message = rootCause.getMessage();
+        if (message == null || message.isBlank())
+        {
+            message = rootCause.getClass().getSimpleName();
+        }
+        return new CRUDInformation(false, message);
+    }
 
     public List<BusinessEntity<? extends User>> getAllUsers()
     {
@@ -54,7 +68,7 @@ public class AdminOperation
             return new CRUDInformation(true,"Success");
         } catch (EntityNotMatchException | EntityNotFoundException e)
         {
-            return new CRUDInformation(false,e.getMessage());
+            return failure(e);
         }
     }
     public <T extends BaseEntity & ConvertToFileData> CRUDInformation addUser(T user)
@@ -65,7 +79,7 @@ public class AdminOperation
             return new CRUDInformation(true,"Success");
         } catch (RuntimeException e)
         {
-            return new CRUDInformation(false,e.getMessage());
+            return failure(e);
         }
     }
 
@@ -78,7 +92,7 @@ public class AdminOperation
             return new CRUDInformation(true,"Success");
         } catch (RuntimeException e)
         {
-            return new CRUDInformation(false,e.getMessage());
+            return failure(e);
         }
 
     }
@@ -103,7 +117,7 @@ public class AdminOperation
         }
         catch (RuntimeException e)
         {
-            return new CRUDInformation(false,e.getMessage());
+            return failure(e);
         }
     }
 
@@ -115,7 +129,7 @@ public class AdminOperation
             return new CRUDInformation(true,"Success");
         } catch (RuntimeException e)
         {
-            return new CRUDInformation(false,e.getMessage());
+            return failure(e);
         }
     }
 
@@ -129,16 +143,34 @@ public class AdminOperation
         return hospitalEntityAllocator.getAllBusinessEntities(MedicalManagerToFile.PREFIX);
     }
 
-    public void allocateDoctorToMedicalManager(Doctor doctor,MedicalManager medicalManager)
+    public CRUDInformation allocateDoctorToMedicalManager(Doctor doctor,MedicalManager medicalManager)
     {
-        doctor.setBelongsToMedicalManager(medicalManager.getSelf());
-        hospitalEntityAllocator.saveChanges(doctor);
+        try
+        {
+            doctor.setBelongsToMedicalManager(medicalManager.getSelf());
+            hospitalEntityAllocator.saveChanges(doctor);
+            return (new CRUDInformation(true, "Success to allocate doctor to medical manager"));
+        } catch (RuntimeException e)
+        {
+            return failure(e);
+        }
     }
 
-    public void allocateDoctorToMedicalManager(MedicalManager medicalManager,Doctor doctor)
+    public CRUDInformation unallocatedDoctorToMedicalManager(Doctor doctor,MedicalManager medicalManager)
     {
-        doctor.setBelongsToMedicalManager(medicalManager.getSelf());
-        hospitalEntityAllocator.saveChanges(doctor);
+        try
+        {
+            if (!doctor.getBelongsToMedicalManager().getId().equals(medicalManager.getId()))
+            {
+                return new CRUDInformation(false, "Manager is not the original doctor's manager");
+            }
+            doctor.setBelongsToMedicalManager(null);
+            hospitalEntityAllocator.saveChanges(doctor);
+            return (new CRUDInformation(true, "Success to unallocated doctor's medical manager"));
+        }  catch (RuntimeException e)
+        {
+            return failure(e);
+        }
     }
 
     public List<Facility> getAllFacilities()
@@ -155,7 +187,7 @@ public class AdminOperation
         }
         catch (RuntimeException e)
         {
-            return new CRUDInformation(false,e.getMessage());
+            return failure(e);
         }
     }
 

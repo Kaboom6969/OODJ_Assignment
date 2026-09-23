@@ -160,6 +160,7 @@ public class UserDialog extends JDialog
         int icon = JOptionPane.INFORMATION_MESSAGE;
         if (!crudInformation.isSuccess()) icon = JOptionPane.ERROR_MESSAGE;
         JOptionPane.showMessageDialog(this, crudInformation.message(),"",icon);
+        if (crudInformation.isSuccess()) dispose();
     }
 
     private void initComponents() {
