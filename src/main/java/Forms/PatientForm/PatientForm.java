@@ -7,6 +7,7 @@ package Forms.PatientForm;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.BaseEntity;
 import entities.BaseEntity.AppointmentToFile.AppointmentStatus;
+import entities.BaseEntity.AssessmentResultToFile;
 import entities.BaseEntity.PrescriptionToFile;
 import entities.BusinessEntity.Appointment;
 import entities.BusinessEntity.Department;
@@ -89,6 +90,7 @@ public class PatientForm extends javax.swing.JFrame {
         medicalTbl.getSelectionModel().addListSelectionListener(evt -> {
             if (!evt.getValueIsAdjusting()) {
                 refreshPrescriptionsTable();
+                refreshAssessmentTable();
             }
         });
         updateAppointmentActionButtons();
@@ -348,6 +350,7 @@ public class PatientForm extends javax.swing.JFrame {
         medicalTbl.getColumnModel().getColumn(2).setPreferredWidth(150); // Diagnosis
         medicalTbl.getColumnModel().getColumn(3).setPreferredWidth(304); // Vitals — longest content
         refreshPrescriptionsTable();
+        refreshAssessmentTable();
     }
 
     // Tab 4: Prescriptions
@@ -362,10 +365,10 @@ public class PatientForm extends javax.swing.JFrame {
         PrescriptionsTbl.setModel(tableModel);
 
         PrescriptionsTbl.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
-        PrescriptionsTbl.getColumnModel().getColumn(0).setPreferredWidth(150); // Medication
-        PrescriptionsTbl.getColumnModel().getColumn(1).setPreferredWidth(110);  // Dosage
-        PrescriptionsTbl.getColumnModel().getColumn(2).setPreferredWidth(150); // Frequency
-        PrescriptionsTbl.getColumnModel().getColumn(3).setPreferredWidth(304); // Duration & Instructions
+        PrescriptionsTbl.getColumnModel().getColumn(0).setPreferredWidth(120); // Medication
+        PrescriptionsTbl.getColumnModel().getColumn(1).setPreferredWidth(100);  // Dosage
+        PrescriptionsTbl.getColumnModel().getColumn(2).setPreferredWidth(132); // Frequency
+        PrescriptionsTbl.getColumnModel().getColumn(3).setPreferredWidth(230); // Duration & Instructions
 
         int selectedRow = medicalTbl.getSelectedRow();
         if (selectedRow < 0 || currentMedicalHistory == null
@@ -382,6 +385,39 @@ public class PatientForm extends javax.swing.JFrame {
                 prescription.getDosage(),
                 prescription.getFrequency(),
                 prescription.getDurationDays() + " days — " + prescription.getInstructions()
+            });
+        }
+    }
+
+    private void refreshAssessmentTable() {
+        DefaultTableModel tableModel = new DefaultTableModel(
+                new Object[] {"Result", "Remark", "Completed"}, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        AssessmentTbl.setModel(tableModel);
+        
+        AssessmentTbl.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
+        AssessmentTbl.getColumnModel().getColumn(0).setPreferredWidth(181); // Result
+        AssessmentTbl.getColumnModel().getColumn(1).setPreferredWidth(300); // Remark
+        AssessmentTbl.getColumnModel().getColumn(2).setPreferredWidth(100); // Completed
+
+        int selectedRow = medicalTbl.getSelectedRow();
+        if (selectedRow < 0 || currentMedicalHistory == null
+                || currentMedicalHistory.isEmpty()
+                || selectedRow >= currentMedicalHistory.size()) {
+            return;
+        }
+
+        MedicalRecord record = currentMedicalHistory.get(selectedRow);
+        DateTimeFormatter assessmentFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        for (AssessmentResultToFile assessment : record.getAssessmentResults()) {
+            tableModel.addRow(new Object[] {
+                assessment.getResult(),
+                assessment.getRemark(),
+                assessment.getCompletedTime().format(assessmentFormatter)
             });
         }
     }
@@ -427,9 +463,13 @@ public class PatientForm extends javax.swing.JFrame {
         jPanel4 = new javax.swing.JPanel();
         jLabel10 = new javax.swing.JLabel();
         jScrollPane3 = new javax.swing.JScrollPane();
-        PrescriptionsTbl = new javax.swing.JTable();
+        AssessmentTbl = new javax.swing.JTable();
         jScrollPane4 = new javax.swing.JScrollPane();
         medicalTbl = new javax.swing.JTable();
+        jLabel17 = new javax.swing.JLabel();
+        jLabel18 = new javax.swing.JLabel();
+        jScrollPane8 = new javax.swing.JScrollPane();
+        PrescriptionsTbl = new javax.swing.JTable();
         jPanel7 = new javax.swing.JPanel();
         jLabel12 = new javax.swing.JLabel();
         usernameTf = new javax.swing.JTextField();
@@ -698,7 +738,7 @@ public class PatientForm extends javax.swing.JFrame {
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGap(29, 29, 29)
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 697, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(21, Short.MAX_VALUE))
+                .addContainerGap(28, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -719,11 +759,11 @@ public class PatientForm extends javax.swing.JFrame {
 
         jPanel4.setBackground(new java.awt.Color(241, 232, 236));
 
-        jLabel10.setFont(new java.awt.Font("Times New Roman", 1, 36)); // NOI18N
-        jLabel10.setText("Medical Records & Presriptions");
+        jLabel10.setFont(new java.awt.Font("Times New Roman", 1, 24)); // NOI18N
+        jLabel10.setText("Assessments");
         jLabel10.setToolTipText("");
 
-        PrescriptionsTbl.setModel(new javax.swing.table.DefaultTableModel(
+        AssessmentTbl.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null},
                 {null, null, null, null},
@@ -734,7 +774,7 @@ public class PatientForm extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        jScrollPane3.setViewportView(PrescriptionsTbl);
+        jScrollPane3.setViewportView(AssessmentTbl);
 
         medicalTbl.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -749,32 +789,72 @@ public class PatientForm extends javax.swing.JFrame {
         ));
         jScrollPane4.setViewportView(medicalTbl);
 
+        jLabel17.setFont(new java.awt.Font("Times New Roman", 1, 36)); // NOI18N
+        jLabel17.setText("Medical Records ");
+        jLabel17.setToolTipText("");
+
+        jLabel18.setFont(new java.awt.Font("Times New Roman", 1, 24)); // NOI18N
+        jLabel18.setText("Presriptions");
+        jLabel18.setToolTipText("");
+
+        PrescriptionsTbl.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane8.setViewportView(PrescriptionsTbl);
+
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
         jPanel4Layout.setHorizontalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addGap(0, 16, Short.MAX_VALUE)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                        .addComponent(jLabel10)
-                        .addGap(122, 122, 122))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 720, Short.MAX_VALUE)
-                            .addComponent(jScrollPane3))
-                        .addGap(11, 11, 11))))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel17)
+                .addGap(230, 230, 230))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                .addGap(0, 29, Short.MAX_VALUE)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 720, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel10)
+                            .addComponent(jLabel18))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane8)
+                            .addComponent(jScrollPane3))))
+                .addContainerGap())
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
-                .addGap(37, 37, 37)
-                .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 222, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(10, Short.MAX_VALUE))
+                .addGap(43, 43, 43)
+                .addComponent(jLabel17, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(31, 31, 31)
+                        .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGap(18, 18, 18)
+                        .addComponent(jScrollPane8, javax.swing.GroupLayout.PREFERRED_SIZE, 68, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                        .addContainerGap())
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 33, Short.MAX_VALUE)
+                        .addComponent(jLabel10)
+                        .addGap(33, 33, 33))))
         );
 
         jTabbedPane1.addTab("Records", jPanel4);
@@ -881,7 +961,7 @@ public class PatientForm extends javax.swing.JFrame {
                                     .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 283, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)))
                             .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 645, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(36, Short.MAX_VALUE))
+                .addContainerGap(43, Short.MAX_VALUE))
         );
         jPanel7Layout.setVerticalGroup(
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1220,6 +1300,7 @@ public class PatientForm extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTable AssessmentTbl;
     private javax.swing.JButton CancelBtn;
     private javax.swing.JTable PrescriptionsTbl;
     private javax.swing.JButton RescheduleBtn;
@@ -1244,6 +1325,8 @@ public class PatientForm extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
+    private javax.swing.JLabel jLabel17;
+    private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -1264,6 +1347,7 @@ public class PatientForm extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JScrollPane jScrollPane7;
+    private javax.swing.JScrollPane jScrollPane8;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JButton logOutBtn;
     private javax.swing.JTable medicalTbl;
