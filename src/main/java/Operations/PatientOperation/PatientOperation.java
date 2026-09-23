@@ -91,35 +91,33 @@ public class PatientOperation implements PatientService
     }
 
     // APPOINTMENT SERVICES
-    // 1. Load everything needed (not affect the other methods)
-    // 1.1 Loads all departments available to the patient. Department records. 
+    // 1. Loads all departments available to the patient. Department records. 
     public List<Department> loadAllDepartments()
     {
         //PREFIX is a constant (a public static final variable) in DepartmentToFile..
         return allocator.getAllBusinessEntities(DepartmentToFile.PREFIX);
     }
-
-    // 1.2 Loads all doctors available to the patient. Doctor records.
-    public List<Doctor> loadAllDoctors()
-    {
-        return allocator.getAllBusinessEntities(DoctorToFile.PREFIX);
-    }
-
-    // 1.3 Filter all doctors available by department. Doctor records.
-    public List<Doctor> loadDoctorsByDepartment(Department department)
-    {
-        List<Doctor> filtered = new ArrayList<>();
-        for (Doctor doctor : loadAllDoctors())
-        {
-            if (doctor.getBelongsToDepartment().getId().equals(department.getSelf().getId()))
-            {
-                filtered.add(doctor);
-            }
-        }
-        return filtered;
-    }
     
-    // 1.4. Loads the next upcoming appointment, or null when none exists. Patient -> Appointment. 
+    // 2 Loads the patient's upcoming and past appointments, including their statuses. Patient -> Appointment.
+    public List<Appointment> loadMyAppointments()
+    {
+        List<Appointment> appointments = new ArrayList<>();
+        // Straight read of all linked appointments; no validation or status filtering is needed.
+        for (AppointmentToFile appointmentData : patient.getAppointments())
+        {
+            appointments.add(allocator.getBusinessEntity(appointmentData.getId()));
+        }
+        appointments.sort((first, second) ->
+                first.getSelf().getAppointmentTime().compareTo(second.getSelf().getAppointmentTime()));
+
+        // If first is earlier than second, it returns a negative number.
+        // If first is exactly the same time as second, it returns 0.
+        // If first is later than second, it returns a positive number.
+        // The .sort() method uses these negative/positive numbers to figure out the order
+        return appointments;
+    }
+
+    // 3 Loads the next upcoming appointment, or null when none exists. Patient -> Appointment. 
     public Appointment loadNextUpcomingAppointment()
     {
         LocalDateTime now = LocalDateTime.now();
@@ -139,7 +137,7 @@ public class PatientOperation implements PatientService
         return nextAppointment;
     }
     
-    // 2.  Aggregates ratings from the doctor's completed appointments. Doctor -> Appointment -> Feedback.
+    // 4.  Aggregates ratings from the doctor's completed appointments. Doctor -> Appointment -> Feedback.
     public double loadDoctorAverageRating(Doctor doctor)
     {
         int totalRating = 0;
@@ -163,7 +161,7 @@ public class PatientOperation implements PatientService
         }
     }
 
-    // 3. Loads available appointment slots from doctor shifts. Doctor -> DoctorShift -> Appointment. 
+    // 5. Loads available appointment slots from doctor shifts. Doctor -> DoctorShift -> Appointment. 
     public List<LocalDateTime> loadAvailableSlots(Doctor doctor)
     {
         return loadAvailableSlots(doctor, null);
@@ -202,12 +200,33 @@ public class PatientOperation implements PatientService
         return availableSlots;
     }
 
-    // 4. Returns date-filtered results per doctor 
+    // 6. Returns date-filtered results per doctor 
+    // 6.1 Loads all doctors available to the patient. Doctor records.
+    public List<Doctor> loadAllDoctors()
+    {
+        return allocator.getAllBusinessEntities(DoctorToFile.PREFIX);
+    }
+
+    // 6.2 Filter all doctors available by department. Doctor records.
+    public List<Doctor> loadDoctorsByDepartment(Department department)
+    {
+        List<Doctor> filtered = new ArrayList<>();
+        for (Doctor doctor : loadAllDoctors())
+        {
+            if (doctor.getBelongsToDepartment().getId().equals(department.getSelf().getId()))
+            {
+                filtered.add(doctor);
+            }
+        }
+        return filtered;
+    }
+
     // record = generates a complete, immutable (read-only) class behind the scenes.
     // Its purpose here is to simply bundle two pieces of data together (a specific doctor and their list of times)
     // so they can be returned as a single unit from the loadDoctorAvailability method.
     public record DoctorAvailability(Doctor doctor, List<LocalDateTime> availableSlots) {}
 
+    // 6.3 Filter all doctors available by date. Doctor records.
     public List<DoctorAvailability> loadDoctorAvailability(Department department, LocalDate date)
     {
         List<DoctorAvailability> results = new ArrayList<>();
@@ -227,7 +246,8 @@ public class PatientOperation implements PatientService
         return results;
     }
 
-    // 5. Returns facility availability for a given time. Facility -> Appointment.
+    // Reuse function for booking & rescheduling:
+    // 1. Returns facility availability for a given time. Facility -> Appointment.
     private Facility findAvailableFacility(LocalDateTime time, String excludeAppointmentId)
     {
         for (Facility candidate : allocator.<Facility>getAllBusinessEntities(FacilityToFile.PREFIX)) {
@@ -256,7 +276,7 @@ public class PatientOperation implements PatientService
         return null;
     }
 
-    // 6. Checks if the patient has an active appointment at the specified time.
+    // 2. Checks if the patient has an active appointment at the specified time.
     private boolean hasActiveAppointmentAtTime(LocalDateTime time, String excludeAppointmentId)
     {
         for (Appointment existingAppointment : loadMyAppointments()) {
@@ -275,7 +295,7 @@ public class PatientOperation implements PatientService
         return false; // Free to book
     }
 
-    // 8. Books an appointment for the patient with the selected doctor and facility. Patient -> Appointment -> Doctor/Facility.
+    // 7. Books an appointment for the patient with the selected doctor and facility. Patient -> Appointment -> Doctor/Facility.
     @Override 
     public void bookAppointment(Doctor doctor, LocalDateTime time, String reason)
     {
@@ -332,7 +352,7 @@ public class PatientOperation implements PatientService
         allocator.saveChanges(appointment);
     }
 
-    // 9. Reschedules an existing appointment to a new time. Appointment -> AppointmentToFile.
+    // 8. Reschedules an existing appointment to a new time. Appointment -> AppointmentToFile.
     @Override 
     public void rescheduleAppointment(Appointment appointment, LocalDateTime newTime)
     {
@@ -371,7 +391,7 @@ public class PatientOperation implements PatientService
         allocator.saveChanges(appointment);
     }
 
-    //10. Cancels an appointment while preserving its linked medical record and feedback. Appointment -> AppointmentToFile. 
+    //9. Cancels an appointment while preserving its linked medical record and feedback. Appointment -> AppointmentToFile. 
     @Override
     public void cancelAppointment(Appointment appointment)
     {
@@ -386,25 +406,6 @@ public class PatientOperation implements PatientService
         }
         appointment.getSelf().setStatus(AppointmentStatus.CANCELLED);
         allocator.saveChanges(appointment);
-    }
-
-    // 11. Loads the patient's upcoming and past appointments, including their statuses. Patient -> Appointment.
-    public List<Appointment> loadMyAppointments()
-    {
-        List<Appointment> appointments = new ArrayList<>();
-        // Straight read of all linked appointments; no validation or status filtering is needed.
-        for (AppointmentToFile appointmentData : patient.getAppointments())
-        {
-            appointments.add(allocator.getBusinessEntity(appointmentData.getId()));
-        }
-        appointments.sort((first, second) ->
-                first.getSelf().getAppointmentTime().compareTo(second.getSelf().getAppointmentTime()));
-
-        // If first is earlier than second, it returns a negative number.
-        // If first is exactly the same time as second, it returns 0.
-        // If first is later than second, it returns a positive number.
-        // The .sort() method uses these negative/positive numbers to figure out the order
-        return appointments;
     }
 
     // HEALTH RECORD SERVICES
