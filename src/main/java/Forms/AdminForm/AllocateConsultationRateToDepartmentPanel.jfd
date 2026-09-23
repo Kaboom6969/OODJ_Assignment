@@ -1,0 +1,94 @@
+﻿JFDML JFormDesigner: "8.3" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class org.jdesktop.layout.GroupLayout ) {
+			"$horizontalGroup": "par l {seq l {space :::p, comp scrollPane1:::p:295:p, space :p:53:p, par l {comp unLinkButton:::p::p, comp linkButton:::p::p}, space ::33:x, comp scrollPane2:::p:329:p, space :::p}}"
+			"$verticalGroup": "par l {seq l {space :p:121:p, comp linkButton:::p::p, space s:::p, comp unLinkButton:::p::p, space ::278:x}, seq {par l {comp scrollPane2::l:p:473:p, comp scrollPane1::l:p:473:p}, space :0:12:x}}"
+		} ) {
+			name: "this"
+			add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+				name: "scrollPane1"
+				add( new FormComponent( "javax.swing.JTable" ) {
+					name: "consulatationRateTable"
+					"model": new com.jformdesigner.model.SwingTableModel( new java.util.Vector {
+						add( new java.util.Vector {
+							add( null )
+							add( null )
+							add( null )
+						} )
+						add( new java.util.Vector {
+							add( null )
+							add( null )
+							add( null )
+						} )
+					}, new java.util.Vector {
+						add( "Id" )
+						add( "Name" )
+						add( "consultationRateObject" )
+					}, new java.util.Vector {
+						add( null )
+						add( null )
+						add( null )
+					}, new java.util.Vector {
+						add( null )
+						add( null )
+						add( null )
+					}, new java.util.Vector {
+						add( null )
+						add( null )
+						add( null )
+					} )
+				} )
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "unLinkButton"
+				"text": "Unlink"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "unLink", true ) )
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "linkButton"
+				"text": "Link"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "link", true ) )
+			} )
+			add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+				name: "scrollPane2"
+				add( new FormComponent( "javax.swing.JTable" ) {
+					name: "departmentTable"
+					"model": new com.jformdesigner.model.SwingTableModel( new java.util.Vector {
+						add( new java.util.Vector {
+							add( null )
+							add( null )
+							add( null )
+						} )
+						add( new java.util.Vector {
+							add( null )
+							add( null )
+							add( null )
+						} )
+					}, new java.util.Vector {
+						add( "Id" )
+						add( "Name" )
+						add( "departmentObject" )
+					}, new java.util.Vector {
+						add( null )
+						add( null )
+						add( null )
+					}, new java.util.Vector {
+						add( null )
+						add( null )
+						add( null )
+					}, new java.util.Vector {
+						add( null )
+						add( null )
+						add( null )
+					} )
+				} )
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 800, 485 )
+		} )
+	}
+}

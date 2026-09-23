@@ -1,0 +1,79 @@
+﻿JFDML JFormDesigner: "8.3" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class org.jdesktop.layout.GroupLayout ) {
+			"$horizontalGroup": "par l {seq l {space :p:32:p, comp allUserScrollPanel:::p:709:p, space s:::p, par l {comp reloadButton:::p:84:p, comp addButton:::p::p, comp updateButton:::p::p, comp deleteButton:::p::p}, space ::57:x}}"
+			"$verticalGroup": "par l {seq {par l {seq l {space :p:42:p, comp allUserScrollPanel:::p:425:p}, seq l {space :p:92:p, comp reloadButton:::p::p, space s:::p, comp addButton:::p::p, space s:::p, comp updateButton:::p::p, space s:::p, comp deleteButton:::p::p}}, space ::43:x}}"
+		} ) {
+			name: "this"
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "reloadButton"
+				"text": "Reload"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "reloadUser", true ) )
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "addButton"
+				"text": "Add"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "addUser", true ) )
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "updateButton"
+				"text": "Update"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "updateUser", true ) )
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "deleteButton"
+				"text": "Delete"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "deleteUser", true ) )
+			} )
+			add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+				name: "allUserScrollPanel"
+				add( new FormComponent( "javax.swing.JTable" ) {
+					name: "userTable"
+					"model": new com.jformdesigner.model.SwingTableModel( new java.util.Vector, new java.util.Vector {
+						add( "Role" )
+						add( "Id" )
+						add( "Name" )
+						add( "Email" )
+						add( "Gender" )
+						add( "Date Of Birth" )
+						add( "Phone Number" )
+						add( "User Object" )
+					}, new java.util.Vector {
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+					}, new java.util.Vector {
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+					}, new java.util.Vector {
+						add( null )
+						add( null )
+						add( null )
+						add( new com.jformdesigner.model.SwingTableColumn( null, 150, 0, 0, true ) )
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+					} )
+				} )
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 900, 510 )
+		} )
+	}
+}
