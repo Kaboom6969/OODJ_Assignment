@@ -72,7 +72,7 @@ public class PatientOperation implements PatientService
         }
 
         // Validate email for forbidden characters
-        if (email != null && (email.contains("|") || email.contains("\n") || email.contains("\r"))) {
+        if (email != null && (email.contains("|") || email.contains("\\n") || email.contains("\\r"))) {
             throw new ProfileValidationException("Email cannot contain '|' or line breaks.");
         }
 
@@ -286,8 +286,8 @@ public class PatientOperation implements PatientService
             throw new BookingValidationException("Reason cannot be empty.");
         }
         // otherwise will crash the delimiter-based file format when saving to disk, as '|' is used as a field separator.
-        if (reason.contains("|")) {
-            throw new BookingValidationException("Reason cannot contain the '|' character.");
+        if (reason.contains("|") || reason.contains("\\n") || reason.contains("\\r")) {
+            throw new BookingValidationException("Reason cannot contain the '|' character or line breakers.");
         }
 
         if (!loadAvailableSlots(doctor).contains(time)) {
@@ -427,8 +427,8 @@ public class PatientOperation implements PatientService
         if (comment == null || comment.trim().isEmpty()) {
             throw new FeedbackValidationException("Comment cannot be empty.");
         }
-        if (comment.contains("|")) {
-            throw new FeedbackValidationException("Comment cannot contain the '|' character.");
+        if (comment.contains("|") || comment.contains("\\n") || comment.contains("\\r")) {
+            throw new FeedbackValidationException("Comment cannot contain the '|' character or line breakers.");
         }
 
         FeedbackToFile feedbackData = new FeedbackToFile(
