@@ -48,7 +48,8 @@ public class PatientOperation implements PatientService
         this.patient = patient;
     }
 
-    // 2. Updates and validates the patient's profile details, then saves the patient. Patient -> PatientToFile
+    // PROFILE SERVICES
+    // 1. Updates and validates the patient's profile details, then saves the patient. Patient -> PatientToFile
     @Override 
     public void updateProfile(String name, String password, UserWithDetails.Gender gender,
                               String dob, String email, String phone)
@@ -89,21 +90,22 @@ public class PatientOperation implements PatientService
         allocator.saveChanges(patient);
     }
 
-    // 3. Load everything needed (not affect the other methods)
-    // 3.1 Loads all departments available to the patient. Department records. 
+    // APPOINTMENT SERVICES
+    // 1. Load everything needed (not affect the other methods)
+    // 1.1 Loads all departments available to the patient. Department records. 
     public List<Department> loadAllDepartments()
     {
         //PREFIX is a constant (a public static final variable) in DepartmentToFile..
         return allocator.getAllBusinessEntities(DepartmentToFile.PREFIX);
     }
 
-    // 3.2 Loads all doctors available to the patient. Doctor records.
+    // 1.2 Loads all doctors available to the patient. Doctor records.
     public List<Doctor> loadAllDoctors()
     {
         return allocator.getAllBusinessEntities(DoctorToFile.PREFIX);
     }
 
-    // 3.3 Filter all doctors available by department. Doctor records.
+    // 1.3 Filter all doctors available by department. Doctor records.
     public List<Doctor> loadDoctorsByDepartment(Department department)
     {
         List<Doctor> filtered = new ArrayList<>();
@@ -117,7 +119,7 @@ public class PatientOperation implements PatientService
         return filtered;
     }
     
-    // 3.4. Loads the next upcoming appointment, or null when none exists. Patient -> Appointment. 
+    // 1.4. Loads the next upcoming appointment, or null when none exists. Patient -> Appointment. 
     public Appointment loadNextUpcomingAppointment()
     {
         LocalDateTime now = LocalDateTime.now();
@@ -137,7 +139,7 @@ public class PatientOperation implements PatientService
         return nextAppointment;
     }
     
-    // 4.  Aggregates ratings from the doctor's completed appointments. Doctor -> Appointment -> Feedback.
+    // 2.  Aggregates ratings from the doctor's completed appointments. Doctor -> Appointment -> Feedback.
     public double loadDoctorAverageRating(Doctor doctor)
     {
         int totalRating = 0;
@@ -161,7 +163,7 @@ public class PatientOperation implements PatientService
         }
     }
 
-    // 5. Loads available appointment slots from doctor shifts. Doctor -> DoctorShift -> Appointment. 
+    // 3. Loads available appointment slots from doctor shifts. Doctor -> DoctorShift -> Appointment. 
     public List<LocalDateTime> loadAvailableSlots(Doctor doctor)
     {
         return loadAvailableSlots(doctor, null);
@@ -200,7 +202,7 @@ public class PatientOperation implements PatientService
         return availableSlots;
     }
 
-    // 6. Returns date-filtered results per doctor 
+    // 4. Returns date-filtered results per doctor 
     // record = generates a complete, immutable (read-only) class behind the scenes.
     // Its purpose here is to simply bundle two pieces of data together (a specific doctor and their list of times)
     // so they can be returned as a single unit from the loadDoctorAvailability method.
@@ -225,7 +227,7 @@ public class PatientOperation implements PatientService
         return results;
     }
 
-    // 7. Returns facility availability for a given time. Facility -> Appointment.
+    // 5. Returns facility availability for a given time. Facility -> Appointment.
     private Facility findAvailableFacility(LocalDateTime time, String excludeAppointmentId)
     {
         for (Facility candidate : allocator.<Facility>getAllBusinessEntities(FacilityToFile.PREFIX)) {
@@ -254,7 +256,7 @@ public class PatientOperation implements PatientService
         return null;
     }
 
-    // 8. Books an appointment for the patient with the selected doctor and facility. Patient -> Appointment -> Doctor/Facility.
+    // 6. Books an appointment for the patient with the selected doctor and facility. Patient -> Appointment -> Doctor/Facility.
     @Override 
     public void bookAppointment(Doctor doctor, LocalDateTime time, String reason)
     {
@@ -307,7 +309,7 @@ public class PatientOperation implements PatientService
         allocator.saveChanges(appointment);
     }
 
-    // 9. Reschedules an existing appointment to a new time. Appointment -> AppointmentToFile.
+    // 7. Reschedules an existing appointment to a new time. Appointment -> AppointmentToFile.
     @Override 
     public void rescheduleAppointment(Appointment appointment, LocalDateTime newTime)
     {
@@ -342,7 +344,7 @@ public class PatientOperation implements PatientService
         allocator.saveChanges(appointment);
     }
 
-    /** 10. Cancels an appointment while preserving its linked medical record and feedback. Appointment -> AppointmentToFile. */
+    /** 8. Cancels an appointment while preserving its linked medical record and feedback. Appointment -> AppointmentToFile. */
     @Override
     public void cancelAppointment(Appointment appointment)
     {
@@ -359,7 +361,7 @@ public class PatientOperation implements PatientService
         allocator.saveChanges(appointment);
     }
 
-    // 11. Loads the patient's upcoming and past appointments, including their statuses. Patient -> Appointment.
+    // 9. Loads the patient's upcoming and past appointments, including their statuses. Patient -> Appointment.
     public List<Appointment> loadMyAppointments()
     {
         List<Appointment> appointments = new ArrayList<>();
@@ -378,7 +380,8 @@ public class PatientOperation implements PatientService
         return appointments;
     }
 
-    // 12. Loads the patient's medical history. Patient -> Appointment -> MedicalRecord.
+    // HEALTH RECORD SERVICES
+    // 1. Loads the patient's medical history. Patient -> Appointment -> MedicalRecord.
     @Override 
     public List<MedicalRecord> loadMedicalHistory()
     {
@@ -395,7 +398,7 @@ public class PatientOperation implements PatientService
         return medicalHistory;
     }
 
-    // 13. Loads prescriptions belonging to a medical record. Patient -> MedicalRecord -> Prescription.
+    // 2. Loads prescriptions belonging to a medical record. Patient -> MedicalRecord -> Prescription.
     @Override 
     public List<PrescriptionToFile> loadPrescriptions(MedicalRecord record)
     {
@@ -407,7 +410,8 @@ public class PatientOperation implements PatientService
         return prescriptions;
     }
 
-    // 14. Submits one feedback record for a completed appointment that has no feedback yet. Appointment -> Feedback. */
+    // FEEDBACK SERVICES
+    // 1. Submits one feedback record for a completed appointment that has no feedback yet. Appointment -> Feedback. */
     @Override
     public void submitFeedback(Appointment appointment, int rating, String comment)
     {
@@ -437,7 +441,7 @@ public class PatientOperation implements PatientService
         allocator.saveChanges(appointment);
     }
 
-    // 15. Loads feedback submitted by the patient. Patient -> Appointment -> Feedback.
+    // 2. Loads feedback submitted by the patient. Patient -> Appointment -> Feedback.
     public List<FeedbackToFile> loadMyFeedback()
     {
         List<FeedbackToFile> feedbackList = new ArrayList<>();
@@ -452,13 +456,14 @@ public class PatientOperation implements PatientService
         return feedbackList;
     }
 
-    // 16. Loads the patient's insurance status. Patient -> Insurance. 
+    // BILLING SERVICES
+    // 1. Loads the patient's insurance status. Patient -> Insurance. 
     public InsuranceToFile loadInsuranceStatus()
     {
         return patient.getInsurance();
     }
 
-    // 17. Loads the patient's billing list.
+    // 2. Loads the patient's billing list.
     public List<BillToFile> loadBillingList()
     {
         List<BillToFile> billList = new ArrayList<>();
