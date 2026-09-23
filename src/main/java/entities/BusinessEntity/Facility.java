@@ -48,7 +48,7 @@ public class Facility extends BusinessEntity<FacilityToFile> implements OwnEntit
         boolean requireOne = !isJustConstruct;
         belongsToDepartment = new LazyEntity<DepartmentToFile>
         (
-            linkerManagerHashMap.get(DepartmentToFile.PREFIX).findBasedOnKeyOneResult(selfId, requireOne),
+            linkerManagerHashMap.get(DepartmentToFile.PREFIX).findBasedOnKeyOneResult(selfId, false),
             new EntityHandler(fileDataHandlerHashMap.get(DepartmentToFile.PREFIX))
         );
         appointments = new LazyEntityList<AppointmentToFile>
@@ -56,21 +56,5 @@ public class Facility extends BusinessEntity<FacilityToFile> implements OwnEntit
             linkerManagerHashMap.get(AppointmentToFile.PREFIX).findBasedOnKey(selfId),
             new EntityHandler(fileDataHandlerHashMap.get(AppointmentToFile.PREFIX))
         );
-    }
-    @Override
-    public List<LinkerManager> getLinkerManager()
-    {
-        List<LinkerManager> linkerManagers = getLinkerManagerWithoutValidate();
-        for (LinkerManager linkerManager : linkerManagers)
-        {
-            if
-            (
-                linkerManager.includeClass(DepartmentToFile.class)
-            )
-            {
-                if (!linkerManager.isThisRequireOne()) throw new LinkerRequireOneOnlyException();
-            }
-        }
-        return linkerManagers;
     }
 }
