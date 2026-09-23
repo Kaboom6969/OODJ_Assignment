@@ -3,7 +3,6 @@ package Operations.PatientOperation;
 import Exceptions.PatientExceptions.BookingValidationException;
 import Exceptions.PatientExceptions.FeedbackValidationException;
 import Exceptions.PatientExceptions.ProfileValidationException;
-import Operations.PatientOperation.PatientOperation.DoctorAvailability;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.AppointmentToFile;
 import entities.BaseEntity.AppointmentToFile.AppointmentStatus;
@@ -31,9 +30,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Patient-facing operations. Implementations must use HospitalEntityAllocator
+Patient-facing operations. Implementations must use HospitalEntityAllocator
  * for persistence and business-entity loading.
- */
+**/
 public class PatientOperation implements PatientService
 {
     // Assumed slot length because DoctorShiftToFile and ConsultationRateToFile have no duration field.
@@ -42,17 +41,15 @@ public class PatientOperation implements PatientService
     private final HospitalEntityAllocator allocator;
     private Patient patient;
 
-    /** 1. Creates patient operations for the supplied allocator and logged-in patient. */
+    // 1. Creates patient operations for the supplied allocator and logged-in patient.
     public PatientOperation(HospitalEntityAllocator allocator, Patient patient)
     {
         this.allocator = allocator;
         this.patient = patient;
     }
 
-    /**
-     * 2. Updates and validates the patient's profile details, then saves the patient.
-     * Patient -> PatientToFile
-     */
+    // 2. Updates and validates the patient's profile details, then saves the patient. Patient -> PatientToFile
+    @Override 
     public void updateProfile(String name, String password, UserWithDetails.Gender gender,
                               String dob, String email, String phone)
     {
@@ -73,10 +70,12 @@ public class PatientOperation implements PatientService
             throw new ProfileValidationException("Date of Birth cannot be in the future.");
         }
 
+        // Validate email for forbidden characters
         if (email != null && (email.contains("|") || email.contains("\n") || email.contains("\r"))) {
             throw new ProfileValidationException("Email cannot contain '|' or line breaks.");
         }
 
+        // will catch the other exceptions thrown by the setters in UserWithDetails and User
         try {
             patient.getSelf().setName(name);
             patient.getSelf().setPassword(password);
@@ -90,20 +89,55 @@ public class PatientOperation implements PatientService
         allocator.saveChanges(patient);
     }
 
-    /** 16. Loads all departments. Department records. */
+    // 3. Load everything needed (not affect the other methods)
+    // 3.1 Loads all departments available to the patient. Department records. 
     public List<Department> loadAllDepartments()
     {
         //PREFIX is a constant (a public static final variable) in DepartmentToFile..
         return allocator.getAllBusinessEntities(DepartmentToFile.PREFIX);
     }
 
-    /** 3. Loads all doctors available to the patient. Doctor records. */
+    // 3.2 Loads all doctors available to the patient. Doctor records.
     public List<Doctor> loadAllDoctors()
     {
         return allocator.getAllBusinessEntities(DoctorToFile.PREFIX);
     }
 
-    /** 4.  Aggregates ratings from the doctor's completed appointments. Doctor -> Appointment -> Feedback. */
+    // 3.3 Filter all doctors available by department. Doctor records.
+    public List<Doctor> loadDoctorsByDepartment(Department department)
+    {
+        List<Doctor> filtered = new ArrayList<>();
+        for (Doctor doctor : loadAllDoctors())
+        {
+            if (doctor.getBelongsToDepartment().getId().equals(department.getSelf().getId()))
+            {
+                filtered.add(doctor);
+            }
+        }
+        return filtered;
+    }
+    
+    // 3.4. Loads the next upcoming appointment, or null when none exists. Patient -> Appointment. 
+    public Appointment loadNextUpcomingAppointment()
+    {
+        LocalDateTime now = LocalDateTime.now();
+        Appointment nextAppointment = null;
+        for (Appointment appointment : loadMyAppointments())
+        {
+            AppointmentStatus status = appointment.getSelf().getStatus();
+            LocalDateTime appointmentTime = appointment.getSelf().getAppointmentTime();
+            if ((status != AppointmentStatus.BOOKED && status != AppointmentStatus.RESCHEDULED)
+                    || !appointmentTime.isAfter(now)) continue;
+            if (nextAppointment == null
+                    || appointmentTime.isBefore(nextAppointment.getSelf().getAppointmentTime()))
+            {
+                nextAppointment = appointment;
+            }
+        }
+        return nextAppointment;
+    }
+    
+    // 4.  Aggregates ratings from the doctor's completed appointments. Doctor -> Appointment -> Feedback.
     public double loadDoctorAverageRating(Doctor doctor)
     {
         int totalRating = 0;
@@ -126,22 +160,8 @@ public class PatientOperation implements PatientService
             return (double) totalRating / ratedAppointmentCount;
         }
     }
-    
-    /** 17. Filter all doctors available to the patient. Doctor records. */
-    public List<Doctor> loadDoctorsByDepartment(Department department)
-    {
-        List<Doctor> filtered = new ArrayList<>();
-        for (Doctor doctor : loadAllDoctors())
-        {
-            if (doctor.getBelongsToDepartment().getId().equals(department.getSelf().getId()))
-            {
-                filtered.add(doctor);
-            }
-        }
-        return filtered;
-    }
 
-    /** 5. Loads available appointment slots from doctor shifts. Doctor -> DoctorShift -> Appointment. */
+    // 5. Loads available appointment slots from doctor shifts. Doctor -> DoctorShift -> Appointment. 
     public List<LocalDateTime> loadAvailableSlots(Doctor doctor)
     {
         return loadAvailableSlots(doctor, null);
@@ -180,8 +200,8 @@ public class PatientOperation implements PatientService
         return availableSlots;
     }
 
-    /** 18. Returns date-filtered results per doctor */
-    // generates a complete, immutable (read-only) class behind the scenes.
+    // 6. Returns date-filtered results per doctor 
+    // record = generates a complete, immutable (read-only) class behind the scenes.
     // Its purpose here is to simply bundle two pieces of data together (a specific doctor and their list of times)
     // so they can be returned as a single unit from the loadDoctorAvailability method.
     public record DoctorAvailability(Doctor doctor, List<LocalDateTime> availableSlots) {}
@@ -205,7 +225,7 @@ public class PatientOperation implements PatientService
         return results;
     }
 
-    /** 19. Returns facility */
+    // 7. Returns facility availability for a given time. Facility -> Appointment.
     private Facility findAvailableFacility(LocalDateTime time, String excludeAppointmentId)
     {
         for (Facility candidate : allocator.<Facility>getAllBusinessEntities(FacilityToFile.PREFIX)) {
@@ -234,7 +254,8 @@ public class PatientOperation implements PatientService
         return null;
     }
 
-    /** 6. Books an appointment for the patient with the selected doctor and facility. Patient -> Appointment -> Doctor/Facility. */
+    // 8. Books an appointment for the patient with the selected doctor and facility. Patient -> Appointment -> Doctor/Facility.
+    @Override 
     public void bookAppointment(Doctor doctor, LocalDateTime time, String reason)
     {
         // Only active appointments consume the patient's booking limit;
@@ -286,7 +307,8 @@ public class PatientOperation implements PatientService
         allocator.saveChanges(appointment);
     }
 
-    /** 7.  Reschedules an existing appointment to a new time. Appointment -> AppointmentToFile. */
+    // 9. Reschedules an existing appointment to a new time. Appointment -> AppointmentToFile.
+    @Override 
     public void rescheduleAppointment(Appointment appointment, LocalDateTime newTime)
     {
         if (appointment == null) {
@@ -294,6 +316,12 @@ public class PatientOperation implements PatientService
         }
         if (newTime == null) {
             throw new BookingValidationException("New appointment time cannot be null.");
+        }
+        AppointmentStatus status = appointment.getSelf().getStatus();
+        if (status != AppointmentStatus.BOOKED
+                && status != AppointmentStatus.RESCHEDULED) {
+            throw new BookingValidationException(
+                    "Only booked or rescheduled appointments can be rescheduled.");
         }
         if (newTime.isBefore(LocalDateTime.now())) {
             throw new BookingValidationException("Appointment time cannot be in the past.");
@@ -314,17 +342,24 @@ public class PatientOperation implements PatientService
         allocator.saveChanges(appointment);
     }
 
-    /** 8. Cancels an appointment while preserving its linked medical record and feedback. Appointment -> AppointmentToFile. */
+    /** 10. Cancels an appointment while preserving its linked medical record and feedback. Appointment -> AppointmentToFile. */
+    @Override
     public void cancelAppointment(Appointment appointment)
     {
         if (appointment == null) {
             throw new BookingValidationException("Appointment cannot be null.");
         }
+        AppointmentStatus status = appointment.getSelf().getStatus();
+        if (status != AppointmentStatus.BOOKED
+                && status != AppointmentStatus.RESCHEDULED) {
+            throw new BookingValidationException(
+                    "This appointment cannot be cancelled." + status + ".");
+        }
         appointment.getSelf().setStatus(AppointmentStatus.CANCELLED);
         allocator.saveChanges(appointment);
     }
 
-    /** 9. Loads the patient's upcoming and past appointments, including their statuses. Patient -> Appointment. */
+    // 11. Loads the patient's upcoming and past appointments, including their statuses. Patient -> Appointment.
     public List<Appointment> loadMyAppointments()
     {
         List<Appointment> appointments = new ArrayList<>();
@@ -343,7 +378,8 @@ public class PatientOperation implements PatientService
         return appointments;
     }
 
-    /** 10. Loads the patient's medical history. Patient -> Appointment -> MedicalRecord. */
+    // 12. Loads the patient's medical history. Patient -> Appointment -> MedicalRecord.
+    @Override 
     public List<MedicalRecord> loadMedicalHistory()
     {
         List<MedicalRecord> medicalHistory = new ArrayList<>();
@@ -359,7 +395,8 @@ public class PatientOperation implements PatientService
         return medicalHistory;
     }
 
-    /** 11. Loads prescriptions belonging to a medical record. Patient -> MedicalRecord -> Prescription. */
+    // 13. Loads prescriptions belonging to a medical record. Patient -> MedicalRecord -> Prescription.
+    @Override 
     public List<PrescriptionToFile> loadPrescriptions(MedicalRecord record)
     {
         List<PrescriptionToFile> prescriptions = new ArrayList<>();
@@ -370,7 +407,8 @@ public class PatientOperation implements PatientService
         return prescriptions;
     }
 
-    /** 12. Submits one feedback record for a completed appointment that has no feedback yet. Appointment -> Feedback. */
+    // 14. Submits one feedback record for a completed appointment that has no feedback yet. Appointment -> Feedback. */
+    @Override
     public void submitFeedback(Appointment appointment, int rating, String comment)
     {
         if (appointment == null) {
@@ -399,7 +437,7 @@ public class PatientOperation implements PatientService
         allocator.saveChanges(appointment);
     }
 
-    /** 13. Loads feedback submitted by the patient. Patient -> Appointment -> Feedback. */
+    // 15. Loads feedback submitted by the patient. Patient -> Appointment -> Feedback.
     public List<FeedbackToFile> loadMyFeedback()
     {
         List<FeedbackToFile> feedbackList = new ArrayList<>();
@@ -414,13 +452,13 @@ public class PatientOperation implements PatientService
         return feedbackList;
     }
 
-    /** 14. Loads the patient's insurance status. Patient -> Insurance. */
+    // 16. Loads the patient's insurance status. Patient -> Insurance. 
     public InsuranceToFile loadInsuranceStatus()
     {
         return patient.getInsurance();
     }
 
-    // 19. Loads the patient's billing list.
+    // 17. Loads the patient's billing list.
     public List<BillToFile> loadBillingList()
     {
         List<BillToFile> billList = new ArrayList<>();
@@ -439,25 +477,5 @@ public class PatientOperation implements PatientService
             }
         }
         return billList;
-    }
-
-    /** 15. Loads the next upcoming appointment, or null when none exists. Patient -> Appointment. */
-    public Appointment loadNextUpcomingAppointment()
-    {
-        LocalDateTime now = LocalDateTime.now();
-        Appointment nextAppointment = null;
-        for (Appointment appointment : loadMyAppointments())
-        {
-            AppointmentStatus status = appointment.getSelf().getStatus();
-            LocalDateTime appointmentTime = appointment.getSelf().getAppointmentTime();
-            if ((status != AppointmentStatus.BOOKED && status != AppointmentStatus.RESCHEDULED)
-                    || !appointmentTime.isAfter(now)) continue;
-            if (nextAppointment == null
-                    || appointmentTime.isBefore(nextAppointment.getSelf().getAppointmentTime()))
-            {
-                nextAppointment = appointment;
-            }
-        }
-        return nextAppointment;
     }
 }
