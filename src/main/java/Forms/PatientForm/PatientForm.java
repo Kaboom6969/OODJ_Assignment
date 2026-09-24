@@ -1197,7 +1197,7 @@ public class PatientForm extends javax.swing.JFrame {
                         javax.swing.JOptionPane.ERROR_MESSAGE);
                         
             } catch (Exception exception) {
-                // Catch unexpected system errors (e.g., file writing failed)
+                // Safe net 
                 javax.swing.JOptionPane.showMessageDialog(this,
                     "System Error: " + exception.getMessage(), "Error",
                     javax.swing.JOptionPane.ERROR_MESSAGE);
