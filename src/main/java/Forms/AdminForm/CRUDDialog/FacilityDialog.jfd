@@ -1,0 +1,49 @@
+﻿JFDML JFormDesigner: "8.3" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormWindow( "javax.swing.JDialog", new FormLayoutManager( class org.jdesktop.layout.GroupLayout ) {
+			"$horizontalGroup": "par l {seq {par l {seq l {space :p:14:p, par t {comp nameLabel:::p::p, comp facilityTypeLabel:::p::p}, space s:::p, par l {comp nameTextField:::p:185:p, comp facilityTypeComboBox:::p::p}}, seq l {space :p:137:p, comp actionButton:::p::p}, seq t {space :::p, par t {comp availableLabel:::p::p, comp capacityLabel:::p::p}, space s:::p, par l:::p {seq {comp availableComboBox:::p::p, space :p:97:p}, comp capacityTextField:::::x}}}, space ::99:x}}"
+			"$verticalGroup": "par l {seq l {space :p:51:p, par t {comp nameTextField:::p::p, comp nameLabel:::p::p}, space s:::p, par b {comp facilityTypeComboBox::b:p::p, comp facilityTypeLabel::b:p::p}, space :::x, par b {comp capacityTextField::b:p::p, comp capacityLabel::b:p::p}, space :::p, par b {comp availableLabel::b:p::p, comp availableComboBox::b:p::p}, space s:::p, comp actionButton:::p::p, space :p:28:p}}"
+		} ) {
+			name: "this"
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "nameLabel"
+				"text": "Name:"
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "facilityTypeLabel"
+				"text": "Facility Type:"
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "availableLabel"
+				"text": "Is Available:"
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "nameTextField"
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "actionButton"
+				"text": "Action"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "action", true ) )
+			} )
+			add( new FormComponent( "javax.swing.JComboBox" ) {
+				name: "availableComboBox"
+			} )
+			add( new FormComponent( "javax.swing.JComboBox" ) {
+				name: "facilityTypeComboBox"
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "capacityLabel"
+				"text": "Capacity:"
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "capacityTextField"
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 400, 300 )
+		} )
+	}
+}

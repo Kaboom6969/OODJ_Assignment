@@ -48,7 +48,7 @@ public class ConsultationRate extends BusinessEntity<ConsultationRateToFile> imp
         boolean requireOne = !isJustConstruct;
         belongsToDepartment = new LazyEntity<DepartmentToFile>
         (
-            linkerManagerHashMap.get(DepartmentToFile.PREFIX).findBasedOnKeyOneResult(selfId, requireOne),
+            linkerManagerHashMap.get(DepartmentToFile.PREFIX).findBasedOnKeyOneResult(selfId,false),
             new EntityHandler(fileDataHandlerHashMap.get(DepartmentToFile.PREFIX))
         );
 
@@ -57,21 +57,5 @@ public class ConsultationRate extends BusinessEntity<ConsultationRateToFile> imp
             linkerManagerHashMap.get(BillToFile.PREFIX).findBasedOnKey(selfId),
             new EntityHandler(fileDataHandlerHashMap.get(BillToFile.PREFIX))
         );
-    }
-    @Override
-    public List<LinkerManager> getLinkerManager()
-    {
-        List<LinkerManager> linkerManagers = getLinkerManagerWithoutValidate();
-        for (LinkerManager linkerManager : linkerManagers)
-        {
-            if
-            (
-                linkerManager.includeClass(DepartmentToFile.class)
-            )
-            {
-                if (!linkerManager.isThisRequireOne()) throw new LinkerRequireOneOnlyException();
-            }
-        }
-        return linkerManagers;
     }
 }

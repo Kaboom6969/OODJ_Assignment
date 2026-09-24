@@ -4,92 +4,16 @@ new FormModel {
 	contentType: "form/swing"
 	root: new FormRoot {
 		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class org.jdesktop.layout.GroupLayout ) {
-			"$horizontalGroup": "par l {seq l {space :::p, comp adminTab:::::x, space :::p}}"
-			"$verticalGroup": "par l {seq l {space :::p, comp adminTab:::::x, space :::p}}"
+			"$horizontalGroup": "par l {seq l {space :::p, comp adminTab:::p:890:p, space :::x}}"
+			"$verticalGroup": "par l {seq l {space :::p, comp adminTab:::p:507:p, space :::x}}"
 		} ) {
 			name: "this"
 			add( new FormContainer( "javax.swing.JTabbedPane", new FormLayoutManager( class javax.swing.JTabbedPane ) ) {
 				name: "adminTab"
-				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class org.jdesktop.layout.GroupLayout ) {
-					"$horizontalGroup": "par l {seq l {space :::p, comp allUserScrollPanel:::p:709:p, space :::p, par l {comp reloadUserButton:::p:84:p, comp addUserButton:::p::p, comp updateUserButton:::p::p, comp deleteUserButton::l:p::p}, space ::31:x}}"
-					"$verticalGroup": "par l {seq l {space :p:40:p, comp reloadUserButton:::p::p, space s:::p, comp addUserButton:::p::p, space s:::p, comp updateUserButton:::p::p, space s:::p, comp deleteUserButton:::p::p, space ::207:x}, seq l {space :::p, comp allUserScrollPanel::::425:x, space :::p}}"
-				} ) {
-					name: "allUserPanel"
-					add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
-						name: "allUserScrollPanel"
-						add( new FormComponent( "javax.swing.JTable" ) {
-							name: "userTable"
-							"model": new com.jformdesigner.model.SwingTableModel( new java.util.Vector, new java.util.Vector {
-								add( "Role" )
-								add( "Id" )
-								add( "Name" )
-								add( "Email" )
-								add( "Gender" )
-								add( "Date Of Birth" )
-								add( "Phone Number" )
-								add( "User Object" )
-							}, new java.util.Vector {
-								add( null )
-								add( null )
-								add( null )
-								add( null )
-								add( null )
-								add( null )
-								add( null )
-								add( null )
-							}, new java.util.Vector {
-								add( null )
-								add( null )
-								add( null )
-								add( null )
-								add( null )
-								add( null )
-								add( null )
-								add( null )
-							}, new java.util.Vector {
-								add( null )
-								add( null )
-								add( null )
-								add( new com.jformdesigner.model.SwingTableColumn( null, 150, 0, 0, true ) )
-								add( null )
-								add( null )
-								add( null )
-								add( null )
-							} )
-						} )
-					} )
-					add( new FormComponent( "javax.swing.JButton" ) {
-						name: "reloadUserButton"
-						"text": "Reload"
-						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "reloadUser", true ) )
-					} )
-					add( new FormComponent( "javax.swing.JButton" ) {
-						name: "addUserButton"
-						"text": "Add User"
-						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "addUser", true ) )
-					} )
-					add( new FormComponent( "javax.swing.JButton" ) {
-						name: "updateUserButton"
-						"text": "Update User"
-						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "updateUser", true ) )
-					} )
-					add( new FormComponent( "javax.swing.JButton" ) {
-						name: "deleteUserButton"
-						"text": "Delete User"
-						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "deleteUser", true ) )
-					} )
-				}, new FormLayoutConstraints( null ) {
-					"title": "All User"
-				} )
-				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class java.awt.BorderLayout ) ) {
-					name: "DTMMPanel"
-				}, new FormLayoutConstraints( null ) {
-					"title": "Allocate Doctor to Manger"
-				} )
 			} )
 		}, new FormLayoutConstraints( null ) {
 			"location": new java.awt.Point( 0, 0 )
-			"size": new java.awt.Dimension( 880, 520 )
+			"size": new java.awt.Dimension( 915, 560 )
 		} )
 	}
 }

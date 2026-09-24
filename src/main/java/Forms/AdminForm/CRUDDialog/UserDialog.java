@@ -2,12 +2,12 @@
  * Created by JFormDesigner on Sun Sep 20 23:01:21 GMT+08:00 2026
  */
 
-package Forms.AdminForm;
+package Forms.AdminForm.CRUDDialog;
 
 import java.awt.event.*;
 import Forms.ComboBoxItem;
 import Operations.AdminOperation.AdminOperation;
-import Tools.HospitalEntityAllocator;
+import entities.BaseEntity.BaseEntity;
 import entities.BaseEntity.Users.*;
 import entities.BusinessEntity.*;
 
@@ -67,9 +67,9 @@ public class UserDialog extends JDialog
     {
         nameTextField.setText(user.getName());
         passwordTextField.setText(user.getPassword());
+        emailTextField.setText(user.getEmail());
         if (user instanceof UserWithDetails userWithDetails)
         {
-            emailTextField.setText(userWithDetails.getEmail());
             genderComboBox.setSelectedItem(userWithDetails.getGender());
             dateOfBirthTextField.setText(userWithDetails.getDateOfBirth().toString());
             phoneNumberTextField.setText(userWithDetails.getPhoneNumber());
@@ -141,20 +141,20 @@ public class UserDialog extends JDialog
                 try
                 {
                     crudInformation =
-                    adminOperation.addUser(packData(null), (((ComboBoxItem<Class<?>>) Objects.requireNonNull(roleComboBox.getSelectedItem())).getItem()));
-                } catch (IllegalArgumentException iae)
+                    adminOperation.add(packData(null), (((ComboBoxItem<Class<?>>) Objects.requireNonNull(roleComboBox.getSelectedItem())).getItem()));
+                } catch (RuntimeException re)
                 {
-                    crudInformation = new AdminOperation.CRUDInformation(false, iae.getMessage());
+                    crudInformation = new AdminOperation.CRUDInformation(false, re.getMessage());
                 }
                 break;
             case MODIFY:
                 try
                 {
-                    BusinessEntity<? extends User> user = adminOperation.constructUserFull(packData(id), (((ComboBoxItem<Class<?>>) Objects.requireNonNull(roleComboBox.getSelectedItem())).getItem()));
-                    crudInformation = adminOperation.updateUser(user);
-                } catch (IllegalArgumentException iae)
+                    BusinessEntity<?> user = adminOperation.constructFull(packData(id), (Class<? extends BaseEntity>) ((ComboBoxItem<Class<?>>) Objects.requireNonNull(roleComboBox.getSelectedItem())).getItem());
+                    crudInformation = adminOperation.update(user);
+                } catch (RuntimeException re)
                 {
-                    crudInformation = new AdminOperation.CRUDInformation(false, iae.getMessage());
+                    crudInformation = new AdminOperation.CRUDInformation(false, re.getMessage());
                 }
         }
         int icon = JOptionPane.INFORMATION_MESSAGE;

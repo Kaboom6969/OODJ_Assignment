@@ -76,7 +76,7 @@ public abstract class UserWithDetails extends User
         super(data);
         this.gender = Gender.valueOf(data[4].toUpperCase().trim());
         this.dateOfBirth = LocalDate.parse(data[5],LocalDateParser.getDateFormatterAuto(data[5]));
-        this.phoneNumber = data[6];
+        setPhoneNumber(data[6]);
     }
 
     public void setDateOfBirth(LocalDate dateOfBirth)

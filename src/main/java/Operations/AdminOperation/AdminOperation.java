@@ -8,7 +8,9 @@ import Interfaces.OwnerShip;
 import Tools.EntityConvertManager;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.BaseEntity;
+import entities.BaseEntity.ConsultationRateToFile;
 import entities.BaseEntity.FacilityToFile;
+import entities.BaseEntity.InsuranceToFile;
 import entities.BaseEntity.Users.*;
 import entities.BusinessEntity.*;
 
@@ -59,23 +61,24 @@ public class AdminOperation
         allUsers.addAll(admins);allUsers.addAll(patients); allUsers.addAll(medicalManagers); allUsers.addAll(doctors);
         return allUsers;
     }
-
-    public CRUDInformation deleteUser(BusinessEntity<? extends User> user)
+    public CRUDInformation delete(BusinessEntity<?> businessEntity)
     {
         try
         {
-            hospitalEntityAllocator.deleteBusinessEntity(user);
+            hospitalEntityAllocator.deleteBusinessEntity(businessEntity);
             return new CRUDInformation(true,"Success");
         } catch (EntityNotMatchException | EntityNotFoundException e)
         {
             return failure(e);
         }
     }
-    public <T extends BaseEntity & ConvertToFileData> CRUDInformation addUser(T user)
+
+    public <T extends BaseEntity & ConvertToFileData> CRUDInformation add(List<String> data,Class<?> clazz)
     {
         try
         {
-            hospitalEntityAllocator.addEntityForceNewId(user);
+            T object = construct(data, clazz);
+            hospitalEntityAllocator.addEntityForceNewId(object);
             return new CRUDInformation(true,"Success");
         } catch (RuntimeException e)
         {
@@ -83,54 +86,51 @@ public class AdminOperation
         }
     }
 
-    public <T extends User & ConvertToFileData> CRUDInformation addUser(List<String> data,Class<?> clazz)
-    {
-        try
-        {
-            T user = constructUser(data,clazz);
-            hospitalEntityAllocator.addEntityForceNewId(user);
-            return new CRUDInformation(true,"Success");
-        } catch (RuntimeException e)
-        {
-            return failure(e);
-        }
 
-    }
-
-    public <T extends BaseEntity & ConvertToFileData> T constructUser(List<String> data,Class<?> clazz)
+    public <T extends BaseEntity & ConvertToFileData> T construct(List<String> data,Class<?> clazz)
     {
         String prefix = null;
         return (T) EntityConvertManager.getConvertMap().get(EntityConvertManager.getPrefixMap().get(clazz)).apply(data.toArray(new String[data.size()]));
     }
 
-    public <T extends BusinessEntity<User>> T constructUserFull(List<String> data, Class<?> clazz)
-    {
-        return hospitalEntityAllocator.convertToBusinessEntity(constructUser(data,clazz),false);
-    }
-
-    public CRUDInformation addUser(BusinessEntity<? extends User> user)
+    public <Q extends BaseEntity&ConvertToFileData ,T extends BusinessEntity<Q>> T constructFull(List<String> data, Class<? extends BaseEntity> clazz)
     {
         try
         {
-            hospitalEntityAllocator.addEntityForceNewId(user.getSelf());
-            return new CRUDInformation(true, "Success");
+            return hospitalEntityAllocator.convertToBusinessEntity(construct(data,clazz),false);
+        } catch (Exception e)
+        {
+            throw new RuntimeException(failure(e).message());
         }
-        catch (RuntimeException e)
+
+    }
+    private CRUDInformation add(BusinessEntity<?> businessEntity)
+    {
+        try
+        {
+            hospitalEntityAllocator.addEntityForceNewId(businessEntity.getSelf());
+            return new CRUDInformation(true,"Success");
+        }  catch (RuntimeException e)
         {
             return failure(e);
         }
     }
 
-    public<T extends BusinessEntity<?>> CRUDInformation updateUser(T user)
+    public CRUDInformation update(BusinessEntity<?> businessEntity)
     {
         try
         {
-            hospitalEntityAllocator.saveChanges(user);
+            hospitalEntityAllocator.saveChanges(businessEntity);
             return new CRUDInformation(true,"Success");
         } catch (RuntimeException e)
         {
             return failure(e);
         }
+    }
+
+    public List<ConsultationRate> getAllConsultationRates()
+    {
+        return hospitalEntityAllocator.getAllBusinessEntities(ConsultationRateToFile.PREFIX);
     }
 
     public List<Doctor> getAllDoctors()
@@ -178,18 +178,11 @@ public class AdminOperation
         return hospitalEntityAllocator.getAllBusinessEntities(FacilityToFile.PREFIX);
     }
 
-    public CRUDInformation addFacility(Facility facility)
+    public List<Insurance> getAllInsurances()
     {
-        try
-        {
-            hospitalEntityAllocator.addEntityForceNewId(facility.getSelf());
-            return new CRUDInformation(true, "Success");
-        }
-        catch (RuntimeException e)
-        {
-            return failure(e);
-        }
+        return hospitalEntityAllocator.getAllBusinessEntities(InsuranceToFile.PREFIX);
     }
+
 
 
 
