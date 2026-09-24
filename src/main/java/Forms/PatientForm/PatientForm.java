@@ -5,6 +5,7 @@
 package Forms.PatientForm;
 
 import Tools.HospitalEntityAllocator;
+import Exceptions.PatientExceptions.FeedbackValidationException;
 import entities.BaseEntity.BaseEntity;
 import entities.BaseEntity.AppointmentToFile.AppointmentStatus;
 import entities.BaseEntity.AssessmentResultToFile;
@@ -1146,6 +1147,7 @@ public class PatientForm extends javax.swing.JFrame {
             return;
         }
 
+        // 1.Handle the View Feedback state
         if ("View Feedback".equals(feedbackBtn.getText())) {
             javax.swing.JOptionPane.showMessageDialog(this,
                     "Rating: " + appointment.getFeedback().getRating()
@@ -1154,28 +1156,53 @@ public class PatientForm extends javax.swing.JFrame {
             return;
         }
 
-        FeedbackDialog dialog = new FeedbackDialog(this, true);
-        dialog.setVisible(true);
-        if (!dialog.isSubmitted()) {
-            return;
-        }
+        // 2.1 Setup initial variables outside the loop to remember previous input
+        int currentRating = 5; // Or whatever default your dialog uses
+        String currentComment = "";
 
-        try {
-            operation.submitFeedback(appointment, dialog.getSelectedRating(),
-                dialog.getEnteredComment());
-            javax.swing.JOptionPane.showMessageDialog(this,
-                    "Feedback submitted successfully.", "Feedback Submitted",
-                    javax.swing.JOptionPane.INFORMATION_MESSAGE);
+        // 2.2 Loop until successful submission or user cancels
+        while (true) {
+            FeedbackDialog dialog = new FeedbackDialog(this, true);
+            
+            // Pass the previous attempt's values back in so the user doesn't have to retype everything
+            dialog.setInitialRating(currentRating);
+            dialog.setInitialComment(currentComment);
+            dialog.setVisible(true);
+
+            // If user clicks "Cancel" or closes the window, break out of the method entirely
+            if (!dialog.isSubmitted()) {
+                return;
+            }
+
+            // Capture the new input
+            currentRating = dialog.getSelectedRating();
+            currentComment = dialog.getEnteredComment();
+
+            try {
+                // Attempt to submit to backend
+                operation.submitFeedback(appointment, currentRating, currentComment);
+                
+                // If the line above succeeds without throwing an exception, show success and break the loop
+                javax.swing.JOptionPane.showMessageDialog(this,
+                        "Feedback submitted successfully.", "Feedback Submitted",
+                        javax.swing.JOptionPane.INFORMATION_MESSAGE);
                 refreshAllTabs();
-        } catch (IllegalArgumentException exception) {
-            javax.swing.JOptionPane.showMessageDialog(this,
-                    exception.getMessage(), "Feedback Error",
+                break; // Exit the while loop
+                
+            } catch (FeedbackValidationException exception) {
+                // Validation failed! Show the custom error message.
+                // no 'break' here. The loop will restart and show the dialog again.
+                javax.swing.JOptionPane.showMessageDialog(this,
+                        exception.getMessage(), "Feedback Error",
+                        javax.swing.JOptionPane.ERROR_MESSAGE);
+                        
+            } catch (Exception exception) {
+                // Catch unexpected system errors (e.g., file writing failed)
+                javax.swing.JOptionPane.showMessageDialog(this,
+                    "System Error: " + exception.getMessage(), "Error",
                     javax.swing.JOptionPane.ERROR_MESSAGE);
-        } catch (Exception exception) {
-            // Keep unexpected errors inside the dialog instead of crashing the window.
-            javax.swing.JOptionPane.showMessageDialog(this,
-                "Something went wrong: " + exception.getMessage(), "Feedback Error",
-                javax.swing.JOptionPane.ERROR_MESSAGE);
+                break; // Break the loop on a system crash so they aren't stuck forever
+            }
         }
     }//GEN-LAST:event_feedbackBtnActionPerformed
 
