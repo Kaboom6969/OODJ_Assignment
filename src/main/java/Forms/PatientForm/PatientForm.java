@@ -5,6 +5,7 @@
 package Forms.PatientForm;
 
 import Tools.HospitalEntityAllocator;
+import Exceptions.PatientExceptions.BookingValidationException;
 import Exceptions.PatientExceptions.FeedbackValidationException;
 import entities.BaseEntity.BaseEntity;
 import entities.BaseEntity.AppointmentToFile.AppointmentStatus;
@@ -1053,6 +1054,11 @@ public class PatientForm extends javax.swing.JFrame {
                 "Appointment booked successfully.", "Booking Confirmed",
                 javax.swing.JOptionPane.INFORMATION_MESSAGE);
             refreshAllTabs();
+        } catch (BookingValidationException exception) {
+            javax.swing.JOptionPane.showMessageDialog(this,
+                exception.getMessage(), "Booking Error",
+                javax.swing.JOptionPane.ERROR_MESSAGE);
+            refreshDoctorList();
         } catch (IllegalArgumentException exception) {
             javax.swing.JOptionPane.showMessageDialog(this,
                 exception.getMessage(), "Booking Error",
@@ -1097,6 +1103,11 @@ public class PatientForm extends javax.swing.JFrame {
                     "Appointment rescheduled successfully.", "Appointment Updated",
                     javax.swing.JOptionPane.INFORMATION_MESSAGE);
                 refreshAllTabs();
+            } catch (BookingValidationException exception) {
+                javax.swing.JOptionPane.showMessageDialog(this,
+                    exception.getMessage(), "Reschedule Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE);
+                refreshAllTabs();
         } catch (IllegalArgumentException exception) {
             javax.swing.JOptionPane.showMessageDialog(this,
                     exception.getMessage(), "Reschedule Error",
@@ -1127,6 +1138,11 @@ public class PatientForm extends javax.swing.JFrame {
             javax.swing.JOptionPane.showMessageDialog(this,
                     "Appointment cancelled successfully.", "Appointment Updated",
                     javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                refreshAllTabs();
+            } catch (BookingValidationException exception) {
+                javax.swing.JOptionPane.showMessageDialog(this,
+                    exception.getMessage(), "Cancellation Error",
+                    javax.swing.JOptionPane.ERROR_MESSAGE);
                 refreshAllTabs();
         } catch (IllegalArgumentException exception) {
             javax.swing.JOptionPane.showMessageDialog(this,
