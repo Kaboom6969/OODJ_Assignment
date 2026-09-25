@@ -5,24 +5,33 @@
 package Forms.AdminForm.CRUDPanel;
 
 import Forms.AdminForm.CRUDDialog.InsuranceDialog;
-import Forms.AdminForm.CRUDDialog.UserDialog;
+import Interfaces.RefreshablePanel;
 import Operations.AdminOperation.AdminOperation;
-import entities.BaseEntity.Users.User;
-import entities.BusinessEntity.BusinessEntity;
 import entities.BusinessEntity.Insurance;
 
-import java.awt.*;import java.awt.event.*;
+import java.awt.*;
+import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.GroupLayout;
-import javax.swing.table.*;import static Forms.AdminForm.FrameHelper.getObjectFromCurrentSelectedRow;
+import javax.swing.table.*;
+
+import static Forms.AdminForm.FrameHelper.getObjectFromCurrentSelectedRow;
 
 /**
  * @author leezh
  */
-public class InsurancePanel extends JPanel {
+public class InsurancePanel extends JPanel implements RefreshablePanel
+{
     private AdminOperation adminOperation;
     private Window frameWindow;
-    public InsurancePanel(Window frameWindow,AdminOperation adminOperation)
+
+    @Override
+    public void refreshData()
+    {
+        reload();
+    }
+
+    public InsurancePanel(Window frameWindow, AdminOperation adminOperation)
     {
         this.frameWindow = frameWindow;
         this.adminOperation = adminOperation;
@@ -44,12 +53,14 @@ public class InsurancePanel extends JPanel {
         });
         buttonDetectForSelectListInTable();
     }
+
     private void buttonDetectForSelectListInTable()
     {
         int selectedRow = table.getSelectedRow();
         updateButton.setEnabled(selectedRow != -1);
         deleteButton.setEnabled(selectedRow != -1);
     }
+
     private void clearTable(JTable table)
     {
         DefaultTableModel model = (DefaultTableModel) table.getModel();
@@ -60,7 +71,7 @@ public class InsurancePanel extends JPanel {
     {
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         var objects = adminOperation.getAllInsurances();
-        for (var object  : objects)
+        for (var object : objects)
         {
             Object[] row = new Object[5];
             row[0] = object.getId();
@@ -73,7 +84,7 @@ public class InsurancePanel extends JPanel {
 
     }
 
-    private void reload(ActionEvent e)
+    private void reload()
     {
         clearTable(table);
         loadAllToTable();
@@ -81,27 +92,28 @@ public class InsurancePanel extends JPanel {
 
     private void add(ActionEvent e)
     {
-        InsuranceDialog insuranceDialog = new InsuranceDialog(frameWindow,adminOperation);
+        InsuranceDialog insuranceDialog = new InsuranceDialog(frameWindow, adminOperation);
         insuranceDialog.setVisible(true);
-        reload(null);
+        reload();
     }
 
     private void update(ActionEvent e)
     {
-        Insurance insurance = getObjectFromCurrentSelectedRow(table,4);
-        if(insurance == null)
+        Insurance insurance = getObjectFromCurrentSelectedRow(table, 4);
+        if (insurance == null)
         {
             JOptionPane.showMessageDialog(this, "Please select a insurance");
             return;
         }
-       InsuranceDialog insuranceDialog = new InsuranceDialog(frameWindow,adminOperation,insurance);
+        InsuranceDialog insuranceDialog = new InsuranceDialog(frameWindow, adminOperation, insurance);
         insuranceDialog.setVisible(true);
-        reload(null);
+        reload();
     }
+
     private void delete(ActionEvent e)
     {
         Insurance insurance = getObjectFromCurrentSelectedRow(table, 4);
-        if(insurance == null)
+        if (insurance == null)
         {
             JOptionPane.showMessageDialog(this, "Please select a Insurance");
             return;
@@ -109,21 +121,17 @@ public class InsurancePanel extends JPanel {
         AdminOperation.CRUDInformation crudInformation = adminOperation.delete(insurance);
         if (crudInformation.isSuccess())
         {
-            reload(null);
+            reload();
             JOptionPane.showMessageDialog(this, "Insurance has been deleted");
-        }
-        else
+        } else
         {
             JOptionPane.showMessageDialog(this, crudInformation.message());
         }
     }
 
 
-
-
-
-
-    private void initComponents() {
+    private void initComponents()
+    {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
         reloadButton = new JButton();
         addButton = new JButton();
@@ -136,7 +144,7 @@ public class InsurancePanel extends JPanel {
 
         //---- reloadButton ----
         reloadButton.setText("Reload");
-        reloadButton.addActionListener(e -> reload(e));
+        reloadButton.addActionListener(e -> reload());
 
         //---- addButton ----
         addButton.setText("Add");

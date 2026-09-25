@@ -11,7 +11,10 @@ import Forms.AdminForm.CRUDDialog.UserDialog;
 import Forms.AdminForm.CRUDPanel.ConsultationRatePanel;import Forms.AdminForm.CRUDPanel.FacilityPanel;
 import Forms.AdminForm.CRUDPanel.InsurancePanel;
 import Forms.AdminForm.CRUDPanel.UserPanel;
-import Forms.AdminForm.LinkPanel.AllocateDoctorToMedicalManagerPanel;import Operations.AdminOperation.AdminOperation;
+import Forms.AdminForm.LinkPanel.AllocateConsultationRateAndFacilityToDepartment;
+import Forms.AdminForm.LinkPanel.AllocateDoctorToMedicalManagerPanel;
+import Interfaces.RefreshablePanel;
+import Operations.AdminOperation.AdminOperation;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.Users.User;
 import entities.BaseEntity.Users.UserWithDetails;
@@ -41,11 +44,22 @@ public class AdminForm extends JFrame {
         InsurancePanel insurancePanel = new InsurancePanel(this, adminOperation);
         FacilityPanel facilityPanel = new FacilityPanel(this, adminOperation);
         ConsultationRatePanel consultationRatePanel = new ConsultationRatePanel(this, adminOperation);
+        AllocateConsultationRateAndFacilityToDepartment allocateConsultationRateAndFacilityToDepartment = new AllocateConsultationRateAndFacilityToDepartment(adminOperation);
         adminTab.add(userPanel,"User Panel");
         adminTab.add(insurancePanel,"Insurance Panel");
         adminTab.add(facilityPanel,"Facility Panel");
         adminTab.add(consultationRatePanel,"Consultation Rate Panel");
         adminTab.add(allocateDoctorToMedicalManagerPanel,"Allocate Doctor To Medical Manager");
+        adminTab.add(allocateConsultationRateAndFacilityToDepartment,"Allocate Consultation Rate and Facility To Department");
+        adminTab.addChangeListener(e ->
+        {
+            Component selectedPanel = adminTab.getSelectedComponent();
+
+            if (selectedPanel instanceof RefreshablePanel refreshablePanel)
+            {
+                refreshablePanel.refreshData();
+            }
+        });
 
     }
 

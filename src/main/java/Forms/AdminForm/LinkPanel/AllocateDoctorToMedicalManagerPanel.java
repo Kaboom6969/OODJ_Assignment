@@ -2,30 +2,35 @@
  * Created by JFormDesigner on Thu Sep 24 00:14:43 GMT+08:00 2026
  */
 
-package Forms.AdminForm;
+package Forms.AdminForm.LinkPanel;
 
 import java.awt.event.*;
+
+import Interfaces.RefreshablePanel;
 import Operations.AdminOperation.AdminOperation;
-import entities.BaseEntity.Users.DoctorToFile;
 import entities.BaseEntity.Users.MedicalManagerToFile;
 import entities.BaseEntity.Users.User;
 import entities.BusinessEntity.BusinessEntity;
 import entities.BusinessEntity.Doctor;
 import entities.BusinessEntity.MedicalManager;
-import entities.LazyEntity.LazyEntityList;
 
 import java.awt.*;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
-import javax.swing.table.*;
+import javax.swing.table.*;import static Forms.AdminForm.FrameHelper.getObjectFromCurrentSelectedRow;import static Forms.AdminForm.FrameHelper.getObjectFromRow;
 
 /**
  * @author leezh
  */
-public class AllocateDoctorToMedicalManagerPanel extends JPanel
+public class AllocateDoctorToMedicalManagerPanel extends JPanel implements RefreshablePanel
 {
     private AdminOperation adminOperation;
+    @Override
+    public void refreshData()
+    {
+        reload();
+    }
 
     public AllocateDoctorToMedicalManagerPanel(AdminOperation adminOperation)
     {
@@ -271,11 +276,8 @@ public class AllocateDoctorToMedicalManagerPanel extends JPanel
         MEDICAL_MANAGER_UNLINKING_AND_CONNECTED,
     }
 
-    private record ColorStatus(Integer rowShouldBeColored, Color color)
-    {
-    }
+    private record ColorStatus(Integer rowShouldBeColored, Color color){}
 
-    ;
     private ADTMStatus adtmStatus;
 
     private HashMap<JTable, List<ColorStatus>> colorMap = new HashMap<>();
@@ -611,21 +613,6 @@ public class AllocateDoctorToMedicalManagerPanel extends JPanel
         model.setRowCount(0);
     }
 
-    private <T> T getObjectFromCurrentSelectedRow(JTable table, int column)
-    {
-        int selectedRow = table.getSelectedRow();
-        if (selectedRow == -1)
-        {
-            return null;
-        }
-        selectedRow = table.convertRowIndexToModel(selectedRow);
-        return getObjectFromRow(table, selectedRow, column);
-    }
-
-    private <T> T getObjectFromRow(JTable table, int modelRow, int column)
-    {
-        return (T) table.getModel().getValueAt(modelRow, column);
-    }
 
     private void setTableToAllBanExceptSelectedRows(JTable table)
     {

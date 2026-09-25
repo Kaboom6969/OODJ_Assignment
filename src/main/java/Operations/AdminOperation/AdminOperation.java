@@ -7,10 +7,7 @@ import Interfaces.Linkable;
 import Interfaces.OwnerShip;
 import Tools.EntityConvertManager;
 import Tools.HospitalEntityAllocator;
-import entities.BaseEntity.BaseEntity;
-import entities.BaseEntity.ConsultationRateToFile;
-import entities.BaseEntity.FacilityToFile;
-import entities.BaseEntity.InsuranceToFile;
+import entities.BaseEntity.*;
 import entities.BaseEntity.Users.*;
 import entities.BusinessEntity.*;
 
@@ -127,7 +124,10 @@ public class AdminOperation
             return failure(e);
         }
     }
-
+    public List<Department> getAllDepartments()
+    {
+        return hospitalEntityAllocator.getAllBusinessEntities(DepartmentToFile.PREFIX);
+    }
     public List<ConsultationRate> getAllConsultationRates()
     {
         return hospitalEntityAllocator.getAllBusinessEntities(ConsultationRateToFile.PREFIX);
@@ -141,6 +141,66 @@ public class AdminOperation
     public List<MedicalManager> getAllMedicalManagers()
     {
         return hospitalEntityAllocator.getAllBusinessEntities(MedicalManagerToFile.PREFIX);
+    }
+    public CRUDInformation allocateConsultationRateToDepartment(ConsultationRate consultationRate,Department department)
+    {
+        try
+        {
+            consultationRate.setBelongsToDepartment(department.getSelf());
+            hospitalEntityAllocator.saveChanges(consultationRate);
+            return (new CRUDInformation(true, "Success to allocate consultation rate to department"));
+        } catch (RuntimeException e)
+        {
+            return failure(e);
+        }
+    }
+
+    public CRUDInformation unallocatedConsultationRateToDepartment(ConsultationRate consultationRate,Department department)
+    {
+        try
+        {
+            if (!consultationRate.getBelongsToDepartment().getId().equals(department.getId()))
+            {
+                return new CRUDInformation(false, "Department is not the original consultation rate's department");
+            }
+            consultationRate.setBelongsToDepartment(null);
+            hospitalEntityAllocator.saveChanges(consultationRate);
+            return (new CRUDInformation(true, "Success to unallocated consultation rate to department"));
+        }  catch (RuntimeException e)
+        {
+            return failure(e);
+        }
+    }
+
+    public CRUDInformation allocateFacilityToDepartment(Facility facility,Department department)
+    {
+        try
+        {
+            facility.setBelongsToDepartment(department.getSelf());
+            hospitalEntityAllocator.saveChanges(facility);
+            return (new CRUDInformation(true, "Success to allocate facility to department"));
+        }
+        catch (RuntimeException e)
+        {
+            return failure(e);
+        }
+    }
+
+    public CRUDInformation unallocatedFacilityToDepartment(Facility facility,Department department)
+    {
+        try
+        {
+            if (!facility.getBelongsToDepartment().getId().equals(department.getId()))
+            {
+                return new CRUDInformation(false, "Department is not the original facility's department");
+            }
+            facility.setBelongsToDepartment(null);
+            hospitalEntityAllocator.saveChanges(facility);
+            return (new CRUDInformation(true, "Success to unallocated facility to department"));
+        }  catch (RuntimeException e)
+        {
+            return failure(e);
+        }
     }
 
     public CRUDInformation allocateDoctorToMedicalManager(Doctor doctor,MedicalManager medicalManager)

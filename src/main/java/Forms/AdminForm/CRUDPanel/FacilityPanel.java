@@ -5,6 +5,7 @@
 package Forms.AdminForm.CRUDPanel;
 
 import Forms.AdminForm.CRUDDialog.FacilityDialog;import Forms.AdminForm.CRUDDialog.InsuranceDialog;
+import Interfaces.RefreshablePanel;
 import Operations.AdminOperation.AdminOperation;
 import entities.BusinessEntity.Facility;import entities.BusinessEntity.Insurance;
 
@@ -19,10 +20,18 @@ import static Forms.AdminForm.FrameHelper.getObjectFromCurrentSelectedRow;
 /**
  * @author leezh
  */
-public class FacilityPanel extends JPanel {
+public class FacilityPanel extends JPanel implements RefreshablePanel
+{
     private AdminOperation adminOperation;
     private Window frameWindow;
-    public FacilityPanel(Window frameWindow,AdminOperation adminOperation)
+    @Override
+    public void refreshData()
+    {
+        reload(null);
+    }
+
+
+    public FacilityPanel(Window frameWindow, AdminOperation adminOperation)
     {
         this.frameWindow = frameWindow;
         this.adminOperation = adminOperation;
@@ -44,12 +53,14 @@ public class FacilityPanel extends JPanel {
         });
         buttonDetectForSelectListInTable();
     }
+
     private void buttonDetectForSelectListInTable()
     {
         int selectedRow = table.getSelectedRow();
         updateButton.setEnabled(selectedRow != -1);
         deleteButton.setEnabled(selectedRow != -1);
     }
+
     private void clearTable(JTable table)
     {
         DefaultTableModel model = (DefaultTableModel) table.getModel();
@@ -60,7 +71,7 @@ public class FacilityPanel extends JPanel {
     {
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         var objects = adminOperation.getAllFacilities();
-        for (var object  : objects)
+        for (var object : objects)
         {
             Object[] row = new Object[6];
             row[0] = object.getId();
@@ -82,27 +93,28 @@ public class FacilityPanel extends JPanel {
 
     private void add(ActionEvent e)
     {
-        FacilityDialog facilityDialog = new FacilityDialog(frameWindow,adminOperation);
+        FacilityDialog facilityDialog = new FacilityDialog(frameWindow, adminOperation);
         facilityDialog.setVisible(true);
         reload(null);
     }
 
     private void update(ActionEvent e)
     {
-        Facility facility = getObjectFromCurrentSelectedRow(table,5);
-        if(facility == null)
+        Facility facility = getObjectFromCurrentSelectedRow(table, 5);
+        if (facility == null)
         {
             JOptionPane.showMessageDialog(this, "Please select a facility");
             return;
         }
-        FacilityDialog facilityDialog = new FacilityDialog(frameWindow,adminOperation,facility);
+        FacilityDialog facilityDialog = new FacilityDialog(frameWindow, adminOperation, facility);
         facilityDialog.setVisible(true);
         reload(null);
     }
+
     private void delete(ActionEvent e)
     {
         Facility facility = getObjectFromCurrentSelectedRow(table, 5);
-        if(facility == null)
+        if (facility == null)
         {
             JOptionPane.showMessageDialog(this, "Please select a facility");
             return;
@@ -112,14 +124,14 @@ public class FacilityPanel extends JPanel {
         {
             reload(null);
             JOptionPane.showMessageDialog(this, "Facility has been deleted");
-        }
-        else
+        } else
         {
             JOptionPane.showMessageDialog(this, crudInformation.message());
         }
     }
 
-    private void initComponents() {
+    private void initComponents()
+    {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
         allUserScrollPanel = new JScrollPane();
         table = new JTable();

@@ -5,6 +5,7 @@
 package Forms.AdminForm.CRUDPanel;
 
 import Forms.AdminForm.CRUDDialog.UserDialog;
+import Interfaces.RefreshablePanel;
 import Operations.AdminOperation.AdminOperation;
 import entities.BaseEntity.Users.User;
 import entities.BaseEntity.Users.UserWithDetails;
@@ -21,9 +22,11 @@ import static Forms.AdminForm.FrameHelper.getObjectFromCurrentSelectedRow;
 /**
  * @author leezh
  */
-public class UserPanel extends JPanel {
+public class UserPanel extends JPanel implements RefreshablePanel
+{
     private AdminOperation adminOperation;
     private Window parentWindow;
+
     public UserPanel(Window FrameWindow, AdminOperation adminOperation)
     {
         this.parentWindow = FrameWindow;
@@ -46,13 +49,13 @@ public class UserPanel extends JPanel {
         });
         buttonDetectForSelectListInAllUserTable();
     }
+
     private void buttonDetectForSelectListInAllUserTable()
     {
         int selectedRow = userTable.getSelectedRow();
         updateUserButton.setEnabled(selectedRow != -1);
         deleteUserButton.setEnabled(selectedRow != -1);
     }
-
 
 
     private void clearTable(JTable table)
@@ -69,28 +72,28 @@ public class UserPanel extends JPanel {
 
     private void addUser(ActionEvent e)
     {
-        UserDialog userDialog = new UserDialog(parentWindow,adminOperation);
+        UserDialog userDialog = new UserDialog(parentWindow, adminOperation);
         userDialog.setVisible(true);
         reloadUser(null);
     }
 
     private void updateUser(ActionEvent e)
     {
-        BusinessEntity<? extends User> user = getObjectFromCurrentSelectedRow(userTable,7);
-        if(user == null)
+        BusinessEntity<? extends User> user = getObjectFromCurrentSelectedRow(userTable, 7);
+        if (user == null)
         {
             JOptionPane.showMessageDialog(this, "Please select a user");
             return;
         }
-        UserDialog userDialog = new UserDialog(parentWindow,adminOperation,user);
+        UserDialog userDialog = new UserDialog(parentWindow, adminOperation, user);
         userDialog.setVisible(true);
         reloadUser(null);
     }
 
     private void deleteUser(ActionEvent e)
     {
-        BusinessEntity<? extends User> user = getObjectFromCurrentSelectedRow(userTable,7);
-        if(user == null)
+        BusinessEntity<? extends User> user = getObjectFromCurrentSelectedRow(userTable, 7);
+        if (user == null)
         {
             JOptionPane.showMessageDialog(this, "Please select a user");
             return;
@@ -100,12 +103,12 @@ public class UserPanel extends JPanel {
         {
             reloadUser(null);
             JOptionPane.showMessageDialog(this, "User has been deleted");
-        }
-        else
+        } else
         {
             JOptionPane.showMessageDialog(this, crudInformation.message());
         }
     }
+
     private void loadAllUserToUserTable()
     {
         DefaultTableModel model = (DefaultTableModel) userTable.getModel();
@@ -132,7 +135,14 @@ public class UserPanel extends JPanel {
 
     }
 
-    private void initComponents() {
+    @Override
+    public void refreshData()
+    {
+        reloadUser(null);
+    }
+
+    private void initComponents()
+    {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
         allUserScrollPanel = new JScrollPane();
         userTable = new JTable();
@@ -220,5 +230,6 @@ public class UserPanel extends JPanel {
     private JButton addUserButton;
     private JButton updateUserButton;
     private JButton deleteUserButton;
+
     // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
 }

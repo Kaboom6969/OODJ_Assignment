@@ -4,9 +4,12 @@
 
 package Forms.AdminForm.CRUDPanel;
 
-import Forms.AdminForm.CRUDDialog.ConsultationRateDialog;import Forms.AdminForm.CRUDDialog.FacilityDialog;
+import Forms.AdminForm.CRUDDialog.ConsultationRateDialog;
+import Forms.AdminForm.CRUDDialog.FacilityDialog;
+import Interfaces.RefreshablePanel;
 import Operations.AdminOperation.AdminOperation;
-import entities.BusinessEntity.ConsultationRate;import entities.BusinessEntity.Facility;
+import entities.BusinessEntity.ConsultationRate;
+import entities.BusinessEntity.Facility;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -19,10 +22,17 @@ import static Forms.AdminForm.FrameHelper.getObjectFromCurrentSelectedRow;
 /**
  * @author leezh
  */
-public class ConsultationRatePanel extends JPanel {
+public class ConsultationRatePanel extends JPanel implements RefreshablePanel
+{
     private AdminOperation adminOperation;
     private Window frameWindow;
-    public ConsultationRatePanel(Window frameWindow,AdminOperation adminOperation)
+    @Override
+    public void refreshData()
+    {
+        reload(null);
+    }
+
+    public ConsultationRatePanel(Window frameWindow, AdminOperation adminOperation)
     {
         this.frameWindow = frameWindow;
         this.adminOperation = adminOperation;
@@ -44,12 +54,14 @@ public class ConsultationRatePanel extends JPanel {
         });
         buttonDetectForSelectListInTable();
     }
+
     private void buttonDetectForSelectListInTable()
     {
         int selectedRow = table.getSelectedRow();
         updateButton.setEnabled(selectedRow != -1);
         deleteButton.setEnabled(selectedRow != -1);
     }
+
     private void clearTable(JTable table)
     {
         DefaultTableModel model = (DefaultTableModel) table.getModel();
@@ -60,7 +72,7 @@ public class ConsultationRatePanel extends JPanel {
     {
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         var objects = adminOperation.getAllConsultationRates();
-        for (var object  : objects)
+        for (var object : objects)
         {
             Object[] row = new Object[5];
             row[0] = object.getId();
@@ -81,27 +93,28 @@ public class ConsultationRatePanel extends JPanel {
 
     private void add(ActionEvent e)
     {
-        ConsultationRateDialog consultationRateDialog = new ConsultationRateDialog(frameWindow,adminOperation);
+        ConsultationRateDialog consultationRateDialog = new ConsultationRateDialog(frameWindow, adminOperation);
         consultationRateDialog.setVisible(true);
         reload(null);
     }
 
     private void update(ActionEvent e)
     {
-        ConsultationRate consultationRate = getObjectFromCurrentSelectedRow(table,4);
-        if(consultationRate == null)
+        ConsultationRate consultationRate = getObjectFromCurrentSelectedRow(table, 4);
+        if (consultationRate == null)
         {
             JOptionPane.showMessageDialog(this, "Please select a consultation rate");
             return;
         }
-        ConsultationRateDialog consultationRateDialog = new ConsultationRateDialog(frameWindow,adminOperation,consultationRate);
+        ConsultationRateDialog consultationRateDialog = new ConsultationRateDialog(frameWindow, adminOperation, consultationRate);
         consultationRateDialog.setVisible(true);
         reload(null);
     }
+
     private void delete(ActionEvent e)
     {
         ConsultationRate consultationRate = getObjectFromCurrentSelectedRow(table, 4);
-        if(consultationRate == null)
+        if (consultationRate == null)
         {
             JOptionPane.showMessageDialog(this, "Please select a consultation rate");
             return;
@@ -111,15 +124,15 @@ public class ConsultationRatePanel extends JPanel {
         {
             reload(null);
             JOptionPane.showMessageDialog(this, "Consultation rate has been deleted");
-        }
-        else
+        } else
         {
             JOptionPane.showMessageDialog(this, crudInformation.message());
         }
     }
 
 
-    private void initComponents() {
+    private void initComponents()
+    {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
         allUserScrollPanel = new JScrollPane();
         table = new JTable();
