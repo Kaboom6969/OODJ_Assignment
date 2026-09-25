@@ -35,6 +35,14 @@ public class FeedbackDialog extends javax.swing.JDialog {
         return enteredComment;
     }
 
+    public void setInitialRating(int rating) {
+        ratingSlider.setValue(rating);
+    }
+
+    public void setInitialComment(String comment) {
+        commentTa.setText(comment);
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
