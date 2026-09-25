@@ -1,0 +1,42 @@
+﻿JFDML JFormDesigner: "8.3" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormWindow( "javax.swing.JDialog", new FormLayoutManager( class org.jdesktop.layout.GroupLayout ) {
+			"$horizontalGroup": "par l {seq {par l {seq l {space :p:105:p, par t {comp isActiveLabel:::p::p, comp nameLabel::t:p::p, comp priceLabel::t:p::p}, space s:::p, par l {comp nameTextField:::p:185:p, comp priceTextField:::p:185:p, comp isActiveComboBox:::p::p}}, seq l {space :p:224:p, comp actionButton:::p::p}}, space ::218:x}}"
+			"$verticalGroup": "par l {seq l {space :p:113:p, par b {comp nameTextField::b:p::p, comp nameLabel::b:p::p}, space :p:15:p, par b {comp priceTextField::b:p::p, comp priceLabel::b:p::p}, space :p:11:p, par b {comp isActiveLabel::b:p::p, comp isActiveComboBox::b:p::p}, space u:::p, comp actionButton:::p::p, space ::92:x}}"
+		} ) {
+			name: "this"
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "nameLabel"
+				"text": "Name:"
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "priceLabel"
+				"text": "Price:"
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "isActiveLabel"
+				"text": "Is Active:"
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "nameTextField"
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "priceTextField"
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "actionButton"
+				"text": "Action"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "action", true ) )
+			} )
+			add( new FormComponent( "javax.swing.JComboBox" ) {
+				name: "isActiveComboBox"
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 585, 410 )
+		} )
+	}
+}

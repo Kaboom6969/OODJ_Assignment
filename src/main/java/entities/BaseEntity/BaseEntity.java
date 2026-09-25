@@ -3,11 +3,12 @@ package entities.BaseEntity;
 
 import Exceptions.IdPrefixExceptions.IdPrefixNotMatchException;
 import Exceptions.IdPrefixExceptions.IdPrefixOversizeException;
+import Interfaces.ConvertToFileData;
 
 import javax.naming.OperationNotSupportedException;
 import java.util.Objects;
 
-public abstract class BaseEntity
+public abstract class BaseEntity implements ConvertToFileData
 {
     private static int idNumberWidth = 0;
     private Integer idNumber;

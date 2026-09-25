@@ -1,0 +1,75 @@
+﻿JFDML JFormDesigner: "8.3" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class org.jdesktop.layout.GroupLayout ) {
+			"$horizontalGroup": "par l {seq l {space ::49:x, comp allUserScrollPanel:::p:709:p, space :p:35:p, par l {comp deleteButton:::p::p, comp addButton:::p::p, comp reloadButton::l:p:84:p, comp updateButton:::p::p}, space :p:138:p}}"
+			"$verticalGroup": "par l {seq l {space :p:175:p, comp reloadButton:::p::p, space u:::p, comp addButton:::p::p, space s:::p, comp updateButton:::p::p, space :p:18:p, comp deleteButton:::p::p, space ::181:x}, seq t {space ::66:x, comp allUserScrollPanel:::p:425:p, space :p:49:p}}"
+		} ) {
+			name: "this"
+			add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+				name: "allUserScrollPanel"
+				add( new FormComponent( "javax.swing.JTable" ) {
+					name: "table"
+					"model": new com.jformdesigner.model.SwingTableModel( new java.util.Vector {
+						add( new java.util.Vector {
+							add( null )
+							add( null )
+							add( null )
+							add( null )
+							add( null )
+						} )
+					}, new java.util.Vector {
+						add( "Id" )
+						add( "Name" )
+						add( "Price" )
+						add( "Is Active" )
+						add( "ConsultationRate Object" )
+					}, new java.util.Vector {
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+					}, new java.util.Vector {
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+					}, new java.util.Vector {
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+					} )
+				} )
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "reloadButton"
+				"text": "Reload"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "reload", true ) )
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "addButton"
+				"text": "Add"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "add", true ) )
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "updateButton"
+				"text": "Update"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "update", true ) )
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "deleteButton"
+				"text": "Delete"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "delete", true ) )
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 1015, 540 )
+		} )
+	}
+}

@@ -32,8 +32,6 @@ public class HospitalEntityAllocator
     private Path linkerDirectory;
     private Path entityDirectory;
 
-    //private EntityHandler entityHandler;
-
     public HospitalEntityAllocator(Path linkerDirectory,Path entityDirectory)
     {
         this.linkerDirectory = linkerDirectory;

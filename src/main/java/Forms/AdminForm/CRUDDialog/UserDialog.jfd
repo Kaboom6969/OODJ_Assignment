@@ -1,0 +1,71 @@
+﻿JFDML JFormDesigner: "8.3" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormWindow( "javax.swing.JDialog", new FormLayoutManager( class org.jdesktop.layout.GroupLayout ) {
+			"$horizontalGroup": "par l {seq l {space :p:28:p, par t {comp nameLabel::t:p::p, comp passwordLabel::t:p::p, comp emailLabel::t:p::p, comp dateOfBirthLabel::t:p::p, comp phoneNumberLabel:::p::p, comp genderLabel::t:p::p, comp roleLabel::t:p::p}, space s:::p, par l {seq {comp passwordTextField:::p:185:p, space :::x}, seq t {par t {comp phoneNumberTextField::l:::x, comp emailTextField::l:::x, seq l {par l {comp genderComboBox:::p::p, comp roleComboBox:::p::p, comp nameTextField:::p:185:p}, space :0:0:x}, comp dateOfBirthTextField::l:::x}, space :p:69:p}}}, seq l {space :p:114:p, comp actionButton:::p::p, space :0:0:x}}"
+			"$verticalGroup": "par l {seq l {space :p:23:p, par b {comp nameLabel::b:p::p, comp nameTextField::b:p::p}, space :p:12:p, par b {comp passwordLabel::b:p::p, comp passwordTextField::b:p::p}, space u:::p, par b {comp emailLabel::b:p::p, comp emailTextField::b:p::p}, space :::p, par b {comp genderComboBox::b:p::p, comp genderLabel::b:p::p}, space :p:9:p, par b {comp dateOfBirthLabel::b:p::p, comp dateOfBirthTextField::b:p::p}, space :p:21:p, par b {comp phoneNumberLabel::b:p::p, comp phoneNumberTextField::b:p::p}, space :p:20:p, par b {comp roleComboBox::b:p::p, comp roleLabel::b:p::p}, space s:::p, comp actionButton:::p::p, space :::x}}"
+		} ) {
+			name: "this"
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "nameLabel"
+				"text": "Name:"
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "passwordLabel"
+				"text": "Password:"
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "emailLabel"
+				"text": "Email:"
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "genderLabel"
+				"text": "Gender:"
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "dateOfBirthLabel"
+				"text": "Date Of Birth:"
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "phoneNumberLabel"
+				"text": "Phone Number:"
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "roleLabel"
+				"text": "Role:"
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "nameTextField"
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "emailTextField"
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "phoneNumberTextField"
+			} )
+			add( new FormComponent( "javax.swing.JComboBox" ) {
+				name: "genderComboBox"
+			} )
+			add( new FormComponent( "javax.swing.JComboBox" ) {
+				name: "roleComboBox"
+				addEvent( new FormEvent( "java.awt.event.ItemListener", "itemStateChanged", "roleComboBoxItemStateChanged", true ) )
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "passwordTextField"
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "actionButton"
+				"text": "Action"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "action", true ) )
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "dateOfBirthTextField"
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 400, 420 )
+		} )
+	}
+}
