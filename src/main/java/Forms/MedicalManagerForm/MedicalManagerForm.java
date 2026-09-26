@@ -140,6 +140,7 @@ public class MedicalManagerForm extends JFrame {
                 );
             }
         });
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
     // Refresh department names in Shift Rosters dropdown
