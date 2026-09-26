@@ -1,10 +1,50 @@
-DP0001|General Medicine
-DP0002|Cardiology
-DP0003|Paediatrics
-DP0004|Orthopaedics
-DP0005|Dermatology
-DP0006|Neurology
-DP0007|Radiology
-DP0008|Oncology
-DP0009|Emergency
-DP0010|Pharmacy
+DP0001|General Medicine Unit 1
+DP0002|Cardiology Unit 1
+DP0003|Paediatrics Unit 1
+DP0004|Orthopaedics Unit 1
+DP0005|Neurology Unit 1
+DP0006|Dermatology Unit 1
+DP0007|Ophthalmology Unit 1
+DP0008|ENT Unit 1
+DP0009|Obstetrics Unit 1
+DP0010|Gynaecology Unit 1
+DP0011|Oncology Unit 1
+DP0012|Psychiatry Unit 1
+DP0013|Urology Unit 1
+DP0014|Nephrology Unit 1
+DP0015|Endocrinology Unit 1
+DP0016|General Medicine Unit 2
+DP0017|Cardiology Unit 2
+DP0018|Paediatrics Unit 2
+DP0019|Orthopaedics Unit 2
+DP0020|Neurology Unit 2
+DP0021|Dermatology Unit 2
+DP0022|Ophthalmology Unit 2
+DP0023|ENT Unit 2
+DP0024|Obstetrics Unit 2
+DP0025|Gynaecology Unit 2
+DP0026|Oncology Unit 2
+DP0027|Psychiatry Unit 2
+DP0028|Urology Unit 2
+DP0029|Nephrology Unit 2
+DP0030|Endocrinology Unit 2
+DP0031|General Medicine Unit 3
+DP0032|Cardiology Unit 3
+DP0033|Paediatrics Unit 3
+DP0034|Orthopaedics Unit 3
+DP0035|Neurology Unit 3
+DP0036|Dermatology Unit 3
+DP0037|Ophthalmology Unit 3
+DP0038|ENT Unit 3
+DP0039|Obstetrics Unit 3
+DP0040|Gynaecology Unit 3
+DP0041|Oncology Unit 3
+DP0042|Psychiatry Unit 3
+DP0043|Urology Unit 3
+DP0044|Nephrology Unit 3
+DP0045|Endocrinology Unit 3
+DP0046|General Medicine Unit 4
+DP0047|Cardiology Unit 4
+DP0048|Paediatrics Unit 4
+DP0049|Orthopaedics Unit 4
+DP0050|Neurology Unit 4

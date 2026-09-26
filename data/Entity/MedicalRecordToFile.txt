@@ -1,10 +1,50 @@
-MR0001|36.3|68|107|66|Diagnosis 01|Consultation note 01
-MR0002|36.4|71|109|67|Diagnosis 02|Consultation note 02
-MR0003|36.5|74|111|68|Diagnosis 03|Consultation note 03
-MR0004|36.6|77|113|69|Diagnosis 04|Consultation note 04
-MR0005|36.7|80|115|70|Diagnosis 05|Consultation note 05
-MR0006|36.8|83|117|71|Diagnosis 06|Consultation note 06
-MR0007|36.9|86|119|72|Diagnosis 07|Consultation note 07
-MR0008|37.0|89|121|73|Diagnosis 08|Consultation note 08
-MR0009|37.1|92|123|74|Diagnosis 09|Consultation note 09
-MR0010|37.2|95|125|75|Diagnosis 10|Consultation note 10
+MR0001|36.3|63|106|66|Viral infection|Clinical consultation note 01
+MR0002|36.4|64|107|67|Hypertension review|Clinical consultation note 02
+MR0003|36.5|65|108|68|Muscle strain|Clinical consultation note 03
+MR0004|36.6|66|109|69|Allergic dermatitis|Clinical consultation note 04
+MR0005|36.7|67|110|70|Migraine|Clinical consultation note 05
+MR0006|36.8|68|111|71|Gastritis|Clinical consultation note 06
+MR0007|36.9|69|112|72|Seasonal allergy|Clinical consultation note 07
+MR0008|36.2|70|113|73|Minor joint inflammation|Clinical consultation note 08
+MR0009|36.3|71|114|74|Respiratory irritation|Clinical consultation note 09
+MR0010|36.4|72|115|75|Routine observation|Clinical consultation note 10
+MR0011|36.5|73|116|76|Viral infection|Clinical consultation note 11
+MR0012|36.6|74|117|77|Hypertension review|Clinical consultation note 12
+MR0013|36.7|75|118|78|Muscle strain|Clinical consultation note 13
+MR0014|36.8|76|119|79|Allergic dermatitis|Clinical consultation note 14
+MR0015|36.9|77|120|80|Migraine|Clinical consultation note 15
+MR0016|36.2|78|121|81|Gastritis|Clinical consultation note 16
+MR0017|36.3|79|122|82|Seasonal allergy|Clinical consultation note 17
+MR0018|36.4|80|123|65|Minor joint inflammation|Clinical consultation note 18
+MR0019|36.5|81|124|66|Respiratory irritation|Clinical consultation note 19
+MR0020|36.6|82|125|67|Routine observation|Clinical consultation note 20
+MR0021|36.7|83|126|68|Viral infection|Clinical consultation note 21
+MR0022|36.8|84|127|69|Hypertension review|Clinical consultation note 22
+MR0023|36.9|85|128|70|Muscle strain|Clinical consultation note 23
+MR0024|36.2|62|129|71|Allergic dermatitis|Clinical consultation note 24
+MR0025|36.3|63|105|72|Migraine|Clinical consultation note 25
+MR0026|36.4|64|106|73|Gastritis|Clinical consultation note 26
+MR0027|36.5|65|107|74|Seasonal allergy|Clinical consultation note 27
+MR0028|36.6|66|108|75|Minor joint inflammation|Clinical consultation note 28
+MR0029|36.7|67|109|76|Respiratory irritation|Clinical consultation note 29
+MR0030|36.8|68|110|77|Routine observation|Clinical consultation note 30
+MR0031|36.9|69|111|78|Viral infection|Clinical consultation note 31
+MR0032|36.2|70|112|79|Hypertension review|Clinical consultation note 32
+MR0033|36.3|71|113|80|Muscle strain|Clinical consultation note 33
+MR0034|36.4|72|114|81|Allergic dermatitis|Clinical consultation note 34
+MR0035|36.5|73|115|82|Migraine|Clinical consultation note 35
+MR0036|36.6|74|116|65|Gastritis|Clinical consultation note 36
+MR0037|36.7|75|117|66|Seasonal allergy|Clinical consultation note 37
+MR0038|36.8|76|118|67|Minor joint inflammation|Clinical consultation note 38
+MR0039|36.9|77|119|68|Respiratory irritation|Clinical consultation note 39
+MR0040|36.2|78|120|69|Routine observation|Clinical consultation note 40
+MR0041|36.3|79|121|70|Viral infection|Clinical consultation note 41
+MR0042|36.4|80|122|71|Hypertension review|Clinical consultation note 42
+MR0043|36.5|81|123|72|Muscle strain|Clinical consultation note 43
+MR0044|36.6|82|124|73|Allergic dermatitis|Clinical consultation note 44
+MR0045|36.7|83|125|74|Migraine|Clinical consultation note 45
+MR0046|36.8|84|126|75|Gastritis|Clinical consultation note 46
+MR0047|36.9|85|127|76|Seasonal allergy|Clinical consultation note 47
+MR0048|36.2|62|128|77|Minor joint inflammation|Clinical consultation note 48
+MR0049|36.3|63|129|78|Respiratory irritation|Clinical consultation note 49
+MR0050|36.4|64|105|79|Routine observation|Clinical consultation note 50

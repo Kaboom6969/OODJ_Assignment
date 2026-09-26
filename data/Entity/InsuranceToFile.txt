@@ -1,10 +1,50 @@
-IN0001|AIA Malaysia|50|true
-IN0002|Prudential Malaysia|55|true
-IN0003|Great Eastern|60|true
-IN0004|Allianz Malaysia|65|true
-IN0005|Etiqa Insurance|70|true
-IN0006|Zurich Malaysia|75|true
-IN0007|Tokio Marine|80|true
-IN0008|Takaful Malaysia|85|true
-IN0009|Hong Leong Assurance|90|false
-IN0010|Generali Malaysia|95|false
+IN0001|AIA Plan 01|30|true
+IN0002|Prudential Plan 02|40|true
+IN0003|Great Eastern Plan 03|50|true
+IN0004|Allianz Plan 04|60|true
+IN0005|Etiqa Plan 05|70|true
+IN0006|Tokio Marine Plan 06|80|true
+IN0007|Zurich Plan 07|90|true
+IN0008|Takaful Malaysia Plan 08|30|true
+IN0009|Hong Leong Assurance Plan 09|40|true
+IN0010|Manulife Plan 10|50|true
+IN0011|AIA Plan 11|60|true
+IN0012|Prudential Plan 12|70|true
+IN0013|Great Eastern Plan 13|80|true
+IN0014|Allianz Plan 14|90|true
+IN0015|Etiqa Plan 15|30|true
+IN0016|Tokio Marine Plan 16|40|true
+IN0017|Zurich Plan 17|50|true
+IN0018|Takaful Malaysia Plan 18|60|true
+IN0019|Hong Leong Assurance Plan 19|70|true
+IN0020|Manulife Plan 20|80|true
+IN0021|AIA Plan 21|90|true
+IN0022|Prudential Plan 22|30|true
+IN0023|Great Eastern Plan 23|40|true
+IN0024|Allianz Plan 24|50|true
+IN0025|Etiqa Plan 25|60|true
+IN0026|Tokio Marine Plan 26|70|true
+IN0027|Zurich Plan 27|80|true
+IN0028|Takaful Malaysia Plan 28|90|true
+IN0029|Hong Leong Assurance Plan 29|30|true
+IN0030|Manulife Plan 30|40|true
+IN0031|AIA Plan 31|50|true
+IN0032|Prudential Plan 32|60|true
+IN0033|Great Eastern Plan 33|70|true
+IN0034|Allianz Plan 34|80|true
+IN0035|Etiqa Plan 35|90|true
+IN0036|Tokio Marine Plan 36|30|true
+IN0037|Zurich Plan 37|40|true
+IN0038|Takaful Malaysia Plan 38|50|true
+IN0039|Hong Leong Assurance Plan 39|60|true
+IN0040|Manulife Plan 40|70|true
+IN0041|AIA Plan 41|80|false
+IN0042|Prudential Plan 42|90|false
+IN0043|Great Eastern Plan 43|30|false
+IN0044|Allianz Plan 44|40|false
+IN0045|Etiqa Plan 45|50|false
+IN0046|Tokio Marine Plan 46|60|false
+IN0047|Zurich Plan 47|70|false
+IN0048|Takaful Malaysia Plan 48|80|false
+IN0049|Hong Leong Assurance Plan 49|90|false
+IN0050|Manulife Plan 50|30|false
