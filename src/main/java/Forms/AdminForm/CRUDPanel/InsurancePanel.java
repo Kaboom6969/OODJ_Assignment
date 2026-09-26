@@ -129,6 +129,10 @@ public class InsurancePanel extends JPanel implements RefreshablePanel
         }
     }
 
+    private void reload(ActionEvent e) {
+        reload(null);
+    }
+
 
     private void initComponents()
     {
@@ -144,7 +148,7 @@ public class InsurancePanel extends JPanel implements RefreshablePanel
 
         //---- reloadButton ----
         reloadButton.setText("Reload");
-        reloadButton.addActionListener(e -> reload());
+        reloadButton.addActionListener(e -> reload(e));
 
         //---- addButton ----
         addButton.setText("Add");
