@@ -4,8 +4,10 @@
 
 package Forms.AdminForm;
 
+import java.awt.event.*;
 import Forms.AdminForm.CRUDPanel.*;import Forms.AdminForm.LinkPanel.AllocateConsultationRateAndFacilityToDepartment;import Forms.AdminForm.LinkPanel.AllocateDoctorToMedicalManagerPanel;
 import Forms.AdminForm.LinkPanel.AllocateInsuranceToPatientPanel;
+import Forms.BaseFrame;
 import Interfaces.RefreshablePanel;import Operations.AdminOperation.AdminOperation;
 import Tools.EntityConvertManager;
 import Tools.HospitalEntityAllocator;
@@ -22,7 +24,8 @@ import java.util.List;
 /**
  * @author leezh
  */
-public class AdminForm extends JFrame {
+public class AdminForm extends BaseFrame
+{
     private AdminOperation adminOperation;
 
 
@@ -51,12 +54,22 @@ public class AdminForm extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
+    private void logOut(ActionEvent e)
+    {
+        goToParent();
+    }
+
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
         adminTab = new JTabbedPane();
+        logOutButton = new JButton();
 
         //======== this ========
         var contentPane = getContentPane();
+
+        //---- logOutButton ----
+        logOutButton.setText("Log Out");
+        logOutButton.addActionListener(e -> logOut(e));
 
         GroupLayout contentPaneLayout = new GroupLayout(contentPane);
         contentPane.setLayout(contentPaneLayout);
@@ -65,14 +78,21 @@ public class AdminForm extends JFrame {
                 .addGroup(contentPaneLayout.createSequentialGroup()
                     .addContainerGap()
                     .addComponent(adminTab, GroupLayout.PREFERRED_SIZE, 890, GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
+                    .addComponent(logOutButton)
+                    .addContainerGap())
         );
         contentPaneLayout.setVerticalGroup(
             contentPaneLayout.createParallelGroup()
                 .addGroup(contentPaneLayout.createSequentialGroup()
-                    .addContainerGap()
-                    .addComponent(adminTab, GroupLayout.PREFERRED_SIZE, 507, GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(contentPaneLayout.createParallelGroup()
+                        .addGroup(contentPaneLayout.createSequentialGroup()
+                            .addContainerGap()
+                            .addComponent(adminTab, GroupLayout.PREFERRED_SIZE, 507, GroupLayout.PREFERRED_SIZE))
+                        .addGroup(contentPaneLayout.createSequentialGroup()
+                            .addGap(39, 39, 39)
+                            .addComponent(logOutButton, GroupLayout.PREFERRED_SIZE, 439, GroupLayout.PREFERRED_SIZE)))
+                    .addContainerGap(16, Short.MAX_VALUE))
         );
         pack();
         setLocationRelativeTo(getOwner());
@@ -81,6 +101,7 @@ public class AdminForm extends JFrame {
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables  @formatter:off
     private JTabbedPane adminTab;
+    private JButton logOutButton;
     // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
 
 

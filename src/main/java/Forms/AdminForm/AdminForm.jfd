@@ -4,16 +4,21 @@ new FormModel {
 	contentType: "form/swing"
 	root: new FormRoot {
 		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class org.jdesktop.layout.GroupLayout ) {
-			"$horizontalGroup": "par l {seq l {space :::p, comp adminTab:::p:890:p, space :::x}}"
-			"$verticalGroup": "par l {seq l {space :::p, comp adminTab:::p:507:p, space :::x}}"
+			"$horizontalGroup": "par l {seq l {space :::p, comp adminTab:::p:890:p, space ::8:x, comp logOutButton:::p::p, space :::p}}"
+			"$verticalGroup": "par l {seq {par l {seq {space :::p, comp adminTab:::p:507:p}, seq l {space :p:39:p, comp logOutButton:::p:439:p}}, space ::16:x}}"
 		} ) {
 			name: "this"
 			add( new FormContainer( "javax.swing.JTabbedPane", new FormLayoutManager( class javax.swing.JTabbedPane ) ) {
 				name: "adminTab"
 			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "logOutButton"
+				"text": "Log Out"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "logOut", true ) )
+			} )
 		}, new FormLayoutConstraints( null ) {
 			"location": new java.awt.Point( 0, 0 )
-			"size": new java.awt.Dimension( 915, 560 )
+			"size": new java.awt.Dimension( 990, 560 )
 		} )
 	}
 }

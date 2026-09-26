@@ -7,6 +7,7 @@ package Forms.PatientForm;
 import Tools.HospitalEntityAllocator;
 import Exceptions.PatientExceptions.BookingValidationException;
 import Exceptions.PatientExceptions.FeedbackValidationException;
+import Forms.BaseFrame;
 import entities.BaseEntity.BaseEntity;
 import entities.BaseEntity.AppointmentToFile.AppointmentStatus;
 import entities.BaseEntity.AssessmentResultToFile;
@@ -35,7 +36,7 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author jingxian
  */
-public class PatientForm extends javax.swing.JFrame {
+public class PatientForm extends BaseFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(PatientForm.class.getName());
     private HospitalEntityAllocator allocator;
@@ -420,7 +421,8 @@ public class PatientForm extends javax.swing.JFrame {
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
+    private void initComponents()
+    {
 
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jPanel1 = new javax.swing.JPanel();
@@ -429,6 +431,7 @@ public class PatientForm extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         allAppBtn = new javax.swing.JButton();
         bookAppBtn = new javax.swing.JButton();
+        logoutButton = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         departmentCb = new javax.swing.JComboBox<>();
         jScrollPane1 = new javax.swing.JScrollPane();
@@ -524,6 +527,10 @@ public class PatientForm extends javax.swing.JFrame {
         bookAppBtn.setText("Book new Appoinment");
         bookAppBtn.addActionListener(this::bookAppBtnActionPerformed);
 
+        logoutButton.setText("Log Out");
+        logoutButton.setActionCommand("LogOut");
+        logoutButton.addActionListener(this::logoutButtonActionPerformed);
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -539,11 +546,17 @@ public class PatientForm extends javax.swing.JFrame {
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(bookAppBtn))))
                 .addGap(186, 186, 186))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(logoutButton, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(27, 27, 27))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(72, 72, 72)
+                .addGap(27, 27, 27)
+                .addComponent(logoutButton, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(11, 11, 11)
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -560,7 +573,8 @@ public class PatientForm extends javax.swing.JFrame {
 
         departmentCb.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
-        timeLs.setModel(new javax.swing.AbstractListModel<String>() {
+        timeLs.setModel(new javax.swing.AbstractListModel<String>()
+        {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
@@ -596,7 +610,8 @@ public class PatientForm extends javax.swing.JFrame {
 
         dateSn.setModel(new javax.swing.SpinnerDateModel());
 
-        doctorLs.setModel(new javax.swing.AbstractListModel<String>() {
+        doctorLs.setModel(new javax.swing.AbstractListModel<String>()
+        {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
@@ -668,13 +683,15 @@ public class PatientForm extends javax.swing.JFrame {
 
         appointmentTbl.setFont(new java.awt.Font("Tw Cen MT", 0, 14)); // NOI18N
         appointmentTbl.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
+            new Object [][]
+            {
                 {null, null, null, null},
                 {null, null, null, null},
                 {null, null, null, null},
                 {null, null, null, null}
             },
-            new String [] {
+            new String []
+            {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
@@ -742,26 +759,30 @@ public class PatientForm extends javax.swing.JFrame {
         jLabel10.setToolTipText("");
 
         AssessmentTbl.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
+            new Object [][]
+            {
                 {null, null, null, null},
                 {null, null, null, null},
                 {null, null, null, null},
                 {null, null, null, null}
             },
-            new String [] {
+            new String []
+            {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
         jScrollPane3.setViewportView(AssessmentTbl);
 
         medicalTbl.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
+            new Object [][]
+            {
                 {null, null, null, null},
                 {null, null, null, null},
                 {null, null, null, null},
                 {null, null, null, null}
             },
-            new String [] {
+            new String []
+            {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
@@ -776,13 +797,15 @@ public class PatientForm extends javax.swing.JFrame {
         jLabel18.setToolTipText("");
 
         PrescriptionsTbl.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
+            new Object [][]
+            {
                 {null, null, null, null},
                 {null, null, null, null},
                 {null, null, null, null},
                 {null, null, null, null}
             },
-            new String [] {
+            new String []
+            {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
@@ -883,21 +906,26 @@ public class PatientForm extends javax.swing.JFrame {
         jLabel16.setText("Billings:");
 
         billingTb.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
+            new Object [][]
+            {
                 {null, null, null, null, null, null},
                 {null, null, null, null, null, null},
                 {null, null, null, null, null, null},
                 {null, null, null, null, null, null}
             },
-            new String [] {
+            new String []
+            {
                 "Assessment Fee", "Consultation Fee", "Insurance Deduct", "Total", "Issued At", "Status"
             }
-        ) {
-            boolean[] canEdit = new boolean [] {
+        )
+        {
+            boolean[] canEdit = new boolean []
+            {
                 false, true, false, false, false, true
             };
 
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
+            public boolean isCellEditable(int rowIndex, int columnIndex)
+            {
                 return canEdit [columnIndex];
             }
         });
@@ -1271,6 +1299,11 @@ public class PatientForm extends javax.swing.JFrame {
         jTabbedPane1.setSelectedIndex(1);
     }//GEN-LAST:event_bookAppBtnActionPerformed
 
+    private void logoutButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_logoutButtonActionPerformed
+    {//GEN-HEADEREND:event_logoutButtonActionPerformed
+        goToParent();
+    }//GEN-LAST:event_logoutButtonActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1368,6 +1401,7 @@ public class PatientForm extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane7;
     private javax.swing.JScrollPane jScrollPane8;
     private javax.swing.JTabbedPane jTabbedPane1;
+    private javax.swing.JButton logoutButton;
     private javax.swing.JTable medicalTbl;
     private javax.swing.JLabel ratingLbl;
     private javax.swing.JButton resetPwBtn;

@@ -4,8 +4,8 @@ new FormModel {
 	contentType: "form/swing"
 	root: new FormRoot {
 		add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class org.jdesktop.layout.GroupLayout ) {
-			"$horizontalGroup": "par l {seq l {space :p:71:p, comp allUserScrollPanel:::p:709:p, space :p:46:p, par t {comp addButton:::p::p, par l:t {comp deleteButton:::p::p, comp updateButton:::p::p}, comp reloadButton:::p:84:p}, space ::90:x}}"
-			"$verticalGroup": "par l {seq {par l {seq l {space :p:83:p, comp allUserScrollPanel:::p:425:p}, seq l {space :p:142:p, comp reloadButton:::p::p, space s:::p, comp addButton:::p::p, space s:::p, comp updateButton:::p::p, space :p:26:p, comp deleteButton:::p::p}}, space ::87:x}}"
+			"$horizontalGroup": "par l {seq l {space :p:25:p, comp allUserScrollPanel:::p:709:p, space :p:46:p, par t {comp addButton:::p::p, par l:t {comp deleteButton:::p::p, comp updateButton:::p::p}, comp reloadButton:::p:84:p}, space ::16:x}}"
+			"$verticalGroup": "par l {seq l {space :p:47:p, par l {comp allUserScrollPanel::l:p:425:p, seq l {space :p:59:p, comp reloadButton:::p::p, space s:::p, comp addButton:::p::p, space s:::p, comp updateButton:::p::p, space :p:26:p, comp deleteButton:::p::p}}, space ::33:x}}"
 		} ) {
 			name: "this"
 			add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
@@ -69,7 +69,7 @@ new FormModel {
 			} )
 		}, new FormLayoutConstraints( null ) {
 			"location": new java.awt.Point( 0, 0 )
-			"size": new java.awt.Dimension( 1000, 595 )
+			"size": new java.awt.Dimension( 880, 505 )
 		} )
 	}
 }

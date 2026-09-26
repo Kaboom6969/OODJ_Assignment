@@ -183,7 +183,7 @@ public class AssessmentTypePanel extends JPanel implements RefreshablePanel
         layout.setHorizontalGroup(
             layout.createParallelGroup()
                 .addGroup(layout.createSequentialGroup()
-                    .addGap(71, 71, 71)
+                    .addGap(25, 25, 25)
                     .addComponent(allUserScrollPanel, GroupLayout.PREFERRED_SIZE, 709, GroupLayout.PREFERRED_SIZE)
                     .addGap(46, 46, 46)
                     .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
@@ -192,17 +192,16 @@ public class AssessmentTypePanel extends JPanel implements RefreshablePanel
                             .addComponent(deleteButton)
                             .addComponent(updateButton))
                         .addComponent(reloadButton, GroupLayout.PREFERRED_SIZE, 84, GroupLayout.PREFERRED_SIZE))
-                    .addContainerGap(90, Short.MAX_VALUE))
+                    .addContainerGap(16, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup()
                 .addGroup(layout.createSequentialGroup()
+                    .addGap(47, 47, 47)
                     .addGroup(layout.createParallelGroup()
+                        .addComponent(allUserScrollPanel, GroupLayout.PREFERRED_SIZE, 425, GroupLayout.PREFERRED_SIZE)
                         .addGroup(layout.createSequentialGroup()
-                            .addGap(83, 83, 83)
-                            .addComponent(allUserScrollPanel, GroupLayout.PREFERRED_SIZE, 425, GroupLayout.PREFERRED_SIZE))
-                        .addGroup(layout.createSequentialGroup()
-                            .addGap(142, 142, 142)
+                            .addGap(59, 59, 59)
                             .addComponent(reloadButton)
                             .addGap(18, 18, 18)
                             .addComponent(addButton)
@@ -210,7 +209,7 @@ public class AssessmentTypePanel extends JPanel implements RefreshablePanel
                             .addComponent(updateButton)
                             .addGap(26, 26, 26)
                             .addComponent(deleteButton)))
-                    .addContainerGap(87, Short.MAX_VALUE))
+                    .addContainerGap(33, Short.MAX_VALUE))
         );
         // JFormDesigner - End of component initialization  //GEN-END:initComponents  @formatter:on
     }

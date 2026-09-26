@@ -1,5 +1,6 @@
 package Forms.MedicalManagerForm;
 
+import Forms.BaseFrame;
 import Operations.MedicalManagerOperation.MedicalManagerOperation;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.BaseEntity;
@@ -15,7 +16,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MedicalManagerForm extends JFrame {
+public class MedicalManagerForm extends BaseFrame
+{
 
     // --- Profile Form Components ---
     private JTextField nameField;
@@ -98,7 +100,6 @@ public class MedicalManagerForm extends JFrame {
 
         setTitle("Medical Management System");
         setSize(850, 650);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null); // Center window
 
         // Initialize tabs
@@ -109,7 +110,15 @@ public class MedicalManagerForm extends JFrame {
         jTabbedPane.addTab("Shift Rosters", createRosterPanel());
         jTabbedPane.addTab("Metrics & Revenue", createReportPanel());
         jTabbedPane.addTab("Doctor Feedback", createFeedbackPanel());
-        add(jTabbedPane);
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 8));
+        topPanel.setBackground(Color.decode("#4EBC97"));
+
+        JButton logoutButton = new JButton("Logout");
+        setButtonState(logoutButton, true);
+
+        topPanel.add(logoutButton);
+        add(topPanel, BorderLayout.NORTH);
+        add(jTabbedPane, BorderLayout.CENTER);
 
         // Bind events and load initial data
         initEvents();
@@ -124,7 +133,10 @@ public class MedicalManagerForm extends JFrame {
         refreshDocDeptTable();
         refreshDocDeptComboBoxes();
 
-
+        logoutButton.addActionListener(e ->
+        {
+            goToParent();
+        });
         // Trigger refresh automatically when month selection changes
         monthFilterBox.addActionListener(e -> refreshMetrics());
 
@@ -165,7 +177,6 @@ public class MedicalManagerForm extends JFrame {
                 );
             }
         });
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
 
