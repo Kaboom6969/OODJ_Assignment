@@ -53,16 +53,6 @@ public class PatientForm extends javax.swing.JFrame {
      */
     public PatientForm() {
         initComponents();
-        logOutBtn.addActionListener(evt -> {
-            int result = javax.swing.JOptionPane.showConfirmDialog(this,
-                    "Are you sure you want to log out?", "Confirm Logout",
-                    javax.swing.JOptionPane.YES_NO_OPTION);
-            if (result != javax.swing.JOptionPane.YES_OPTION) {
-                return;
-            }
-            // TODO: Navigate to the login screen once it is merged.
-            dispose();
-        });
     }
 
     public PatientForm(HospitalEntityAllocator allocator, Patient patient) {
