@@ -279,7 +279,8 @@ public class MedicalManagerOperation {
                         docName,
                         deptName,
                         date != null ? date.toString() : "",
-                        shiftDetails
+                        shiftDetails,
+                        docToFile.getId()
                 });
             } catch (Exception ignored) {}
         }
@@ -310,7 +311,7 @@ public class MedicalManagerOperation {
         }
 
         // Check for shift conflicts (now both doctor and shiftDate are valid and available)
-        if (hasShiftConflict(doctorId, shiftDate)) {
+        if (hasShiftConflict(doctorId, shiftDate,null)) {
             throw new IllegalArgumentException("Dr. " + doctor.getSelf().getName() + " already has a shift scheduled on " + dateStr + ".");
         }
 
@@ -359,6 +360,11 @@ public class MedicalManagerOperation {
         Doctor doctor = allocator.getBusinessEntity(doctorId);
         if (doctor == null || doctor.getSelf() == null) {
             throw new IllegalArgumentException("Doctor not found: " + doctorId);
+        }
+
+        // Check for shift conflicts, ignoring the current shiftId
+        if (hasShiftConflict(doctorId, shiftDate, shiftId.trim())) {
+            throw new IllegalArgumentException("Dr. " + doctor.getSelf().getName() + " already has a shift scheduled on " + dateStr + ".");
         }
 
         // Determine shift start and end times
@@ -532,9 +538,13 @@ public class MedicalManagerOperation {
     }
 
     // Checks if the doctor already has an active shift on the given date.
-    private boolean hasShiftConflict(String doctorId, LocalDate targetDate) {
+    private boolean hasShiftConflict(String doctorId, LocalDate targetDate, String excludeShiftId) {
         List<DoctorShift> allShifts = allocator.getAllBusinessEntities(DoctorShiftToFile.PREFIX);
         for (DoctorShift shift : allShifts) {
+            // Skip the shift currently being updated
+            if (excludeShiftId != null && shift.getId().equals(excludeShiftId)) {
+                continue;
+            }
             DoctorToFile assignedDoc = shift.getBelongsToDoctor();
             if (assignedDoc != null && assignedDoc.getId().equals(doctorId)) {
                 if (shift.getSelf() != null && targetDate.equals(shift.getSelf().getShiftDate())) {
@@ -625,5 +635,49 @@ public class MedicalManagerOperation {
             } catch (Exception ignored) {}
         }
         return feedbackList;
+    }
+
+    // Assign a doctor to a department
+    public void assignDoctorToDepartment(String doctorId, String deptId) {
+        if (doctorId == null || doctorId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Please select a doctor.");
+        }
+        if (deptId == null || deptId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Please select a department.");
+        }
+
+        Doctor doctor = allocator.getBusinessEntity(doctorId.trim());
+        if (doctor == null || doctor.getSelf() == null) {
+            throw new IllegalArgumentException("Doctor not found: " + doctorId);
+        }
+
+        Department department = allocator.getBusinessEntity(deptId.trim());
+        if (department == null || department.getSelf() == null) {
+            throw new IllegalArgumentException("Department not found: " + deptId);
+        }
+
+        // Set department relationship and save via allocator
+        doctor.setBelongsToDepartment(department.getSelf());
+        allocator.saveChanges(doctor);
+    }
+
+    // Remove department from a doctor (unassign)
+    public void removeDoctorFromDepartment(String doctorId) {
+        if (doctorId == null || doctorId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Please select a doctor.");
+        }
+
+        Doctor doctor = allocator.getBusinessEntity(doctorId.trim());
+        if (doctor == null || doctor.getSelf() == null) {
+            throw new IllegalArgumentException("Doctor not found: " + doctorId);
+        }
+
+        if (doctor.getBelongsToDepartment() == null) {
+            throw new IllegalArgumentException("This doctor does not belong to any department.");
+        }
+
+        // Clear department relationship and save
+        doctor.setBelongsToDepartment(null);
+        allocator.saveChanges(doctor);
     }
 }

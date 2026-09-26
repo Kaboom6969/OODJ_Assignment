@@ -65,6 +65,14 @@ public class MedicalManagerForm extends JFrame {
     private final HospitalEntityAllocator allocator;
     private final MedicalManagerOperation operation;
 
+    // Doctor Department Allocation Components ---
+    private JTable docDeptTable;
+    private DefaultTableModel docDeptTableModel;
+    private JComboBox<String> docDeptDoctorBox;
+    private JComboBox<String> docDeptDepartmentBox;
+    private JButton docDeptAssignBtn;
+    private JButton docDeptRemoveBtn;
+
     // Feedback table and model
     private JTable feedbackTable;
     private DefaultTableModel feedbackTableModel;
@@ -97,6 +105,7 @@ public class MedicalManagerForm extends JFrame {
         JTabbedPane jTabbedPane = new JTabbedPane();
         jTabbedPane.addTab("Personal Profile", createProfilePanel());
         jTabbedPane.addTab("Department Management", createDepartmentPanel());
+        jTabbedPane.addTab("Doctor Department", createDoctorDepartmentPanel());
         jTabbedPane.addTab("Shift Rosters", createRosterPanel());
         jTabbedPane.addTab("Metrics & Revenue", createReportPanel());
         jTabbedPane.addTab("Doctor Feedback", createFeedbackPanel());
@@ -111,6 +120,10 @@ public class MedicalManagerForm extends JFrame {
         // Load initial real metrics data on startup
         refreshMetrics();
         refreshFeedbackTable();
+
+        refreshDocDeptTable();
+        refreshDocDeptComboBoxes();
+
 
         // Trigger refresh automatically when month selection changes
         monthFilterBox.addActionListener(e -> refreshMetrics());
@@ -317,6 +330,7 @@ public class MedicalManagerForm extends JFrame {
 
                 operation.addDepartment(id, name);
                 refreshDepartmentTable();
+                refreshDocDeptComboBoxes();
                 deptTable.clearSelection();
                 JOptionPane.showMessageDialog(this, "Department added successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
             } catch (IllegalArgumentException ex) {
@@ -363,6 +377,8 @@ public class MedicalManagerForm extends JFrame {
                 operation.updateDepartment(deptId, deptNewDeptName);
                 refreshDepartmentTable();
                 refreshRosterTable();
+                refreshDocDeptTable();
+                refreshDocDeptComboBoxes();
                 deptTable.clearSelection();
                 JOptionPane.showMessageDialog(this, "Department updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
             } catch (IllegalArgumentException ex) {
@@ -393,6 +409,8 @@ public class MedicalManagerForm extends JFrame {
                 try {
                     operation.deleteDepartment(deptId);
                     refreshDepartmentTable();
+                    refreshDocDeptTable();
+                    refreshDocDeptComboBoxes();
                     deptTable.clearSelection();
                     JOptionPane.showMessageDialog(this, "Department deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                 } catch (IllegalArgumentException ex) {
@@ -452,6 +470,7 @@ public class MedicalManagerForm extends JFrame {
                 try {
                     operation.deleteShift(shiftId);
                     refreshRosterTable();
+                    resetRosterForm();
                     JOptionPane.showMessageDialog(this, "Shift deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
                 } catch (IllegalArgumentException ex) {
                     JOptionPane.showMessageDialog(this, ex.getMessage(), "Input Error", JOptionPane.WARNING_MESSAGE);
@@ -459,32 +478,26 @@ public class MedicalManagerForm extends JFrame {
             }
         });
 
-        // Clear Shift Button Action
-        clearShiftBtn.addActionListener(e -> {
-            rosterDateField.setText("YYYY-MM-DD");
-            rosterDateField.setForeground(Color.GRAY);
-            rosterTable.clearSelection();
-            if (doctorBox.getItemCount() > 0) {
-                doctorBox.setSelectedIndex(0);
-            }
-        });
 
         // Listen to roster table row selection and populate input fields
         rosterTable.getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting() && rosterTable.getSelectedRow() != -1) {
                 int row = rosterTable.getSelectedRow();
-                selectedShiftId = (String) rosterTableModel.getValueAt(row, 0);
-                String docName = (String) rosterTableModel.getValueAt(row, 1);
-                String date = (String) rosterTableModel.getValueAt(row, 3);
-                String shiftDetails = (String) rosterTableModel.getValueAt(row, 4);
+                int modelRow = rosterTable.convertRowIndexToModel(row); // Convert to model row index
+                selectedShiftId = (String) rosterTableModel.getValueAt(modelRow, 0);
+                String docName = (String) rosterTableModel.getValueAt(modelRow, 1);
+                String date = (String) rosterTableModel.getValueAt(modelRow, 3);
+                String shiftDetails = (String) rosterTableModel.getValueAt(modelRow, 4);
+                String docId = (String) rosterTableModel.getValueAt(modelRow, 5);
 
                 // Fill date text field
                 rosterDateField.setText(date);
                 rosterDateField.setForeground(Color.BLACK);
 
-                // Match and select doctor in dropdown
+                // Match doctor in dropdown by exact Doctor ID
                 for (int i = 0; i < doctorBox.getItemCount(); i++) {
-                    if (doctorBox.getItemAt(i).contains(docName)) {
+                    String item = doctorBox.getItemAt(i);
+                    if (item != null && item.startsWith(docId + " - ")) {
                         doctorBox.setSelectedIndex(i);
                         break;
                     }
@@ -527,10 +540,7 @@ public class MedicalManagerForm extends JFrame {
 
                 // Refresh table and reset form
                 refreshRosterTable();
-                selectedShiftId = null;
-                rosterTable.clearSelection();
-                setButtonState(updateShiftBtn, false);
-                setButtonState(assignShiftBtn, true);
+                resetRosterForm();
             } catch (IllegalArgumentException ex) {
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Validation Error", JOptionPane.WARNING_MESSAGE);
             } catch (Exception ex) {
@@ -539,18 +549,7 @@ public class MedicalManagerForm extends JFrame {
         });
 
         // Update clearShiftBtn to reset update button
-        clearShiftBtn.addActionListener(e -> {
-            selectedShiftId = null;
-            rosterTable.clearSelection();
-            rosterDateField.setText("YYYY-MM-DD");
-            rosterDateField.setForeground(Color.GRAY);
-            departmentField.setText("");
-            if (doctorBox.getItemCount() > 0) {
-                doctorBox.setSelectedIndex(0);
-            }
-            setButtonState(updateShiftBtn, false);
-            setButtonState(assignShiftBtn, true);
-        });
+        clearShiftBtn.addActionListener(e -> resetRosterForm());
 
         // Automatically sync department display when doctor selection changes
         doctorBox.addActionListener(e -> {
@@ -577,6 +576,20 @@ public class MedicalManagerForm extends JFrame {
                 departmentField.setText("");
             }
         });
+    }
+
+    // Reset roster form inputs and button states
+    private void resetRosterForm() {
+        selectedShiftId = null;
+        rosterTable.clearSelection();
+        rosterDateField.setText("YYYY-MM-DD");
+        rosterDateField.setForeground(Color.GRAY);
+        departmentField.setText("");
+        if (doctorBox.getItemCount() > 0) {
+            doctorBox.setSelectedIndex(0);
+        }
+        setButtonState(updateShiftBtn, false);
+        setButtonState(assignShiftBtn, true);
     }
 
     private void setButtonState(JButton btn, boolean enabled) {
@@ -675,7 +688,7 @@ public class MedicalManagerForm extends JFrame {
         panel.setBackground(Color.decode("#88BEA7"));
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        String[] columns = {"Roster ID", "Doctor Name", "Department", "Date", "Shift"};
+        String[] columns = {"Roster ID", "Doctor Name", "Department", "Date", "Shift", "Doctor ID"};
         rosterTableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -685,6 +698,9 @@ public class MedicalManagerForm extends JFrame {
 
         rosterTable = new JTable(rosterTableModel);
         rosterTable.setRowHeight(24);
+
+        rosterTable.removeColumn(rosterTable.getColumn("Doctor ID"));
+
         panel.add(new JScrollPane(rosterTable), BorderLayout.CENTER);
 
         JPanel formPanel = new JPanel(new GridBagLayout());
@@ -983,6 +999,185 @@ public class MedicalManagerForm extends JFrame {
         genderBox.setSelectedIndex(0);
     }
 
+    // Create Doctor Department allocation panel
+    private JPanel createDoctorDepartmentPanel() {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBackground(Color.decode("#7EBDA5"));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Table showing Doctors and their assigned department
+        String[] columns = {"Doctor ID", "Doctor Name", "Current Department"};
+        docDeptTableModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        docDeptTable = new JTable(docDeptTableModel);
+        docDeptTable.setRowHeight(24);
+        panel.add(new JScrollPane(docDeptTable), BorderLayout.CENTER);
+
+        // Form panel for assigning/removing departments
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setOpaque(false);
+        formPanel.setBorder(BorderFactory.createTitledBorder("Doctor Department Assignment"));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(6, 6, 6, 6);
+
+        docDeptDoctorBox = new JComboBox<>();
+        docDeptDepartmentBox = new JComboBox<>();
+        docDeptAssignBtn = new JButton("Assign Department");
+        docDeptRemoveBtn = new JButton("Remove Department");
+
+        setButtonState(docDeptAssignBtn, true);
+        setButtonState(docDeptRemoveBtn, true);
+
+        // Row 0: Doctor
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.EAST;
+        formPanel.add(new JLabel("Doctor:"), gbc);
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
+        formPanel.add(docDeptDoctorBox, gbc);
+
+        // Row 1: Department
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.EAST;
+        formPanel.add(new JLabel("Department:"), gbc);
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        formPanel.add(docDeptDepartmentBox, gbc);
+
+        // Row 2: Buttons
+        JPanel btnGroup = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        btnGroup.setOpaque(false);
+        btnGroup.add(docDeptAssignBtn);
+        btnGroup.add(docDeptRemoveBtn);
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        formPanel.add(btnGroup, gbc);
+
+        panel.add(formPanel, BorderLayout.SOUTH);
+
+        // Table row click: auto-select doctor in dropdown
+        docDeptTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting() && docDeptTable.getSelectedRow() != -1) {
+                int row = docDeptTable.getSelectedRow();
+                String docId = (String) docDeptTableModel.getValueAt(row, 0);
+                for (int i = 0; i < docDeptDoctorBox.getItemCount(); i++) {
+                    if (docDeptDoctorBox.getItemAt(i).startsWith(docId + " - ")) {
+                        docDeptDoctorBox.setSelectedIndex(i);
+                        break;
+                    }
+                }
+            }
+        });
+
+        // Assign Button Action
+        docDeptAssignBtn.addActionListener(e -> {
+            String docItem = (String) docDeptDoctorBox.getSelectedItem();
+            String deptItem = (String) docDeptDepartmentBox.getSelectedItem();
+
+            if (docItem == null || !docItem.contains(" - ")) {
+                JOptionPane.showMessageDialog(this, "Please select a valid doctor.", "Notice", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            if (deptItem == null || !deptItem.contains(" - ")) {
+                JOptionPane.showMessageDialog(this, "Please select a valid department.", "Notice", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            String doctorId = docItem.split(" - ")[0].trim();
+            String deptId = deptItem.split(" - ")[0].trim();
+
+            try {
+                operation.assignDoctorToDepartment(doctorId, deptId);
+                JOptionPane.showMessageDialog(this, "Doctor assigned to department successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                refreshDocDeptTable();
+                refreshRosterTable(); // Keep roster and metrics in sync
+            } catch (IllegalArgumentException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.WARNING_MESSAGE);
+            }
+        });
+
+        // Remove Button Action
+        docDeptRemoveBtn.addActionListener(e -> {
+            String docItem = (String) docDeptDoctorBox.getSelectedItem();
+            if (docItem == null || !docItem.contains(" - ")) {
+                JOptionPane.showMessageDialog(this, "Please select a valid doctor.", "Notice", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            String doctorId = docItem.split(" - ")[0].trim();
+            try {
+                operation.removeDoctorFromDepartment(doctorId);
+                JOptionPane.showMessageDialog(this, "Department removed from doctor successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                refreshDocDeptTable();
+                refreshRosterTable(); // Keep roster in sync
+            } catch (IllegalArgumentException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.WARNING_MESSAGE);
+            }
+        });
+
+        return panel;
+    }
+
+    // Refresh doctor department table
+    private void refreshDocDeptTable() {
+        if (docDeptTableModel == null) return;
+        docDeptTableModel.setRowCount(0);
+        try {
+            List<Doctor> doctors = operation.loadDoctors();
+            for (Doctor doc : doctors) {
+                if (doc.getSelf() == null) continue;
+                String docId = doc.getId();
+                String docName = doc.getSelf().getName();
+                String deptName = "Unassigned";
+
+                if (doc.getBelongsToDepartment() != null) {
+                    deptName = doc.getBelongsToDepartment().getName();
+                }
+
+                docDeptTableModel.addRow(new Object[]{docId, docName, deptName});
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to refresh doctor department table: " + e.getMessage());
+        }
+    }
+
+    // Populate dropdowns for doctor department assignment
+    private void refreshDocDeptComboBoxes() {
+        if (docDeptDoctorBox == null || docDeptDepartmentBox == null) return;
+
+        docDeptDoctorBox.removeAllItems();
+        docDeptDepartmentBox.removeAllItems();
+
+        try {
+            // Load doctors
+            for (Doctor doc : operation.loadDoctors()) {
+                if (doc.getSelf() != null) {
+                    docDeptDoctorBox.addItem(doc.getId() + " - " + doc.getSelf().getName());
+                }
+            }
+
+            // Load departments
+            for (Department dept : operation.loadDepartmentEntities()) {
+                if (dept.getSelf() != null) {
+                    docDeptDepartmentBox.addItem(dept.getId() + " - " + dept.getSelf().getName());
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to refresh assignment dropdowns: " + e.getMessage());
+        }
+    }
+
     // Load personal profile directly from allocator/file
     private void loadProfileData() {
         try {
@@ -1055,7 +1250,7 @@ public class MedicalManagerForm extends JFrame {
     }
 
     // Application entry point
-/*    public static void main(String[] args) {
+   /* public static void main(String[] args) {
         BaseEntity.setIdNumberWidth(4);
 
         HospitalEntityAllocator allocator = new HospitalEntityAllocator(
