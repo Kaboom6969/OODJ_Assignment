@@ -7,6 +7,7 @@ package Forms.LoginForm;
 import java.awt.event.*;
 
 import Forms.AdminForm.AdminForm;
+import Forms.BaseFrame;
 import Forms.DoctorForm.DoctorPanel;
 import Forms.DoctorForm.DoctorPanelTest;
 import Forms.MedicalManagerForm.MedicalManagerForm;
@@ -29,7 +30,7 @@ import java.util.Map;
 /**
  * @author leezh
  */
-public class LoginForm extends JFrame
+public class LoginForm extends BaseFrame
 {
     private final Map<String, Class<? extends User>> roleMap =
     Map.of
@@ -47,6 +48,11 @@ public class LoginForm extends JFrame
         loginOperation = new LoginOperation(hospitalEntityAllocator);
         initComponents();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+    private void clear()
+    {
+        nameField.setText("");
+        passwordField.setText("");
     }
 
     private void loginButtonMouseClicked(MouseEvent e)
@@ -71,21 +77,23 @@ public class LoginForm extends JFrame
         {
             case Admin admin:
                 AdminForm adminForm = new AdminForm(admin,hospitalEntityAllocator);
-                adminForm.setVisible(true);
+                goToSon(adminForm);
                 break;
             case MedicalManager medicalManager:
-                MedicalManagerForm mmf = new MedicalManagerForm(hospitalEntityAllocator,medicalManager);
-                mmf.setVisible(true);
+                MedicalManagerForm medicalManagerForm = new MedicalManagerForm(hospitalEntityAllocator,medicalManager);
+                goToSon(medicalManagerForm);
                 break;
             case Doctor doctor:
                 DoctorPanelTest doctorPanel = new DoctorPanelTest(doctor,hospitalEntityAllocator);
-                doctorPanel.setVisible(true);
+                goToSon(doctorPanel);
                 break;
             case Patient patient:
-                PatientForm pf = new PatientForm(hospitalEntityAllocator,patient);
-                pf.setVisible(true);
+                PatientForm patientForm = new PatientForm(hospitalEntityAllocator,patient);
+                goToSon(patientForm);
             default: break;
         }
+        clear();
+        this.setVisible(false);
     }
 
     private void initComponents() {
