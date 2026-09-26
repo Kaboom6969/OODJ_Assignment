@@ -13,9 +13,10 @@ import java.nio.file.Path;
 
 void main() throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException
 {
+
     try
     {
-        UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+        UIManager.setLookAndFeel("com.formdev.flatlaf.FlatIntelliJLaf");
     } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e)
     {
         try
