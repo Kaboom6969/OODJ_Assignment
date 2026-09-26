@@ -36,78 +36,32 @@ public class MedicalManagerOperation {
 
     // Validate inputs and update profile via allocator
     public void updateProfile(String name, String password, UserWithDetails.Gender gender, String dob, String email, String phone) {
-        // Validate name
-        if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Name cannot be empty.");
-        }
-        if (!name.matches("^[a-zA-Z\\s]+$")) {
-            throw new IllegalArgumentException("Name can only contain letters and spaces.");
-        }
-
-        // Validate password
-        if (password == null || password.length() < 6) {
-            throw new IllegalArgumentException("Password must be at least 6 characters.");
-        }
-        if (!password.matches(".*[A-Z].*")) {
-            throw new IllegalArgumentException("Password must contain at least one uppercase letter.");
-        }
-        if (!password.matches(".*[^a-zA-Z0-9].*")) {
-            throw new IllegalArgumentException("Password must contain at least one special character (e.g., !@#$%^&*).");
-        }
-
-        // Validate date of birth
-        if (dob == null || dob.trim().isEmpty()) {
-            throw new IllegalArgumentException("Date of Birth cannot be empty.");
-        }
-        if (!dob.matches("^\\d{4}-\\d{2}-\\d{2}$")) {
-            throw new IllegalArgumentException("DOB must follow the format YYYY-MM-DD (e.g., 2000-01-01).");
-        }
         LocalDate birthDate;
         try {
             birthDate = LocalDate.parse(dob, DateTimeFormatter.ISO_LOCAL_DATE);
-        } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("Invalid calendar date. Please enter a real date.");
-        }
-        if (birthDate.isAfter(LocalDate.now())) {
-            throw new IllegalArgumentException("Date of Birth cannot be in the future.");
+        } catch (DateTimeParseException | NullPointerException e) {
+            throw new IllegalArgumentException("Date of Birth must be a real date in YYYY-MM-DD format.");
         }
 
-        // Validate email and phone
-        if (email == null || !email.contains("@")) {
-            throw new IllegalArgumentException("Invalid email format (missing '@').");
-        }
-        if (phone == null || !phone.matches("\\d+")) {
-            throw new IllegalArgumentException("Phone number must contain digits only.");
-        }
+        if (medicalManager == null)
+            throw new IllegalStateException("Current medical manager is unavailable.");
 
-        // Determine whether this is a first-time creation or an update to an existing record
-        boolean isFirstTime = false;
-        MedicalManagerToFile self = null;
-        try {
-            self = (medicalManager != null) ? medicalManager.getSelf() : null;
-        } catch (Exception e) {
-            // Record not found in file; treat as first-time creation
-            isFirstTime = true;
-        }
+        MedicalManagerToFile self = medicalManager.getSelf();
+        if (self == null)
+            throw new IllegalStateException("Current medical manager data is unavailable.");
 
-        if (isFirstTime || self == null) {
-            // First-time creation: instantiate a new MedicalManagerToFile and save via allocator
-            String id = (medicalManager != null && medicalManager.getId() != null) ? medicalManager.getId() : "MM0001";
-            MedicalManagerToFile newManager = new MedicalManagerToFile(id, name, password, email, gender, birthDate, phone);
+        // Validate every value through the entity before mutating the current in-memory object.
+        // This prevents a failed field from leaving the profile partially updated.
+        MedicalManagerToFile validatedProfile = new MedicalManagerToFile(
+                self.getId(), name, password, email, gender, birthDate, phone);
 
-            // Convert to business entity and persist to file
-            this.medicalManager = allocator.convertToBusinessEntity(newManager, true);
-            allocator.saveChanges(this.medicalManager);
-        } else {
-            // Update existing entity in file
-            self.setName(name);
-            self.setPassword(password);
-            self.setGender(gender);
-            self.setDateOfBirth(birthDate);
-            self.setPhoneNumber(phone);
-            self.setEmail(email);
-            allocator.saveChanges(medicalManager);
-        }
+        self.setName(validatedProfile.getName());
+        self.setPassword(validatedProfile.getPassword());
+        self.setEmail(validatedProfile.getEmail());
+        self.setGender(validatedProfile.getGender());
+        self.setDateOfBirth(validatedProfile.getDateOfBirth());
+        self.setPhoneNumber(validatedProfile.getPhoneNumber());
+        allocator.saveChanges(medicalManager);
     }
 
     // Getter for the current medical manager business entity

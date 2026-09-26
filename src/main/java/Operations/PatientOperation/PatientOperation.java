@@ -7,6 +7,7 @@ import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.*;
 import entities.BaseEntity.AppointmentToFile.AppointmentStatus;
 import entities.BaseEntity.Users.DoctorToFile;
+import entities.BaseEntity.Users.PatientToFile;
 import entities.BaseEntity.Users.UserWithDetails;
 import entities.BusinessEntity.*;
 
@@ -42,36 +43,31 @@ public class PatientOperation implements PatientService
     public void updateProfile(String name, String password, UserWithDetails.Gender gender,
                               String dob, String email, String phone)
     {
-        // Validate date of birth
-        if (dob == null || dob.trim().isEmpty()) {
-            throw new ProfileValidationException("Date of Birth cannot be empty.");
-        }
-        if (!dob.matches("^\\d{4}-\\d{2}-\\d{2}$")) {
-            throw new ProfileValidationException("DOB must follow the format YYYY-MM-DD (e.g., 2000-01-01).");
-        }
         LocalDate birthDate;
         try {
             birthDate = LocalDate.parse(dob, DateTimeFormatter.ISO_LOCAL_DATE);
-        } catch (DateTimeParseException e) {
-            throw new ProfileValidationException("Invalid calendar date. Please enter a real date.");
-        }
-        if (birthDate.isAfter(LocalDate.now())) {
-            throw new ProfileValidationException("Date of Birth cannot be in the future.");
+        } catch (DateTimeParseException | NullPointerException e) {
+            throw new ProfileValidationException("Date of Birth must be a real date in YYYY-MM-DD format.");
         }
 
-        // Validate email for forbidden characters
-        if (email != null && (email.contains("|") || email.contains("\\n") || email.contains("\\r"))) {
-            throw new ProfileValidationException("Email cannot contain '|' or line breaks.");
-        }
+        if (patient == null)
+            throw new IllegalStateException("Current patient is unavailable.");
 
-        // will catch the other exceptions thrown by the setters in UserWithDetails and User
+        PatientToFile self = patient.getSelf();
+        if (self == null)
+            throw new IllegalStateException("Current patient data is unavailable.");
+
         try {
-            patient.getSelf().setName(name);
-            patient.getSelf().setPassword(password);
-            patient.getSelf().setGender(gender);
-            patient.getSelf().setDateOfBirth(birthDate);
-            patient.getSelf().setPhoneNumber(phone);
-            patient.getSelf().setEmail(email);
+            // Validate every value before changing the current in-memory patient.
+            PatientToFile validatedProfile = new PatientToFile(
+                    self.getId(), name, password, email, gender, birthDate, phone);
+
+            self.setName(validatedProfile.getName());
+            self.setPassword(validatedProfile.getPassword());
+            self.setEmail(validatedProfile.getEmail());
+            self.setGender(validatedProfile.getGender());
+            self.setDateOfBirth(validatedProfile.getDateOfBirth());
+            self.setPhoneNumber(validatedProfile.getPhoneNumber());
         } catch (IllegalArgumentException e) {
             throw new ProfileValidationException(e.getMessage());
         }

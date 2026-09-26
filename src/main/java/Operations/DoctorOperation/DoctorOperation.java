@@ -6,6 +6,7 @@ package Operations.DoctorOperation;
 
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.*;
+import entities.BaseEntity.Users.DoctorToFile;
 import entities.BaseEntity.Users.PatientToFile;
 import entities.BaseEntity.Users.UserWithDetails;
 import entities.BusinessEntity.*;
@@ -49,105 +50,35 @@ public class DoctorOperation {
             String dob,
             String email,
             String phone) {
-
-        validateSafeText(name, "Name");
-        validateSafeText(password, "Password");
-        validateSafeText(dob, "Date of Birth");
-        validateSafeText(email, "Email");
-        validateSafeText(phone, "Phone number");
-
-        // Validate name
-        if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Name cannot be empty.");
-        }
-
-        if (!name.matches("^[a-zA-Z0-9\\s]+$")) {
-            throw new IllegalArgumentException(
-                    "Name can only contain letters, number and spaces."
-            );
-        }
-
-        // Validate password
-        if (password == null || password.length() < 6) {
-            throw new IllegalArgumentException(
-                    "Password must be at least 6 characters."
-            );
-        }
-
-        if (!password.matches(".*[A-Z].*")) {
-            throw new IllegalArgumentException(
-                    "Password must contain at least one uppercase letter."
-            );
-        }
-
-        if (!password.matches(".*[^a-zA-Z0-9].*")) {
-            throw new IllegalArgumentException(
-                    "Password must contain at least one special character."
-            );
-        }
-
-        // Validate date of birth
-        if (dob == null || dob.trim().isEmpty()) {
-            throw new IllegalArgumentException(
-                    "Date of Birth cannot be empty."
-            );
-        }
-
-        if (!dob.matches("^\\d{4}-\\d{2}-\\d{2}$")) {
-            throw new IllegalArgumentException(
-                    "DOB must follow the format YYYY-MM-DD."
-            );
-        }
-
         LocalDate birthDate;
-
         try {
             birthDate = LocalDate.parse(
                     dob,
                     DateTimeFormatter.ISO_LOCAL_DATE
             );
-        } catch (DateTimeParseException e) {
+        } catch (DateTimeParseException | NullPointerException e) {
             throw new IllegalArgumentException(
-                    "Invalid calendar date. Please enter a real date."
+                    "Date of Birth must be a real date in YYYY-MM-DD format."
             );
         }
 
-        if (birthDate.isAfter(LocalDate.now())) {
-            throw new IllegalArgumentException(
-                    "Date of Birth cannot be in the future."
-            );
-        }
+        if (doctor == null)
+            throw new IllegalStateException("Current doctor is unavailable.");
 
-        // Validate email
-        if (email == null || !email.contains("@")) {
-            throw new IllegalArgumentException(
-                    "Invalid email format."
-            );
-        }
+        DoctorToFile self = doctor.getSelf();
+        if (self == null)
+            throw new IllegalStateException("Current doctor data is unavailable.");
 
-        // Validate phone
-        if (phone == null || phone.trim().isEmpty()) {
-            throw new IllegalArgumentException(
-                    "Phone number cannot be empty."
-            );
-        }
+        // Validate every value before changing the current in-memory doctor.
+        DoctorToFile validatedProfile = new DoctorToFile(
+                self.getId(), name, password, email, gender, birthDate, phone);
 
-        // Validate phone number format and allow digits, +, brackets, hyphens, and spaces
-        if (!phone.matches("^[0-9+()\\-\\s]+$")) {
-            throw new IllegalArgumentException(
-                    "Phone number contains invalid characters."
-            );
-        }
-
-        // Update Doctor profile
-        doctor.getSelf().setName(name.trim());
-        doctor.getSelf().setPassword(password);
-        doctor.getSelf().setGender(gender);
-        doctor.getSelf().setDateOfBirth(birthDate);
-        doctor.getSelf().setEmail(email.trim());
-        doctor.getSelf().setPhoneNumber(phone);
-
-        // Use existing allocator to save changes
+        self.setName(validatedProfile.getName());
+        self.setPassword(validatedProfile.getPassword());
+        self.setEmail(validatedProfile.getEmail());
+        self.setGender(validatedProfile.getGender());
+        self.setDateOfBirth(validatedProfile.getDateOfBirth());
+        self.setPhoneNumber(validatedProfile.getPhoneNumber());
         allocator.saveChanges(doctor);
     }
 
