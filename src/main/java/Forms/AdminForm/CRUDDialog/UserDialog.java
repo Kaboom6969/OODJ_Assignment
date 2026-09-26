@@ -4,20 +4,20 @@
 
 package Forms.AdminForm.CRUDDialog;
 
-import java.awt.event.*;
 import Forms.ComboBoxItem;
 import Operations.AdminOperation.AdminOperation;
 import entities.BaseEntity.BaseEntity;
 import entities.BaseEntity.Users.*;
-import entities.BusinessEntity.*;
+import entities.BusinessEntity.BusinessEntity;
 
+import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
-import java.lang.reflect.ParameterizedType;
 import java.util.Objects;
-import javax.swing.*;
-import javax.swing.GroupLayout;
 
 /**
  * @author leezh
@@ -30,7 +30,7 @@ public class UserDialog extends JDialog
     {
         ADD,MODIFY
     }
-    private Modes mode;
+    private final Modes mode;
     private String id = null;
     public UserDialog(Window owner,AdminOperation adminOperation)
     {
@@ -126,7 +126,7 @@ public class UserDialog extends JDialog
         ComboBoxItem<?> role = (ComboBoxItem<?>)roleComboBox.getSelectedItem();
         if (role == null) throw new IllegalStateException("Role is not Selected!");
         if (role.getItem() == AdminToFile.class) return data;
-        data.add(String.valueOf((UserWithDetails.Gender)genderComboBox.getSelectedItem()));
+        data.add(String.valueOf(genderComboBox.getSelectedItem()));
         data.add(dateOfBirthTextField.getText());
         data.add(phoneNumberTextField.getText());
         return data;

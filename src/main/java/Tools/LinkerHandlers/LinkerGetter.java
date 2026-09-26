@@ -17,11 +17,11 @@ import java.util.stream.Stream;
 
 public class LinkerGetter
 {
-    private Class<? extends BaseEntity> class1;
-    private Class<? extends BaseEntity> class2;
+    private final Class<? extends BaseEntity> class1;
+    private final Class<? extends BaseEntity> class2;
     private final Path directory;
-    private String fileName;
-    private Path file;
+    private final String fileName;
+    private final Path file;
 
     public LinkerGetter(Path directory, String fileName, Class<? extends BaseEntity> class1, Class<? extends BaseEntity> class2)
     {
@@ -61,7 +61,6 @@ public class LinkerGetter
         }
         catch (NoSuchFileException e)
         {
-            return;
         }
         catch (IOException e)
         {

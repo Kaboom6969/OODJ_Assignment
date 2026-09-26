@@ -1,14 +1,9 @@
-import Exceptions.EntityExceptions.EntityNotFoundException;
-import Exceptions.EntityExceptions.EntityNotMatchException;
-import Exceptions.EntityExceptions.EntityRepeatedException;
-import Forms.AdminForm.AdminForm;
+import Forms.BaseFrame;
 import Forms.LoginForm.LoginForm;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.BaseEntity;
 
 import javax.swing.*;
-import java.nio.file.Path;
-
 
 
 void main() throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException
@@ -32,7 +27,7 @@ void main() throws UnsupportedLookAndFeelException, ClassNotFoundException, Inst
     Path linkerPath = Path.of("data", "Linker");
     Path entityPath = Path.of("data", "Entity");
     HospitalEntityAllocator hea = new HospitalEntityAllocator(linkerPath,entityPath);
-    LoginForm loginForm = new LoginForm(hea);
-    loginForm.setVisible(true);
+    BaseFrame baseFrame = new LoginForm(hea);
+    baseFrame.setVisible(true);
 
 }

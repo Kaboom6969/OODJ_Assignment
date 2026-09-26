@@ -7,9 +7,10 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="hospital-management-system" />
-        <module name="hospital-management-system (1)" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="25" />
+    <bytecodeTargetLevel target="25">
+      <module name="hospital-management-system (1)" target="25" />
+    </bytecodeTargetLevel>
   </component>
 </project>

@@ -19,11 +19,11 @@ import java.util.List;
 
 public class Appointment extends BusinessEntity<AppointmentToFile> implements OwnEntity, Linkable
 {
-    private LazyEntity<PatientToFile> patient;
-    private LazyEntity<DoctorToFile> doctor;
-    private LazyEntity<FacilityToFile> facility;
-    private LazyEntity<MedicalRecordToFile> medicalRecord;
-    private LazyEntity<FeedbackToFile> feedback;
+    private final LazyEntity<PatientToFile> patient;
+    private final LazyEntity<DoctorToFile> doctor;
+    private final LazyEntity<FacilityToFile> facility;
+    private final LazyEntity<MedicalRecordToFile> medicalRecord;
+    private final LazyEntity<FeedbackToFile> feedback;
 
     public PatientToFile getPatient()
     {

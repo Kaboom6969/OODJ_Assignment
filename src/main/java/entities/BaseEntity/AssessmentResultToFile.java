@@ -25,7 +25,7 @@ public class AssessmentResultToFile extends BaseEntity implements ConvertToFileD
 
     private String result;
     private String remark;
-    private LocalDateTime completedTime;
+    private final LocalDateTime completedTime;
 
     public String getResult()
     {

@@ -7,11 +7,9 @@ import Tools.EntityHandler;
 import Tools.FileHandler.FileDataHandler;
 import entities.BaseEntity.BaseEntity;
 
-import javax.print.attribute.standard.Copies;
-
 public class LazyEntity<T extends BaseEntity & ConvertToFileData>
 {
-    private EntityHandler entityHandler;
+    private final EntityHandler entityHandler;
     private String id;
     private T self;
     private String selfBackup;

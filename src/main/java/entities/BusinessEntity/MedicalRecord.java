@@ -16,11 +16,11 @@ import java.util.List;
 
 public class MedicalRecord extends BusinessEntity<MedicalRecordToFile> implements OwnEntity, OwnEntities, Linkable
 {
-    private LazyEntity<AppointmentToFile> appointment;
-    private LazyEntity<BillToFile> bill;
-    private LazyEntityList<PrescriptionToFile> prescriptions;
-    private LazyEntityList<MedicalRequestToFile> medicalRequests;
-    private LazyEntityList<AssessmentResultToFile> assessmentResults;
+    private final LazyEntity<AppointmentToFile> appointment;
+    private final LazyEntity<BillToFile> bill;
+    private final LazyEntityList<PrescriptionToFile> prescriptions;
+    private final LazyEntityList<MedicalRequestToFile> medicalRequests;
+    private final LazyEntityList<AssessmentResultToFile> assessmentResults;
 
     public AppointmentToFile getAppointment()
     {

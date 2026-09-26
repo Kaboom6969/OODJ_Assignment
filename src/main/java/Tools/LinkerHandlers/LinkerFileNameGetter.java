@@ -1,7 +1,6 @@
 package Tools.LinkerHandlers;
 
 import Tools.EntityConvertManager;
-import Tools.FileHandler.FileDataHandler;
 import Tools.PrefixHandler.PrefixFinder;
 import entities.BaseEntity.BaseEntity;
 import entities.Linker.Linker;
@@ -13,8 +12,8 @@ public class LinkerFileNameGetter
     public record FileNamePack(String fileName,boolean orderChanged){}
     public static String getFileName(Linker linker)
     {
-        String firstId = linker.first;
-        String SecondId = linker.second;
+        String firstId = linker.first();
+        String SecondId = linker.second();
         String firstPrefix = PrefixFinder.findPrefix(firstId);
         String secondPrefix = PrefixFinder.findPrefix(SecondId);
         String firstClassName = EntityConvertManager.getEntityMap().get(firstPrefix).getSimpleName();

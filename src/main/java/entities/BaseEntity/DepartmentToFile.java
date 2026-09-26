@@ -50,8 +50,7 @@ public DepartmentToFile(String id)
     public boolean equals(Object o)
     {
         if (!super.equals(o)) return false;
-        if (!(Objects.equals(name, ((DepartmentToFile)o).name))) return false;
-        return true;
+        return Objects.equals(name, ((DepartmentToFile) o).name);
     }
     @Override
     public int hashCode()

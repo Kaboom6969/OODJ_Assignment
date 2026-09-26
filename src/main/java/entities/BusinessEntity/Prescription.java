@@ -5,7 +5,6 @@ import Interfaces.Linkable;
 import Interfaces.OwnEntity;
 import Tools.EntityHandler;
 import Tools.FileHandler.FileDataHandler;
-import entities.BaseEntity.AssessmentTypeToFile;
 import entities.BaseEntity.MedicalRecordToFile;
 import entities.BaseEntity.PrescriptionToFile;
 import entities.LazyEntity.LazyEntity;
@@ -16,7 +15,7 @@ import java.util.List;
 
 public class Prescription extends BusinessEntity<PrescriptionToFile> implements OwnEntity, Linkable
 {
-    private LazyEntity<MedicalRecordToFile> medicalRecord;
+    private final LazyEntity<MedicalRecordToFile> medicalRecord;
 
     public MedicalRecordToFile getMedicalRecord()
     {

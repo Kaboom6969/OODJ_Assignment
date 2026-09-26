@@ -12,9 +12,9 @@ import java.util.function.Consumer;
 
 public class LazyEntityList<T extends BaseEntity & ConvertToFileData> implements Iterable<T>
 {
-    private List<LazyEntity<T>> lazyEntityList;
+    private final List<LazyEntity<T>> lazyEntityList;
 
-    private EntityHandler entityHandler;
+    private final EntityHandler entityHandler;
     private record RepeatReport (boolean isRepeated,List<List<Integer>> RepeatedIdIndex){}
 
 

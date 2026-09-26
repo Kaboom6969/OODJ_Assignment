@@ -12,10 +12,7 @@ import entities.Linker.LinkerManager;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.nio.file.Path;
-
-import static Interfaces.Linkable.getLinkerManagerWithField;
 
 public class EntityTester
 {

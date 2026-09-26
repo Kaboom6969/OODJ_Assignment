@@ -34,7 +34,7 @@ public class LinkerManager implements ConvertToFileData
 
     private Class<? extends BaseEntity> classFirst;
     private Class<? extends BaseEntity> classSecond;
-    private List<Linker> linkers;
+    private final List<Linker> linkers;
 
     public List<Linker> getLinkers()
     {
@@ -87,9 +87,9 @@ public class LinkerManager implements ConvertToFileData
     {
         String classFirstPrefix = EntityConvertManager.getPrefixMap().get(classFirst);
         String classSecondPrefix = EntityConvertManager.getPrefixMap().get(classSecond);
-        if (!PrefixFinder.findPrefix(linker.first).equals(PrefixFinder.findPrefix(classFirstPrefix)))
+        if (!PrefixFinder.findPrefix(linker.first()).equals(PrefixFinder.findPrefix(classFirstPrefix)))
             return KeyLocation.FIRST;
-        if (!PrefixFinder.findPrefix(linker.second).equals(PrefixFinder.findPrefix(classSecondPrefix)))
+        if (!PrefixFinder.findPrefix(linker.second()).equals(PrefixFinder.findPrefix(classSecondPrefix)))
             return KeyLocation.SECOND;
         return KeyLocation.NOT_FOUND;
     }
@@ -203,9 +203,9 @@ public class LinkerManager implements ConvertToFileData
         List<String> ans = new ArrayList<>();
         for (Linker linker : linkers)
         {
-            if (linker.first.equals(first))
+            if (linker.first().equals(first))
             {
-                ans.add(linker.second);
+                ans.add(linker.second());
             }
         }
         if (ans.isEmpty()) return new ArrayList<>();
@@ -243,9 +243,9 @@ public class LinkerManager implements ConvertToFileData
         List<String> ans = new ArrayList<>();
         for (Linker linker : linkers)
         {
-            if (linker.second.equals(second))
+            if (linker.second().equals(second))
             {
-                ans.add(linker.first);
+                ans.add(linker.first());
             }
         }
         if (ans.isEmpty()) return new ArrayList<>();
@@ -258,7 +258,7 @@ public class LinkerManager implements ConvertToFileData
         List<String> ans = new ArrayList<>();
         for (Linker linker : linkers)
         {
-            ans.add(linker.first + "|" + linker.second);
+            ans.add(linker.first() + "|" + linker.second());
         }
         return String.join("\n", ans);
     }

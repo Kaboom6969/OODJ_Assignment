@@ -9,12 +9,12 @@ public class PrescriptionToFile extends BaseEntity implements ConvertToFileData
 {
     public static final String PREFIX = "PR";
 
-    private String medicationName;
-    private String dosage;
-    private String frequency;
-    private int durationDays;
-    private String instructions;
-    private LocalDateTime issuedAt;
+    private final String medicationName;
+    private final String dosage;
+    private final String frequency;
+    private final int durationDays;
+    private final String instructions;
+    private final LocalDateTime issuedAt;
 
     public String getMedicationName()
     {

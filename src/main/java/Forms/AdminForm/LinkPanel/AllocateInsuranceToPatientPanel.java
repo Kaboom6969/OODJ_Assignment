@@ -4,21 +4,21 @@
 
 package Forms.AdminForm.LinkPanel;
 
-import Forms.AdminForm.CRUDPanel.InsurancePanel;
 import Interfaces.RefreshablePanel;
 import Operations.AdminOperation.AdminOperation;
-import entities.BaseEntity.DepartmentToFile;
 import entities.BaseEntity.InsuranceToFile;
-import entities.BusinessEntity.*;
+import entities.BusinessEntity.Insurance;
+import entities.BusinessEntity.Patient;
 
+import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import javax.swing.*;
-import javax.swing.table.*;
 
 import static Forms.AdminForm.FrameHelper.getObjectFromCurrentSelectedRow;
 import static Forms.AdminForm.FrameHelper.getObjectFromRow;
@@ -28,7 +28,7 @@ import static Forms.AdminForm.FrameHelper.getObjectFromRow;
  */
 public class AllocateInsuranceToPatientPanel extends JPanel implements RefreshablePanel
 {
-    private AdminOperation adminOperation;
+    private final AdminOperation adminOperation;
 
     @Override
     public void refreshData()
@@ -98,8 +98,8 @@ public class AllocateInsuranceToPatientPanel extends JPanel implements Refreshab
     private TargetTable targetTable = TargetTable.NONE;
 
 
-    private HashMap<JTable, HashSet<ColorStatus>> colorMap = new HashMap<>();
-    private HashMap<JTable, HashSet<Integer>> banMap = new HashMap<>();
+    private final HashMap<JTable, HashSet<ColorStatus>> colorMap = new HashMap<>();
+    private final HashMap<JTable, HashSet<Integer>> banMap = new HashMap<>();
     private final Color HIGHLIGHT_COLOR = Color.YELLOW;
     private final Color BAN_COLOR = Color.GRAY;
     private final JButton[] piGroup;
@@ -185,8 +185,7 @@ public class AllocateInsuranceToPatientPanel extends JPanel implements Refreshab
                     turnToLinkUnLink(piGroup);
                     linkButton.setEnabled(true);
                     Insurance insurance = getObjectFromCurrentSelectedRow(insuranceTable, 2);
-                    if (insurance.getPatients().isEmpty()) unLinkButton.setEnabled(false);
-                    else unLinkButton.setEnabled(true);
+                    unLinkButton.setEnabled(!insurance.getPatients().isEmpty());
                 } else
                 {
                     turnToConfirmCancel(piGroup);
@@ -431,7 +430,7 @@ public class AllocateInsuranceToPatientPanel extends JPanel implements Refreshab
         if (insurance == null) return;
         for (int i = 0; i < insuranceTable.getModel().getRowCount(); i++)
         {
-            if (((String) insuranceTable.getModel().getValueAt(i, 0)).equals(insurance.getId()))
+            if (insuranceTable.getModel().getValueAt(i, 0).equals(insurance.getId()))
             {
                 addHighLightColor(insuranceTable, i);
             }

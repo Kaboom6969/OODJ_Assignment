@@ -11,11 +11,11 @@ import entities.BaseEntity.Users.User;
 import entities.BaseEntity.Users.UserWithDetails;
 import entities.BusinessEntity.BusinessEntity;
 
-import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.GroupLayout;
-import javax.swing.table.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumnModel;
+import java.awt.*;
+import java.awt.event.ActionEvent;
 
 import static Forms.AdminForm.FrameHelper.getObjectFromCurrentSelectedRow;
 
@@ -24,8 +24,8 @@ import static Forms.AdminForm.FrameHelper.getObjectFromCurrentSelectedRow;
  */
 public class UserPanel extends JPanel implements RefreshablePanel
 {
-    private AdminOperation adminOperation;
-    private Window parentWindow;
+    private final AdminOperation adminOperation;
+    private final Window parentWindow;
 
     public UserPanel(Window FrameWindow, AdminOperation adminOperation)
     {

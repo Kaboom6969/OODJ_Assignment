@@ -61,7 +61,7 @@ public abstract class BaseEntity implements ConvertToFileData
                 throw new IdPrefixOversizeException
                         (
                                 "Id number width exceed the maximum allowed length\n" +
-                                        "Id number digits:" + String.valueOf(number) + "\n" +
+                                        "Id number digits:" + number + "\n" +
                                         "Id number width:" + idNumberWidth
                         );
             this.idNumber = number;

@@ -8,7 +8,7 @@ public class InsuranceToFile extends BaseEntity implements ConvertToFileData
 {
     public static final String PREFIX = "IN";
 
-    private String companyName;
+    private final String companyName;
     private int coveragePercentage;
     private boolean accepted;
 

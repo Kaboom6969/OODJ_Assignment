@@ -4,33 +4,24 @@
  */
 package Forms.PatientForm;
 
-import Tools.HospitalEntityAllocator;
 import Exceptions.PatientExceptions.BookingValidationException;
 import Exceptions.PatientExceptions.FeedbackValidationException;
 import Forms.BaseFrame;
-import entities.BaseEntity.BaseEntity;
-import entities.BaseEntity.AppointmentToFile.AppointmentStatus;
-import entities.BaseEntity.AssessmentResultToFile;
-import entities.BaseEntity.PrescriptionToFile;
-import entities.BusinessEntity.Appointment;
-import entities.BusinessEntity.Department;
-import entities.BusinessEntity.Doctor;
-import entities.BusinessEntity.Facility;
-import entities.BusinessEntity.MedicalRecord;
-import entities.BusinessEntity.Patient;
 import Operations.PatientOperation.PatientOperation;
 import Operations.PatientOperation.PatientOperation.DoctorAvailability;
-import entities.BaseEntity.BillToFile;
-import entities.BaseEntity.InsuranceToFile;
+import Tools.HospitalEntityAllocator;
+import entities.BaseEntity.AppointmentToFile.AppointmentStatus;
+import entities.BaseEntity.*;
+import entities.BusinessEntity.*;
 
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -575,7 +566,7 @@ public class PatientForm extends BaseFrame {
 
         timeLs.setModel(new javax.swing.AbstractListModel<String>()
         {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            final String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
         });
@@ -612,7 +603,7 @@ public class PatientForm extends BaseFrame {
 
         doctorLs.setModel(new javax.swing.AbstractListModel<String>()
         {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            final String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
         });
@@ -919,7 +910,7 @@ public class PatientForm extends BaseFrame {
             }
         )
         {
-            boolean[] canEdit = new boolean []
+            final boolean[] canEdit = new boolean []
             {
                 false, true, false, false, false, true
             };
@@ -1307,7 +1298,7 @@ public class PatientForm extends BaseFrame {
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
+    static void main(String[] args) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.

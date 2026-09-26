@@ -7,16 +7,13 @@ package Forms.AdminForm.CRUDDialog;
 import Forms.ComboBoxItem;
 import Operations.AdminOperation.AdminOperation;
 import entities.BaseEntity.FacilityToFile;
-import entities.BaseEntity.InsuranceToFile;
 import entities.BusinessEntity.Facility;
-import entities.BusinessEntity.Insurance;
 
+import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.*;
-import javax.swing.GroupLayout;
 
 /**
  * @author leezh
@@ -27,7 +24,7 @@ public class FacilityDialog extends JDialog {
     {
         ADD,MODIFY
     }
-    private Modes mode;
+    private final Modes mode;
     private String id = null;
     public FacilityDialog(Window owner, AdminOperation adminOperation)
     {

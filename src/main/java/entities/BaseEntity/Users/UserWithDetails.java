@@ -94,8 +94,7 @@ public abstract class UserWithDetails extends User
         if (!super.equals(o)) return false;
         if (!(this.dateOfBirth.equals(((UserWithDetails) o).dateOfBirth))) return false;
         if (!(this.gender.equals(((UserWithDetails) o).gender))) return false;
-        if  (!(this.phoneNumber.equals(((UserWithDetails) o).phoneNumber))) return false;
-        return true;
+        return this.phoneNumber.equals(((UserWithDetails) o).phoneNumber);
     }
     @Override
     public int hashCode()

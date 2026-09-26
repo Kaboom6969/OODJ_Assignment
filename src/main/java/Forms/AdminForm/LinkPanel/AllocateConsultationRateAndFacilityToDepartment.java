@@ -11,15 +11,15 @@ import entities.BusinessEntity.ConsultationRate;
 import entities.BusinessEntity.Department;
 import entities.BusinessEntity.Facility;
 
+import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import javax.swing.*;
-import javax.swing.GroupLayout;
-import javax.swing.table.*;
 
 import static Forms.AdminForm.FrameHelper.getObjectFromCurrentSelectedRow;
 import static Forms.AdminForm.FrameHelper.getObjectFromRow;
@@ -29,7 +29,7 @@ import static Forms.AdminForm.FrameHelper.getObjectFromRow;
  */
 public class AllocateConsultationRateAndFacilityToDepartment extends JPanel implements RefreshablePanel
 {
-    private AdminOperation adminOperation;
+    private final AdminOperation adminOperation;
     @Override
     public void refreshData()
     {
@@ -110,8 +110,8 @@ public class AllocateConsultationRateAndFacilityToDepartment extends JPanel impl
     private TargetTable targetTable = TargetTable.NONE;
 
 
-    private HashMap<JTable, HashSet<ColorStatus>> colorMap = new HashMap<>();
-    private HashMap<JTable, HashSet<Integer>> banMap = new HashMap<>();
+    private final HashMap<JTable, HashSet<ColorStatus>> colorMap = new HashMap<>();
+    private final HashMap<JTable, HashSet<Integer>> banMap = new HashMap<>();
     private final Color HIGHLIGHT_COLOR = Color.YELLOW;
     private final Color BAN_COLOR = Color.GRAY;
     private final JButton[] cdGroup;
@@ -569,7 +569,7 @@ public class AllocateConsultationRateAndFacilityToDepartment extends JPanel impl
         if (departmentFromFacility == null) return;
         for (int i = 0; i < departmentTable.getModel().getRowCount(); i++)
         {
-            if (((String) departmentTable.getModel().getValueAt(i, 0)).equals(departmentFromFacility.getId()))
+            if (departmentTable.getModel().getValueAt(i, 0).equals(departmentFromFacility.getId()))
             {
                 addHighLightColor(departmentTable, i);
             }
@@ -585,7 +585,7 @@ public class AllocateConsultationRateAndFacilityToDepartment extends JPanel impl
         if (departmentFromConsultationRate == null) return;
         for (int i = 0; i < departmentTable.getModel().getRowCount(); i++)
         {
-            if (((String) departmentTable.getModel().getValueAt(i, 0)).equals(departmentFromConsultationRate.getId()))
+            if (departmentTable.getModel().getValueAt(i, 0).equals(departmentFromConsultationRate.getId()))
             {
                 addHighLightColor(departmentTable, i);
             }

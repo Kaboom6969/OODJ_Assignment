@@ -16,8 +16,8 @@ public class AssessmentTypeToFile extends BaseEntity implements ConvertToFileDat
         MEDICAL_IMAGING
     }
 
-    private String name;
-    private AssessmentCategory category;
+    private final String name;
+    private final AssessmentCategory category;
     private int price;
 
     public String getName()

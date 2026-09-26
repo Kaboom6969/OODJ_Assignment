@@ -10,9 +10,9 @@ public class DoctorShiftToFile extends BaseEntity implements ConvertToFileData
 {
     public static final String PREFIX = "SH";
 
-    private LocalDate shiftDate;
-    private LocalTime startTime;
-    private LocalTime endTime;
+    private final LocalDate shiftDate;
+    private final LocalTime startTime;
+    private final LocalTime endTime;
 
     public LocalDate getShiftDate()
     {

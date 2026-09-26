@@ -9,11 +9,8 @@ import Interfaces.*;
 import Tools.FileHandler.FileDataHandler;
 import Tools.LinkerHandlers.LinkerHandler;
 import Tools.PrefixHandler.PrefixFinder;
-import entities.BaseEntity.*;
-import entities.BaseEntity.Users.DoctorToFile;
+import entities.BaseEntity.BaseEntity;
 import entities.BusinessEntity.BusinessEntity;
-import entities.BusinessEntity.Department;
-import entities.BusinessEntity.Doctor;
 import entities.LazyEntity.LazyEntity;
 import entities.LazyEntity.LazyEntityList;
 import entities.Linker.Linker;
@@ -28,9 +25,9 @@ import java.util.*;
 public class HospitalEntityAllocator
 {
     public record FilePrefixMatchRecord(boolean isAllMatch,String propertiesName){}
-    private Map<String, FileDataHandler> prefixFileMap;
-    private Path linkerDirectory;
-    private Path entityDirectory;
+    private final Map<String, FileDataHandler> prefixFileMap;
+    private final Path linkerDirectory;
+    private final Path entityDirectory;
 
     public HospitalEntityAllocator(Path linkerDirectory,Path entityDirectory)
     {

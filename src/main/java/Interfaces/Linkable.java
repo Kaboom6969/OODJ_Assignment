@@ -1,6 +1,5 @@
 package Interfaces;
 
-import Tools.FileHandler.FileDataHandler;
 import entities.BaseEntity.BaseEntity;
 import entities.BusinessEntity.BusinessEntity;
 import entities.LazyEntity.LazyEntity;
@@ -10,7 +9,6 @@ import entities.Linker.LinkerManager;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 

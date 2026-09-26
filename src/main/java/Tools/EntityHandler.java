@@ -2,8 +2,8 @@ package Tools;
 
 import Exceptions.EntityExceptions.EntityNotFoundException;
 import Exceptions.EntityExceptions.EntityNotMatchException;
-import Exceptions.IdPrefixExceptions.IdPrefixNotMatchException;
 import Exceptions.EntityExceptions.EntityRepeatedException;
+import Exceptions.IdPrefixExceptions.IdPrefixNotMatchException;
 import Interfaces.ConvertToFileData;
 import Tools.FileHandler.FileDataHandler;
 import Tools.PrefixHandler.PrefixFinder;
@@ -23,7 +23,7 @@ public class EntityHandler
         CODE_ONLY, EXACT_DATA
     }
     public static EntityConvertManager ecm = new EntityConvertManager();
-    private FileDataHandler fileDataHandler;
+    private final FileDataHandler fileDataHandler;
 
     public EntityHandler(FileDataHandler fileDataHandler)
     {

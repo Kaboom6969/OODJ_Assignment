@@ -4,19 +4,15 @@
 
 package Forms.AdminForm.CRUDDialog;
 
-import Forms.ComboBoxItem;
 import Operations.AdminOperation.AdminOperation;
 import entities.BaseEntity.AssessmentTypeToFile;
-import entities.BaseEntity.ConsultationRateToFile;
 import entities.BusinessEntity.AssessmentType;
-import entities.BusinessEntity.ConsultationRate;
 
+import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.*;
-import javax.swing.GroupLayout;
 
 /**
  * @author leezh
@@ -27,7 +23,7 @@ public class AssessmentTypeDialog extends JDialog {
     {
         ADD,MODIFY
     }
-    private Modes mode;
+    private final Modes mode;
     private String id = null;
     public AssessmentTypeDialog(Window owner, AdminOperation adminOperation)
     {

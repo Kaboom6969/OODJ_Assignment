@@ -5,20 +5,10 @@
 package Operations.DoctorOperation;
 
 import Tools.HospitalEntityAllocator;
-import entities.BaseEntity.AppointmentToFile;
-import entities.BaseEntity.AssessmentTypeToFile;
-import entities.BaseEntity.MedicalRecordToFile;
-import entities.BaseEntity.MedicalRequestToFile;
-import entities.BaseEntity.PrescriptionToFile;
+import entities.BaseEntity.*;
 import entities.BaseEntity.Users.PatientToFile;
-import entities.BusinessEntity.Doctor;
 import entities.BaseEntity.Users.UserWithDetails;
-import entities.BusinessEntity.Appointment;
-import entities.BusinessEntity.AssessmentType;
-import entities.BusinessEntity.BusinessEntity;
-import entities.BusinessEntity.MedicalRecord;
-import entities.BusinessEntity.MedicalRequest;
-import entities.BusinessEntity.Patient;
+import entities.BusinessEntity.*;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

@@ -5,21 +5,17 @@
 package Forms.AdminForm.CRUDPanel;
 
 import Forms.AdminForm.CRUDDialog.AssessmentResultDialog;
-import Forms.AdminForm.CRUDDialog.FacilityDialog;
-import Forms.AdminForm.FrameHelper;
 import Interfaces.RefreshablePanel;
 import Operations.AdminOperation.AdminOperation;
 import entities.BaseEntity.MedicalRequestToFile;
 import entities.BusinessEntity.Appointment;
-import entities.BusinessEntity.Facility;
 import entities.BusinessEntity.MedicalRecord;
 import entities.BusinessEntity.MedicalRequest;
 
-import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.GroupLayout;
-import javax.swing.table.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.ActionEvent;
 
 import static Forms.AdminForm.FrameHelper.getObjectFromCurrentSelectedRow;
 
@@ -28,8 +24,8 @@ import static Forms.AdminForm.FrameHelper.getObjectFromCurrentSelectedRow;
  */
 public class MedicalRequestPanel extends JPanel implements RefreshablePanel
 {
-    private AdminOperation adminOperation;
-    private Window frameWindow;
+    private final AdminOperation adminOperation;
+    private final Window frameWindow;
     @Override
     public void refreshData()
     {

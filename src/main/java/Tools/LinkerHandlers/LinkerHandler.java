@@ -1,6 +1,5 @@
 package Tools.LinkerHandlers;
 
-import Exceptions.LinkerExceptions.LinkerRepeatedException;
 import entities.BaseEntity.BaseEntity;
 import entities.Linker.Linker;
 import entities.Linker.LinkerManager;
@@ -14,12 +13,12 @@ import java.util.Set;
 
 public class LinkerHandler
 {
-    private Class<? extends BaseEntity> class1;
-    private Class<? extends BaseEntity> class2;
+    private final Class<? extends BaseEntity> class1;
+    private final Class<? extends BaseEntity> class2;
     private LinkerManager  linkerManager;
-    private LinkerGetter linkerGetter;
-    private LinkerWriter linkerWriter;
-    private String fileName;
+    private final LinkerGetter linkerGetter;
+    private final LinkerWriter linkerWriter;
+    private final String fileName;
 
 
     public LinkerManager getLinkerManager()
