@@ -213,6 +213,7 @@ public class PatientOperation implements PatientService
         List<Doctor> filtered = new ArrayList<>();
         for (Doctor doctor : loadAllDoctors())
         {
+            if (doctor.getBelongsToDepartment() == null) continue;
             if (doctor.getBelongsToDepartment().getId().equals(department.getSelf().getId()))
             {
                 filtered.add(doctor);
@@ -385,7 +386,7 @@ public class PatientOperation implements PatientService
         if (facility == null) {
             throw new BookingValidationException("No consultation rooms are available at the new time.");
         }
-
+        appointment.getSelf().setStatus(AppointmentStatus.RESCHEDULED);
         appointment.getSelf().setAppointmentTime(newTime);
         appointment.setFacility(facility.getSelf());
         allocator.saveChanges(appointment);

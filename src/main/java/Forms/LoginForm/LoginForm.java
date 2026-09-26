@@ -6,7 +6,11 @@ package Forms.LoginForm;
 
 import java.awt.event.*;
 
+import Forms.AdminForm.AdminForm;
+import Forms.DoctorForm.DoctorPanel;
+import Forms.DoctorForm.DoctorPanelTest;
 import Forms.MedicalManagerForm.MedicalManagerForm;
+import Forms.PatientForm.PatientForm;
 import Operations.LoginOperation.LoginOperation;
 import Tools.EntityConvertManager;
 import Tools.HospitalEntityAllocator;
@@ -42,9 +46,15 @@ public class LoginForm extends JFrame
         this.hospitalEntityAllocator = hospitalEntityAllocator;
         loginOperation = new LoginOperation(hospitalEntityAllocator);
         initComponents();
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
     private void loginButtonMouseClicked(MouseEvent e)
+    {
+
+    }
+
+    private void login(ActionEvent e)
     {
         if (nameField.getText().isEmpty() || passwordField.getText().isEmpty())
         {
@@ -59,13 +69,21 @@ public class LoginForm extends JFrame
         }
         switch (user)
         {
-            case Admin ignored: break;
+            case Admin admin:
+                AdminForm adminForm = new AdminForm(admin,hospitalEntityAllocator);
+                adminForm.setVisible(true);
+                break;
             case MedicalManager medicalManager:
                 MedicalManagerForm mmf = new MedicalManagerForm(hospitalEntityAllocator,medicalManager);
                 mmf.setVisible(true);
                 break;
-            case Doctor ignored: break;
-            case Patient ignored: break;
+            case Doctor doctor:
+                DoctorPanelTest doctorPanel = new DoctorPanelTest(doctor,hospitalEntityAllocator);
+                doctorPanel.setVisible(true);
+                break;
+            case Patient patient:
+                PatientForm pf = new PatientForm(hospitalEntityAllocator,patient);
+                pf.setVisible(true);
             default: break;
         }
     }
@@ -75,10 +93,10 @@ public class LoginForm extends JFrame
         nameLabel = new JLabel();
         passwordLabel = new JLabel();
         nameField = new JTextField();
-        passwordField = new JTextField();
         loginButton = new JButton();
         roleComboBox = new JComboBox<>();
         roleLabel = new JLabel();
+        passwordField = new JPasswordField();
 
         //======== this ========
         var contentPane = getContentPane();
@@ -97,6 +115,7 @@ public class LoginForm extends JFrame
                 loginButtonMouseClicked(e);
             }
         });
+        loginButton.addActionListener(e -> login(e));
 
         //---- roleComboBox ----
         roleComboBox.setModel(new DefaultComboBoxModel<>(new String[] {
@@ -113,29 +132,31 @@ public class LoginForm extends JFrame
         contentPane.setLayout(contentPaneLayout);
         contentPaneLayout.setHorizontalGroup(
             contentPaneLayout.createParallelGroup()
-                .addGroup(contentPaneLayout.createSequentialGroup()
+                .addGroup(GroupLayout.Alignment.TRAILING, contentPaneLayout.createSequentialGroup()
+                    .addContainerGap(68, Short.MAX_VALUE)
                     .addGroup(contentPaneLayout.createParallelGroup()
                         .addGroup(contentPaneLayout.createSequentialGroup()
                             .addGroup(contentPaneLayout.createParallelGroup()
                                 .addGroup(contentPaneLayout.createSequentialGroup()
-                                    .addGap(106, 106, 106)
+                                    .addGap(25, 25, 25)
                                     .addComponent(nameLabel, GroupLayout.PREFERRED_SIZE, 40, GroupLayout.PREFERRED_SIZE))
                                 .addComponent(passwordLabel, GroupLayout.Alignment.TRAILING, GroupLayout.PREFERRED_SIZE, 65, GroupLayout.PREFERRED_SIZE)
                                 .addComponent(roleLabel, GroupLayout.Alignment.TRAILING))
                             .addGap(58, 58, 58)
                             .addGroup(contentPaneLayout.createParallelGroup()
-                                .addComponent(nameField, GroupLayout.PREFERRED_SIZE, 134, GroupLayout.PREFERRED_SIZE)
-                                .addComponent(passwordField, GroupLayout.PREFERRED_SIZE, 134, GroupLayout.PREFERRED_SIZE)
-                                .addComponent(roleComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(roleComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addGroup(contentPaneLayout.createParallelGroup(GroupLayout.Alignment.TRAILING, false)
+                                    .addComponent(passwordField, GroupLayout.Alignment.LEADING)
+                                    .addComponent(nameField, GroupLayout.Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 134, GroupLayout.PREFERRED_SIZE))))
                         .addGroup(contentPaneLayout.createSequentialGroup()
-                            .addGap(146, 146, 146)
+                            .addGap(65, 65, 65)
                             .addComponent(loginButton)))
-                    .addContainerGap(70, Short.MAX_VALUE))
+                    .addGap(61, 61, 61))
         );
         contentPaneLayout.setVerticalGroup(
             contentPaneLayout.createParallelGroup()
                 .addGroup(contentPaneLayout.createSequentialGroup()
-                    .addGap(125, 125, 125)
+                    .addGap(59, 59, 59)
                     .addGroup(contentPaneLayout.createParallelGroup()
                         .addComponent(nameField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                         .addComponent(nameLabel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -143,13 +164,13 @@ public class LoginForm extends JFrame
                     .addGroup(contentPaneLayout.createParallelGroup()
                         .addComponent(passwordLabel, GroupLayout.PREFERRED_SIZE, 26, GroupLayout.PREFERRED_SIZE)
                         .addComponent(passwordField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
-                    .addGap(16, 16, 16)
+                    .addGap(21, 21, 21)
                     .addGroup(contentPaneLayout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                         .addComponent(roleComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                         .addComponent(roleLabel))
                     .addGap(18, 18, 18)
                     .addComponent(loginButton)
-                    .addGap(57, 57, 57))
+                    .addGap(43, 43, 43))
         );
         pack();
         setLocationRelativeTo(getOwner());
@@ -160,9 +181,9 @@ public class LoginForm extends JFrame
     private JLabel nameLabel;
     private JLabel passwordLabel;
     private JTextField nameField;
-    private JTextField passwordField;
     private JButton loginButton;
     private JComboBox<String> roleComboBox;
     private JLabel roleLabel;
+    private JPasswordField passwordField;
     // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
 }

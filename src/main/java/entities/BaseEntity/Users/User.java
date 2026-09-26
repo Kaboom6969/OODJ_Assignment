@@ -55,6 +55,7 @@ public abstract class User extends BaseEntity
 
     public void setEmail(String email)
     {
+        if (email.contains("|")) throw new IllegalArgumentException("Email cannot contain |");
         if (email == null || email.isBlank()) throw new IllegalArgumentException("Email cannot be null or empty");
         int atIndex = email.indexOf('@');
         if (atIndex <= 0 || atIndex == email.length() - 1) throw new IllegalArgumentException("Email format is invalid");

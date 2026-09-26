@@ -1,13 +1,16 @@
 /*
- * Created by JFormDesigner on Thu Sep 24 03:22:51 GMT+08:00 2026
+ * Created by JFormDesigner on Sat Sep 26 05:59:04 GMT+08:00 2026
  */
 
 package Forms.AdminForm.CRUDPanel;
 
-import Forms.AdminForm.CRUDDialog.InsuranceDialog;
+import Forms.AdminForm.CRUDDialog.AssessmentTypeDialog;
+import Forms.AdminForm.CRUDDialog.ConsultationRateDialog;
 import Interfaces.RefreshablePanel;
 import Operations.AdminOperation.AdminOperation;
-import entities.BusinessEntity.Insurance;
+import entities.BaseEntity.AssessmentTypeToFile;
+import entities.BusinessEntity.AssessmentType;
+import entities.BusinessEntity.ConsultationRate;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -20,18 +23,17 @@ import static Forms.AdminForm.FrameHelper.getObjectFromCurrentSelectedRow;
 /**
  * @author leezh
  */
-public class InsurancePanel extends JPanel implements RefreshablePanel
+public class AssessmentTypePanel extends JPanel implements RefreshablePanel
 {
     private AdminOperation adminOperation;
     private Window frameWindow;
-
     @Override
     public void refreshData()
     {
-        reload();
+        reload(null);
     }
 
-    public InsurancePanel(Window frameWindow, AdminOperation adminOperation)
+    public AssessmentTypePanel(Window frameWindow, AdminOperation adminOperation)
     {
         this.frameWindow = frameWindow;
         this.adminOperation = adminOperation;
@@ -43,7 +45,7 @@ public class InsurancePanel extends JPanel implements RefreshablePanel
 
     private void panelInit()
     {
-        table.removeColumn(table.getColumn("Insurance Object"));
+        table.removeColumn(table.getColumn("Object"));
         clearTable(table);
         loadAllToTable();
         table.getSelectionModel().addListSelectionListener(e ->
@@ -70,21 +72,21 @@ public class InsurancePanel extends JPanel implements RefreshablePanel
     private void loadAllToTable()
     {
         DefaultTableModel model = (DefaultTableModel) table.getModel();
-        var objects = adminOperation.getAllInsurances();
+        var objects = adminOperation.getAllAssessmentTypes();
         for (var object : objects)
         {
             Object[] row = new Object[5];
             row[0] = object.getId();
-            row[1] = object.getSelf().getCompanyName();
-            row[2] = object.getSelf().getCoveragePercentage();
-            row[3] = object.getSelf().isAccepted();
+            row[1] = object.getSelf().getName();
+            row[2] = object.getSelf().getCategory();
+            row[3] = object.getSelf().getPrice();
             row[4] = object;
             model.addRow(row);
         }
 
     }
 
-    private void reload()
+    private void reload(ActionEvent e)
     {
         clearTable(table);
         loadAllToTable();
@@ -92,59 +94,73 @@ public class InsurancePanel extends JPanel implements RefreshablePanel
 
     private void add(ActionEvent e)
     {
-        InsuranceDialog insuranceDialog = new InsuranceDialog(frameWindow, adminOperation);
-        insuranceDialog.setVisible(true);
-        reload();
+        AssessmentTypeDialog dialog = new AssessmentTypeDialog(frameWindow, adminOperation);
+        dialog.setVisible(true);
+        reload(null);
     }
 
     private void update(ActionEvent e)
     {
-        Insurance insurance = getObjectFromCurrentSelectedRow(table, 4);
-        if (insurance == null)
+        AssessmentType assessmentType = getObjectFromCurrentSelectedRow(table, 4);
+        if (assessmentType == null)
         {
-            JOptionPane.showMessageDialog(this, "Please select a insurance");
+            JOptionPane.showMessageDialog(this, "Please select a assessment type");
             return;
         }
-        InsuranceDialog insuranceDialog = new InsuranceDialog(frameWindow, adminOperation, insurance);
-        insuranceDialog.setVisible(true);
-        reload();
+        AssessmentTypeDialog dialog = new AssessmentTypeDialog(frameWindow, adminOperation, assessmentType);
+        dialog.setVisible(true);
+        reload(null);
     }
 
     private void delete(ActionEvent e)
     {
-        Insurance insurance = getObjectFromCurrentSelectedRow(table, 4);
-        if (insurance == null)
+        AssessmentType assessmentType = getObjectFromCurrentSelectedRow(table, 4);
+        if (assessmentType == null)
         {
-            JOptionPane.showMessageDialog(this, "Please select a Insurance");
+            JOptionPane.showMessageDialog(this, "Please select a assessment type");
             return;
         }
-        AdminOperation.CRUDInformation crudInformation = adminOperation.delete(insurance);
+        if (!assessmentType.getAssessmentResults().isEmpty() || !assessmentType.getMedicalRequests().isEmpty())
+        {
+            JOptionPane.showMessageDialog(this, "This assessment type is link to another entity,cannot delete it");
+            return;
+        }
+        AdminOperation.CRUDInformation crudInformation = adminOperation.delete(assessmentType);
         if (crudInformation.isSuccess())
         {
-            reload();
-            JOptionPane.showMessageDialog(this, "Insurance has been deleted");
+            reload(null);
+            JOptionPane.showMessageDialog(this, "assessment type has been deleted");
         } else
         {
             JOptionPane.showMessageDialog(this, crudInformation.message());
         }
     }
 
-    private void reload(ActionEvent e) {
-        reload(null);
-    }
-
-
-    private void initComponents()
-    {
+    private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
+        allUserScrollPanel = new JScrollPane();
+        table = new JTable();
         reloadButton = new JButton();
         addButton = new JButton();
         updateButton = new JButton();
         deleteButton = new JButton();
-        allUserScrollPanel = new JScrollPane();
-        table = new JTable();
 
         //======== this ========
+
+        //======== allUserScrollPanel ========
+        {
+
+            //---- table ----
+            table.setModel(new DefaultTableModel(
+                new Object[][] {
+                    {null, null, null, null, null},
+                },
+                new String[] {
+                    "Id", "Name", "Category", "Price", "Object"
+                }
+            ));
+            allUserScrollPanel.setViewportView(table);
+        }
 
         //---- reloadButton ----
         reloadButton.setText("Reload");
@@ -162,67 +178,49 @@ public class InsurancePanel extends JPanel implements RefreshablePanel
         deleteButton.setText("Delete");
         deleteButton.addActionListener(e -> delete(e));
 
-        //======== allUserScrollPanel ========
-        {
-
-            //---- table ----
-            table.setModel(new DefaultTableModel(
-                new Object[][] {
-                    {null, null, null, null, null},
-                },
-                new String[] {
-                    "Id", "Company Name", "Coverage Percentage", "Is Accepted", "Insurance Object"
-                }
-            ));
-            {
-                TableColumnModel cm = table.getColumnModel();
-                cm.getColumn(2).setPreferredWidth(150);
-            }
-            allUserScrollPanel.setViewportView(table);
-        }
-
         GroupLayout layout = new GroupLayout(this);
         setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup()
                 .addGroup(layout.createSequentialGroup()
-                    .addGap(32, 32, 32)
+                    .addGap(71, 71, 71)
                     .addComponent(allUserScrollPanel, GroupLayout.PREFERRED_SIZE, 709, GroupLayout.PREFERRED_SIZE)
-                    .addGap(18, 18, 18)
-                    .addGroup(layout.createParallelGroup()
-                        .addComponent(reloadButton, GroupLayout.PREFERRED_SIZE, 84, GroupLayout.PREFERRED_SIZE)
+                    .addGap(46, 46, 46)
+                    .addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING)
                         .addComponent(addButton)
-                        .addComponent(updateButton)
-                        .addComponent(deleteButton))
-                    .addContainerGap(57, Short.MAX_VALUE))
+                        .addGroup(layout.createParallelGroup()
+                            .addComponent(deleteButton)
+                            .addComponent(updateButton))
+                        .addComponent(reloadButton, GroupLayout.PREFERRED_SIZE, 84, GroupLayout.PREFERRED_SIZE))
+                    .addContainerGap(90, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup()
                 .addGroup(layout.createSequentialGroup()
                     .addGroup(layout.createParallelGroup()
                         .addGroup(layout.createSequentialGroup()
-                            .addGap(42, 42, 42)
+                            .addGap(83, 83, 83)
                             .addComponent(allUserScrollPanel, GroupLayout.PREFERRED_SIZE, 425, GroupLayout.PREFERRED_SIZE))
                         .addGroup(layout.createSequentialGroup()
-                            .addGap(92, 92, 92)
+                            .addGap(142, 142, 142)
                             .addComponent(reloadButton)
                             .addGap(18, 18, 18)
                             .addComponent(addButton)
                             .addGap(18, 18, 18)
                             .addComponent(updateButton)
-                            .addGap(18, 18, 18)
+                            .addGap(26, 26, 26)
                             .addComponent(deleteButton)))
-                    .addContainerGap(43, Short.MAX_VALUE))
+                    .addContainerGap(87, Short.MAX_VALUE))
         );
         // JFormDesigner - End of component initialization  //GEN-END:initComponents  @formatter:on
     }
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables  @formatter:off
+    private JScrollPane allUserScrollPanel;
+    private JTable table;
     private JButton reloadButton;
     private JButton addButton;
     private JButton updateButton;
     private JButton deleteButton;
-    private JScrollPane allUserScrollPanel;
-    private JTable table;
     // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
 }

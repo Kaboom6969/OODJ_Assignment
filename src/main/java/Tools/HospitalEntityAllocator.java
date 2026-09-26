@@ -218,8 +218,9 @@ public class HospitalEntityAllocator
         return (T) EntityConvertManager.getBusinessConvertMap().get(prefix).apply(businessEntityConstructor);
 
     }
-    public <T extends BaseEntity & ConvertToFileData> void assignNewId (T entity)
+    public <T extends BaseEntity & ConvertToFileData> int assignNewId (T entity)
     {
+        int setNumber;
         List<BaseEntity> allEntity = getAllEntities(entity.getIdPrefix());
         List<Integer> allNumbers = new ArrayList<>();
         for (BaseEntity baseEntity : allEntity)
@@ -230,7 +231,9 @@ public class HospitalEntityAllocator
         {
             try
             {
-                entity.setIdNumber(1); return;
+                setNumber = 1;
+                entity.setIdNumber(setNumber);
+                return setNumber;
             } catch (OperationNotSupportedException e)
             {
                 throw new RuntimeException(e);
@@ -246,7 +249,9 @@ public class HospitalEntityAllocator
             {
                 try
                 {
-                    entity.setIdNumber(allNumbers.get(i-1) + 1);return;
+                    setNumber = allNumbers.get(i-1) + 1;
+                    entity.setIdNumber(setNumber);
+                    return setNumber;
                 } catch (OperationNotSupportedException e)
                 {
                     throw new RuntimeException(e);
@@ -256,8 +261,9 @@ public class HospitalEntityAllocator
             {
                 try
                 {
-                    entity.setIdNumber(allNumbers.get(i) + 1);
-                    return;
+                    setNumber = allNumbers.get(i) + 1;
+                    entity.setIdNumber(setNumber);
+                    return setNumber;
                 } catch (OperationNotSupportedException e)
                 {
                     throw new RuntimeException(e);
@@ -266,15 +272,17 @@ public class HospitalEntityAllocator
         }
         try
         {
+            setNumber = allNumbers.getFirst()+1;
             entity.setIdNumber(allNumbers.getFirst()+1);
+            return setNumber;
         } catch (OperationNotSupportedException e)
         {
             throw new RuntimeException(e);
         }
     }
-    public <T extends BaseEntity & ConvertToFileData> void addEntityForceNewId(T entity)
+    public <T extends BaseEntity & ConvertToFileData> int addEntityForceNewId(T entity)
     {
-        assignNewId(entity);
+        int number = assignNewId(entity);
         try
         {
             addEntity(entity);
@@ -282,6 +290,7 @@ public class HospitalEntityAllocator
         {
             throw new RuntimeException(e);
         }
+        return number;
     }
     public <T extends BusinessEntity<?>> List<T> getAllBusinessEntities(String prefix)
     {

@@ -101,6 +101,21 @@ public class AdminOperation
         }
 
     }
+
+    public <Q extends BaseEntity & ConvertToFileData,T extends BusinessEntity<Q>> T constructNewFull
+    (List<String> data, Class<? extends BaseEntity> clazz)
+    {
+        try
+        {
+            Q entity = construct(data,clazz);
+            hospitalEntityAllocator.assignNewId(entity);
+            return hospitalEntityAllocator.convertToBusinessEntity(entity,true);
+        } catch (Exception e)
+        {
+            throw new RuntimeException(failure(e).message());
+        }
+    }
+
     private CRUDInformation add(BusinessEntity<?> businessEntity)
     {
         try
@@ -123,6 +138,21 @@ public class AdminOperation
         {
             return failure(e);
         }
+    }
+
+    public <T extends BaseEntity> BusinessEntity<T> convertToBusinessEntity(T baseEntity)
+    {
+        return hospitalEntityAllocator.convertToBusinessEntity(baseEntity,false);
+    }
+
+    public List<MedicalRequest> getAllMedicalRequests()
+    {
+        return hospitalEntityAllocator.getAllBusinessEntities(MedicalRequestToFile.PREFIX);
+    }
+
+    public List<AssessmentType> getAllAssessmentTypes()
+    {
+        return hospitalEntityAllocator.getAllBusinessEntities(AssessmentTypeToFile.PREFIX);
     }
     public List<Department> getAllDepartments()
     {

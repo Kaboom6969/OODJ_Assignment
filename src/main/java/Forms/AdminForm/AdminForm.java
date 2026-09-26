@@ -4,28 +4,18 @@
 
 package Forms.AdminForm;
 
-import java.awt.*;
-import java.awt.event.*;
-
-import Forms.AdminForm.CRUDDialog.UserDialog;
-import Forms.AdminForm.CRUDPanel.ConsultationRatePanel;import Forms.AdminForm.CRUDPanel.FacilityPanel;
-import Forms.AdminForm.CRUDPanel.InsurancePanel;
-import Forms.AdminForm.CRUDPanel.UserPanel;
-import Forms.AdminForm.LinkPanel.AllocateConsultationRateAndFacilityToDepartment;
-import Forms.AdminForm.LinkPanel.AllocateDoctorToMedicalManagerPanel;
-import Interfaces.RefreshablePanel;
-import Operations.AdminOperation.AdminOperation;
+import Forms.AdminForm.CRUDPanel.*;import Forms.AdminForm.LinkPanel.AllocateConsultationRateAndFacilityToDepartment;import Forms.AdminForm.LinkPanel.AllocateDoctorToMedicalManagerPanel;import Interfaces.RefreshablePanel;import Operations.AdminOperation.AdminOperation;
+import Tools.EntityConvertManager;
 import Tools.HospitalEntityAllocator;
+import Tools.PrefixHandler.PrefixFinder;
 import entities.BaseEntity.Users.User;
 import entities.BaseEntity.Users.UserWithDetails;
 import entities.BusinessEntity.Admin;
-import entities.BusinessEntity.BusinessEntity;
 
 import javax.swing.*;
 import javax.swing.GroupLayout;
 import javax.swing.table.*;
-
-import static Forms.AdminForm.FrameHelper.getObjectFromCurrentSelectedRow;
+import java.util.List;
 
 /**
  * @author leezh
@@ -39,36 +29,24 @@ public class AdminForm extends JFrame {
     {
         adminOperation = new AdminOperation(hospitalEntityAllocator,admin);
         initComponents();
-        UserPanel userPanel = new UserPanel(this,adminOperation);
-        AllocateDoctorToMedicalManagerPanel allocateDoctorToMedicalManagerPanel = new AllocateDoctorToMedicalManagerPanel(adminOperation);
-        InsurancePanel insurancePanel = new InsurancePanel(this, adminOperation);
-        FacilityPanel facilityPanel = new FacilityPanel(this, adminOperation);
-        ConsultationRatePanel consultationRatePanel = new ConsultationRatePanel(this, adminOperation);
-        AllocateConsultationRateAndFacilityToDepartment allocateConsultationRateAndFacilityToDepartment = new AllocateConsultationRateAndFacilityToDepartment(adminOperation);
-        adminTab.add(userPanel,"User Panel");
-        adminTab.add(insurancePanel,"Insurance Panel");
-        adminTab.add(facilityPanel,"Facility Panel");
-        adminTab.add(consultationRatePanel,"Consultation Rate Panel");
-        adminTab.add(allocateDoctorToMedicalManagerPanel,"Allocate Doctor To Medical Manager");
-        adminTab.add(allocateConsultationRateAndFacilityToDepartment,"Allocate Consultation Rate and Facility To Department");
+        adminTab.add(new UserPanel(this,adminOperation),"User Panel");
+        adminTab.add(new FacilityPanel(this,adminOperation),"Facility Panel");
+        adminTab.add(new InsurancePanel(this,adminOperation),"Insurance Panel");
+        adminTab.add(new ConsultationRatePanel(this,adminOperation), "Consultation Panel");
+        adminTab.add(new AssessmentTypePanel(this,adminOperation),"Assessment Type Panel");
+        adminTab.add(new MedicalRequestPanel(this,adminOperation),"Medical Request Panel");
+        adminTab.add(new AllocateDoctorToMedicalManagerPanel(adminOperation),"Allocate Doctor To Medical Manager Panel");
+        adminTab.add(new AllocateConsultationRateAndFacilityToDepartment(adminOperation),"Allocate Consultation Rate And Facility To Department Panel");
         adminTab.addChangeListener(e ->
         {
-            Component selectedPanel = adminTab.getSelectedComponent();
-
-            if (selectedPanel instanceof RefreshablePanel refreshablePanel)
+            if (adminTab.getSelectedComponent() instanceof RefreshablePanel rp)
             {
-                refreshablePanel.refreshData();
+                rp.refreshData();
             }
         });
 
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
-
-
-
-
-
-
-
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
@@ -103,4 +81,6 @@ public class AdminForm extends JFrame {
     // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
 
 
+
 }
+

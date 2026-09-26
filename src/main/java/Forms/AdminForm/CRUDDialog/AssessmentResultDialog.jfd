@@ -1,0 +1,35 @@
+﻿JFDML JFormDesigner: "8.3" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormWindow( "javax.swing.JDialog", new FormLayoutManager( class org.jdesktop.layout.GroupLayout ) {
+			"$horizontalGroup": "par l {seq l {par l {seq l {space :p:175:p, comp actionButton:::p::p}, seq l {space :p:73:p, par t {comp remarkLabel:::p::p, comp resultLabel:::p::p}, space :18:18:p, par l {comp resultTextField:::p:185:p, comp remarkTextField:::p:185:p}}}, space ::72:x}}"
+			"$verticalGroup": "par l {seq l {space :p:46:p, par l {seq l {space :8:8:p, comp resultLabel:::p::p}, comp resultTextField:::p::p}, space :p:17:p, par b {comp remarkLabel::b:p::p, comp remarkTextField::b:p::p}, space :p:55:p, comp actionButton:::p::p, space ::49:x}}"
+		} ) {
+			name: "this"
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "resultLabel"
+				"text": "Result:"
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "remarkLabel"
+				"text": "Remark:"
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "resultTextField"
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "remarkTextField"
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "actionButton"
+				"text": "Action"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "action", true ) )
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 400, 300 )
+		} )
+	}
+}
