@@ -9,6 +9,20 @@ public class AssessmentResultToFile extends BaseEntity implements ConvertToFileD
 {
     public static final String PREFIX = "RS";
 
+    public void setResult(String result)
+    {
+        if (result == null || result.isEmpty() || result.contains("|"))
+            throw new IllegalArgumentException("Results must contain at least 1 character and no |");
+        this.result = result;
+    }
+
+    public void setRemark(String remark)
+    {
+        if (remark == null || remark.isEmpty() || remark.contains("|"))
+            throw new IllegalArgumentException("Remarks must contain at least 1 character and no |");
+        this.remark = remark;
+    }
+
     private String result;
     private String remark;
     private LocalDateTime completedTime;
@@ -31,8 +45,8 @@ public class AssessmentResultToFile extends BaseEntity implements ConvertToFileD
     public AssessmentResultToFile(String id, String result, String remark, LocalDateTime completedTime)
     {
         super(id);
-        this.result = result;
-        this.remark = remark;
+        setResult(result);
+        setRemark(remark);
         this.completedTime = completedTime;
     }
 

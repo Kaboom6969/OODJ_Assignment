@@ -39,6 +39,8 @@ public class MedicalRequestToFile extends BaseEntity implements ConvertToFileDat
 
     public void setRemark(String remark)
     {
+        if(remark == null || remark.isEmpty() || remark.contains("|"))
+            throw new IllegalArgumentException("Remarks cannot be null or empty");
         this.remark = remark;
     }
 
@@ -51,7 +53,7 @@ public class MedicalRequestToFile extends BaseEntity implements ConvertToFileDat
     {
         super(id);
         this.requestTime = requestTime;
-        this.remark = remark;
+        setRemark(remark);
         this.status = status;
     }
 
