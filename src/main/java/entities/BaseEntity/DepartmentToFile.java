@@ -14,16 +14,19 @@ public class DepartmentToFile extends BaseEntity implements ConvertToFileData
     }
 
     private String name;
-
-
-    public DepartmentToFile(String id)
+    public void setName(String name)
+    {
+        if (name.contains("|")) throw new IllegalArgumentException("Department name cannot contain |");
+        this.name = name;
+    }
+public DepartmentToFile(String id)
     {
         super(id);
     }
     public DepartmentToFile(String id,String name)
     {
         super(id);
-        this.name = name;
+        setName(name);
     }
 
     public DepartmentToFile(String[] data)
