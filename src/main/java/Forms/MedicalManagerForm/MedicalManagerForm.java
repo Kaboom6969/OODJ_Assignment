@@ -4,6 +4,7 @@ import Operations.MedicalManagerOperation.MedicalManagerOperation;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.BaseEntity;
 import entities.BaseEntity.Users.UserWithDetails;
+import entities.BusinessEntity.Department;
 import entities.BusinessEntity.Doctor;
 import entities.BusinessEntity.MedicalManager;
 
@@ -39,7 +40,7 @@ public class MedicalManagerForm extends JFrame {
     private JTable rosterTable;
     private DefaultTableModel rosterTableModel;
     private JComboBox<String> doctorBox;
-    private JComboBox<String> departmentBox;
+    private JTextField departmentField;
     private JTextField rosterDateField;
     private JComboBox<String> shiftTypeBox;
     private JButton assignShiftBtn;
@@ -64,10 +65,19 @@ public class MedicalManagerForm extends JFrame {
     private final HospitalEntityAllocator allocator;
     private final MedicalManagerOperation operation;
 
+    // Feedback table and model
+    private JTable feedbackTable;
+    private DefaultTableModel feedbackTableModel;
+
+    // Shift update controls
+    private JButton updateShiftBtn;
+    private String selectedShiftId = null;
+
     // Default manager IDfor profile update
     private String currentManagerId = "MM0001";
+
     // Constructor: setup main window and tabs
-    public MedicalManagerForm(HospitalEntityAllocator allocator, MedicalManager medicalManager){
+    public MedicalManagerForm(HospitalEntityAllocator allocator, MedicalManager medicalManager) {
         UIManager.put("Button.disabledText", new Color(190, 190, 190));
         this.allocator = allocator;
         this.medicalManager = medicalManager;
@@ -89,6 +99,7 @@ public class MedicalManagerForm extends JFrame {
         jTabbedPane.addTab("Department Management", createDepartmentPanel());
         jTabbedPane.addTab("Shift Rosters", createRosterPanel());
         jTabbedPane.addTab("Metrics & Revenue", createReportPanel());
+        jTabbedPane.addTab("Doctor Feedback", createFeedbackPanel());
         add(jTabbedPane);
 
         // Bind events and load initial data
@@ -99,6 +110,7 @@ public class MedicalManagerForm extends JFrame {
 
         // Load initial real metrics data on startup
         refreshMetrics();
+        refreshFeedbackTable();
 
         // Trigger refresh automatically when month selection changes
         monthFilterBox.addActionListener(e -> refreshMetrics());
@@ -142,21 +154,6 @@ public class MedicalManagerForm extends JFrame {
         });
     }
 
-    // Refresh department names in Shift Rosters dropdown
-    private void refreshDepartmentComboBox() {
-        if (departmentBox == null) return;
-        departmentBox.removeAllItems();
-        try {
-            ArrayList<String[]> depts = operation.loadDepartment();
-            for (String[] d : depts) {
-                if (d.length >= 2) {
-                    departmentBox.addItem(d[1]); // Column 1: Department Name
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Failed to refresh department dropdown: " + e.getMessage());
-        }
-    }
 
     // Create the Personal Profile panel
     private JPanel createProfilePanel() {
@@ -364,6 +361,7 @@ public class MedicalManagerForm extends JFrame {
 
                 operation.updateDepartment(deptId, deptNewDeptName);
                 refreshDepartmentTable();
+                refreshRosterTable();
                 deptTable.clearSelection();
                 JOptionPane.showMessageDialog(this, "Department updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
             } catch (IllegalArgumentException ex) {
@@ -470,6 +468,89 @@ public class MedicalManagerForm extends JFrame {
             }
         });
 
+        // Listen to roster table row selection and populate input fields
+        rosterTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting() && rosterTable.getSelectedRow() != -1) {
+                int row = rosterTable.getSelectedRow();
+                selectedShiftId = (String) rosterTableModel.getValueAt(row, 0);
+                String docName = (String) rosterTableModel.getValueAt(row, 1);
+                String date = (String) rosterTableModel.getValueAt(row, 3);
+                String shiftDetails = (String) rosterTableModel.getValueAt(row, 4);
+
+                // Fill date text field
+                rosterDateField.setText(date);
+                rosterDateField.setForeground(Color.BLACK);
+
+                // Match and select doctor in dropdown
+                for (int i = 0; i < doctorBox.getItemCount(); i++) {
+                    if (doctorBox.getItemAt(i).contains(docName)) {
+                        doctorBox.setSelectedIndex(i);
+                        break;
+                    }
+                }
+
+                // Match shift type in dropdown
+                if (shiftDetails.contains("Morning")) {
+                    shiftTypeBox.setSelectedIndex(0);
+                } else if (shiftDetails.contains("Evening")) {
+                    shiftTypeBox.setSelectedIndex(1);
+                } else if (shiftDetails.contains("Night")) {
+                    shiftTypeBox.setSelectedIndex(2);
+                }
+
+                // Enable update button, disable assign button
+                setButtonState(updateShiftBtn, true);
+                setButtonState(assignShiftBtn, false);
+            }
+        });
+
+        // Update Shift Button Action
+        updateShiftBtn.addActionListener(e -> {
+            if (selectedShiftId == null) {
+                JOptionPane.showMessageDialog(this, "Please select a shift from the table to update.", "Selection Required", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            String selectedDoc = (String) doctorBox.getSelectedItem();
+            if (selectedDoc == null || !selectedDoc.contains(" - ")) {
+                JOptionPane.showMessageDialog(this, "Please select a valid doctor.", "Input Error", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            String doctorId = selectedDoc.split(" - ")[0].trim();
+            String dateStr = rosterDateField.getText().trim();
+            String shiftType = (String) shiftTypeBox.getSelectedItem();
+
+            try {
+                operation.updateShift(selectedShiftId, doctorId, dateStr, shiftType);
+                JOptionPane.showMessageDialog(this, "Shift updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+
+                // Refresh table and reset form
+                refreshRosterTable();
+                selectedShiftId = null;
+                rosterTable.clearSelection();
+                setButtonState(updateShiftBtn, false);
+                setButtonState(assignShiftBtn, true);
+            } catch (IllegalArgumentException ex) {
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Validation Error", JOptionPane.WARNING_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "System Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        // Update clearShiftBtn to reset update button
+        clearShiftBtn.addActionListener(e -> {
+            selectedShiftId = null;
+            rosterTable.clearSelection();
+            rosterDateField.setText("YYYY-MM-DD");
+            rosterDateField.setForeground(Color.GRAY);
+            departmentField.setText("");
+            if (doctorBox.getItemCount() > 0) {
+                doctorBox.setSelectedIndex(0);
+            }
+            setButtonState(updateShiftBtn, false);
+            setButtonState(assignShiftBtn, true);
+        });
+
         // Automatically sync department display when doctor selection changes
         doctorBox.addActionListener(e -> {
             String selectedDoc = (String) doctorBox.getSelectedItem();
@@ -478,12 +559,21 @@ public class MedicalManagerForm extends JFrame {
                 try {
                     Doctor docBiz = allocator.getBusinessEntity(docId);
                     if (docBiz != null && docBiz.getBelongsToDepartment() != null) {
-                        departmentBox.setSelectedItem(docBiz.getBelongsToDepartment().getName());
+                        String deptId = docBiz.getBelongsToDepartment().getId();
+                        Department freshDept = allocator.getBusinessEntity(deptId);
+                        if (freshDept != null && freshDept.getSelf() != null) {
+                            departmentField.setText(freshDept.getSelf().getName());
+                        } else {
+                            departmentField.setText(docBiz.getBelongsToDepartment().getName());
+                        }
                     } else {
-                        departmentBox.setSelectedIndex(-1);
+                        departmentField.setText("N/A");
                     }
                 } catch (Exception ignored) {
+                    departmentField.setText("N/A");
                 }
+            } else {
+                departmentField.setText("");
             }
         });
     }
@@ -626,8 +716,8 @@ public class MedicalManagerForm extends JFrame {
             }
         });
 
-        // Initialize department dropdown
-        departmentBox = new JComboBox<>();
+        departmentField = new JTextField(14);
+        departmentField.setEditable(false);
 
         String[] shiftTypes = {"Morning (08:00 - 16:00)", "Evening (16:00 - 00:00)", "Night (00:00 - 08:00)"};
         shiftTypeBox = new JComboBox<>(shiftTypes);
@@ -635,11 +725,12 @@ public class MedicalManagerForm extends JFrame {
         assignShiftBtn = new JButton("Assign Shift");
         deleteShiftBtn = new JButton("Delete Shift");
         clearShiftBtn = new JButton("Clear");
+        updateShiftBtn = new JButton("Update Shift");
 
-        JButton[] buttons = {assignShiftBtn, deleteShiftBtn, clearShiftBtn};
-        for (JButton btn : buttons) {
-            setButtonState(btn, true);
-        }
+        setButtonState(assignShiftBtn, true);
+        setButtonState(deleteShiftBtn, true);
+        setButtonState(clearShiftBtn, true);
+        setButtonState(updateShiftBtn, false);
 
         // Row 0: Doctor Dropdown
         gbc.gridx = 0;
@@ -659,7 +750,7 @@ public class MedicalManagerForm extends JFrame {
         gbc.gridx = 1;
         gbc.gridy = 1;
         gbc.anchor = GridBagConstraints.WEST;
-        formPanel.add(departmentBox, gbc);
+        formPanel.add(departmentField, gbc);
 
         // Row 2: Date
         gbc.gridx = 0;
@@ -685,6 +776,7 @@ public class MedicalManagerForm extends JFrame {
         JPanel btnGroup = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 0));
         btnGroup.setOpaque(false);
         btnGroup.add(assignShiftBtn);
+        btnGroup.add(updateShiftBtn);
         btnGroup.add(deleteShiftBtn);
         btnGroup.add(clearShiftBtn);
 
@@ -712,7 +804,7 @@ public class MedicalManagerForm extends JFrame {
         kpiPanel.add(createKpiCard("Bed Occupancy", "87.5%"));
         panel.add(kpiPanel, BorderLayout.NORTH);
 
-        String[] columns = {"Dept ID", "Department Name", "Patients Served", "Revenue", "Avg Stay (Days)"};
+        String[] columns = {"Dept ID", "Department Name", "Patients Served", "Revenue"};
         metricsTableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -763,11 +855,11 @@ public class MedicalManagerForm extends JFrame {
 
         JLabel titleLabel = new JLabel(title);
         titleLabel.setForeground(Color.DARK_GRAY);
-        titleLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
+
 
         JLabel valueLabel = new JLabel(value);
         valueLabel.setForeground(Color.decode("#2E7D5E"));
-        valueLabel.setFont(new Font("SansSerif", Font.BOLD, 18));
+
 
         // Retain reference according to card title
         if ("Total Revenue".equalsIgnoreCase(title)) {
@@ -783,6 +875,73 @@ public class MedicalManagerForm extends JFrame {
         card.add(titleLabel, BorderLayout.NORTH);
         card.add(valueLabel, BorderLayout.CENTER);
         return card;
+    }
+
+    // Create clean and styled feedback UI panel
+    private JPanel createFeedbackPanel() {
+        Color themeBg = Color.decode("#C2D4C8"); // Consistent background color
+
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBackground(themeBg);
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
+        // Table model setup
+        feedbackTableModel = new DefaultTableModel(
+                new String[]{"Doctor Name", "Appointment ID", "Rating", "Comment", "Date"}, 0
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Read-only
+            }
+        };
+
+        feedbackTable = new JTable(feedbackTableModel);
+        feedbackTable.setRowHeight(26);
+        feedbackTable.getTableHeader().setBackground(Color.decode("#EAECEE"));
+
+        // ScrollPane setup: clean white background for entire table area
+        JScrollPane scrollPane = new JScrollPane(feedbackTable);
+        scrollPane.getViewport().setBackground(Color.WHITE);
+        scrollPane.setBorder(BorderFactory.createLineBorder(Color.decode("#B0C4DE"), 1));
+
+        // Top action bar: make it transparent so theme background shows through cleanly
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        topPanel.setOpaque(false);
+        JButton refreshBtn = new JButton("Refresh Feedback");
+
+
+        // Apply your own setButtonState method
+        setButtonState(refreshBtn, true);
+
+        refreshBtn.addActionListener(e -> refreshFeedbackTable());
+
+        topPanel.add(refreshBtn);
+
+        panel.add(topPanel, BorderLayout.NORTH);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        return panel;
+    }
+
+    // Load and display feedback from operation
+    private void refreshFeedbackTable() {
+        if (feedbackTableModel == null) return;
+        feedbackTableModel.setRowCount(0);
+
+        try {
+            List<MedicalManagerOperation.DoctorFeedbackInfo> list = operation.loadAssignedDoctorsFeedback();
+            for (MedicalManagerOperation.DoctorFeedbackInfo item : list) {
+                feedbackTableModel.addRow(new Object[]{
+                        item.doctorName(),
+                        item.appointmentId(),
+                        item.rating(),
+                        item.comment(),
+                        item.date()
+                });
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to load feedback: " + e.getMessage());
+        }
     }
 
     // Fetch live data via Operation and refresh both KPI cards and table rows
@@ -861,7 +1020,6 @@ public class MedicalManagerForm extends JFrame {
         for (String[] d : depts) {
             deptTableModel.addRow(d);
         }
-        refreshDepartmentComboBox();
         resetToNewDeptMode();
     }
 
