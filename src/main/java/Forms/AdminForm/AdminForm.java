@@ -4,7 +4,7 @@
 
 package Forms.AdminForm;
 
-import Operations.AdminOperation.AdminOperation;
+import Forms.AdminForm.CRUDPanel.*;import Forms.AdminForm.LinkPanel.AllocateConsultationRateAndFacilityToDepartment;import Forms.AdminForm.LinkPanel.AllocateDoctorToMedicalManagerPanel;import Interfaces.RefreshablePanel;import Operations.AdminOperation.AdminOperation;
 import Tools.EntityConvertManager;
 import Tools.HospitalEntityAllocator;
 import Tools.PrefixHandler.PrefixFinder;
@@ -23,76 +23,37 @@ import java.util.List;
 public class AdminForm extends JFrame {
     private AdminOperation adminOperation;
 
+
+
     public AdminForm(Admin admin, HospitalEntityAllocator hospitalEntityAllocator)
     {
         adminOperation = new AdminOperation(hospitalEntityAllocator,admin);
         initComponents();
-        loadAllUserToTable();
+        adminTab.add(new UserPanel(this,adminOperation),"User Panel");
+        adminTab.add(new FacilityPanel(this,adminOperation),"Facility Panel");
+        adminTab.add(new InsurancePanel(this,adminOperation),"Insurance Panel");
+        adminTab.add(new ConsultationRatePanel(this,adminOperation), "Consultation Panel");
+        adminTab.add(new AssessmentTypePanel(this,adminOperation),"Assessment Type Panel");
+        adminTab.add(new MedicalRequestPanel(this,adminOperation),"Medical Request Panel");
+        adminTab.add(new AllocateDoctorToMedicalManagerPanel(adminOperation),"Allocate Doctor To Medical Manager Panel");
+        adminTab.add(new AllocateConsultationRateAndFacilityToDepartment(adminOperation),"Allocate Consultation Rate And Facility To Department Panel");
+        adminTab.addChangeListener(e ->
+        {
+            if (adminTab.getSelectedComponent() instanceof RefreshablePanel rp)
+            {
+                rp.refreshData();
+            }
+        });
+
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
         adminTab = new JTabbedPane();
-        allUserPanel = new JPanel();
-        allUserScrollPanel = new JScrollPane();
-        userTable = new JTable();
-        reloadUserButton = new JButton();
 
         //======== this ========
         var contentPane = getContentPane();
-
-        //======== adminTab ========
-        {
-
-            //======== allUserPanel ========
-            {
-
-                //======== allUserScrollPanel ========
-                {
-
-                    //---- userTable ----
-                    userTable.setModel(new DefaultTableModel(
-                        new Object[][] {
-                        },
-                        new String[] {
-                            "Role", "Id", "Name", "Email", "Gender", "Date Of Birth", "Phone Number"
-                        }
-                    ));
-                    {
-                        TableColumnModel cm = userTable.getColumnModel();
-                        cm.getColumn(3).setPreferredWidth(150);
-                    }
-                    allUserScrollPanel.setViewportView(userTable);
-                }
-
-                //---- reloadUserButton ----
-                reloadUserButton.setText("Reload");
-
-                GroupLayout allUserPanelLayout = new GroupLayout(allUserPanel);
-                allUserPanel.setLayout(allUserPanelLayout);
-                allUserPanelLayout.setHorizontalGroup(
-                    allUserPanelLayout.createParallelGroup()
-                        .addGroup(allUserPanelLayout.createSequentialGroup()
-                            .addContainerGap()
-                            .addComponent(allUserScrollPanel, GroupLayout.PREFERRED_SIZE, 709, GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(reloadUserButton, GroupLayout.PREFERRED_SIZE, 84, GroupLayout.PREFERRED_SIZE)
-                            .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                );
-                allUserPanelLayout.setVerticalGroup(
-                    allUserPanelLayout.createParallelGroup()
-                        .addGroup(allUserPanelLayout.createSequentialGroup()
-                            .addGap(40, 40, 40)
-                            .addComponent(reloadUserButton)
-                            .addContainerGap(363, Short.MAX_VALUE))
-                        .addGroup(allUserPanelLayout.createSequentialGroup()
-                            .addContainerGap()
-                            .addComponent(allUserScrollPanel, GroupLayout.DEFAULT_SIZE, 425, Short.MAX_VALUE)
-                            .addContainerGap())
-                );
-            }
-            adminTab.addTab("All User", allUserPanel);
-        }
 
         GroupLayout contentPaneLayout = new GroupLayout(contentPane);
         contentPane.setLayout(contentPaneLayout);
@@ -100,15 +61,15 @@ public class AdminForm extends JFrame {
             contentPaneLayout.createParallelGroup()
                 .addGroup(contentPaneLayout.createSequentialGroup()
                     .addContainerGap()
-                    .addComponent(adminTab, GroupLayout.DEFAULT_SIZE, 796, Short.MAX_VALUE)
-                    .addContainerGap())
+                    .addComponent(adminTab, GroupLayout.PREFERRED_SIZE, 890, GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         contentPaneLayout.setVerticalGroup(
             contentPaneLayout.createParallelGroup()
                 .addGroup(contentPaneLayout.createSequentialGroup()
                     .addContainerGap()
-                    .addComponent(adminTab)
-                    .addContainerGap())
+                    .addComponent(adminTab, GroupLayout.PREFERRED_SIZE, 507, GroupLayout.PREFERRED_SIZE)
+                    .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         pack();
         setLocationRelativeTo(getOwner());
@@ -117,34 +78,9 @@ public class AdminForm extends JFrame {
 
     // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables  @formatter:off
     private JTabbedPane adminTab;
-    private JPanel allUserPanel;
-    private JScrollPane allUserScrollPanel;
-    private JTable userTable;
-    private JButton reloadUserButton;
     // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
 
-    private void loadAllUserToTable()
-    {
-        DefaultTableModel model = (DefaultTableModel) userTable.getModel();
-        var users = adminOperation.getAllUsers();
-        for (var user : users)
-        {
-            User userData = user.getSelf();
-            Object[] row = new Object[7];
-            row[0] = userData.getClass()
-                    .getSimpleName()
-                    .replace("ToFile", "");
-            row[1] = user.getId();
-            row[2] = user.getSelf().getName();
-            row[3] = user.getSelf().getEmail();
-            if (userData instanceof UserWithDetails userWithDetailsData)
-            {
-                row[4] = userWithDetailsData.getGender();
-                row[5] = userWithDetailsData.getDateOfBirth();
-                row[6] = userWithDetailsData.getPhoneNumber();
-            }
-            model.addRow(row);
-        }
 
-    }
+
 }
+

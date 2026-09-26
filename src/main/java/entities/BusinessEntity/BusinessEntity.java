@@ -1,18 +1,26 @@
 package entities.BusinessEntity;
 
 import Interfaces.ConvertToFileData;
+import Interfaces.Linkable;
+import Interfaces.OwnerShip;
+import Tools.PrefixHandler.PrefixFinder;
 import entities.LazyEntity.LazyEntity;
 import Tools.EntityHandler;
 import Tools.FileHandler.FileDataHandler;
 import entities.BaseEntity.BaseEntity;
 import entities.Linker.LinkerManager;
 
+import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 
-public abstract class BusinessEntity<T extends BaseEntity & ConvertToFileData>
+public abstract class BusinessEntity<T extends BaseEntity & ConvertToFileData> implements OwnerShip, Linkable
 {
     private FileDataHandler selfFile;
     protected LazyEntity<T> self;
+    public String getPrefix()
+    {
+        return PrefixFinder.findPrefix(self.getId());
+    }
 
     public BusinessEntity(String id, FileDataHandler selfFile)
     {

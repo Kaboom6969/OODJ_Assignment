@@ -16,6 +16,11 @@ public class DoctorToFile extends UserWithDetails implements ConvertToFileData
         super(id, name, password,email, gender, dateOfBirth, phoneNumber);
     }
 
+    public DoctorToFile(String id, String name, String password, String email, Gender gender, String dateOfBirth, String phoneNumber)
+    {
+        super(id, name, password, email, gender, dateOfBirth, phoneNumber);
+    }
+
     public DoctorToFile(String[] data)
     {
         super(data);

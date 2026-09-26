@@ -1,0 +1,138 @@
+﻿JFDML JFormDesigner: "8.3" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class org.jdesktop.layout.GroupLayout ) {
+			"$horizontalGroup": "par l {seq l {space :p:33:p, comp scrollPane1:::p:213:p, space u:::p, par l {comp cdLinkButton:::p::p, comp cdUnLinkButton:::p::p}, space s:::p, comp scrollPane2:::p:223:p, space u:::p, par l {comp fdLinkButton:::p::p, comp fdUnLinkButton:::p::p}, space u:::p, comp scrollPane3:::p:192:p, space ::14:x}}"
+			"$verticalGroup": "par l {seq {par l {seq {space :p:111:p, comp cdLinkButton:::p::p, space s:::p, comp cdUnLinkButton:::p::p}, seq l {space :p:110:p, comp fdLinkButton:::p::p, space s:::p, comp fdUnLinkButton:::p::p}}, space ::328:x}, seq t {space :0:27:x, par l {seq t {par t {comp scrollPane2:::p:473:p, comp scrollPane3:::p:473:p}, space :p:16:p}, seq t {comp scrollPane1:::p:473:p, space :p:25:p}}}}"
+		} ) {
+			name: "this"
+			add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+				name: "scrollPane1"
+				add( new FormComponent( "javax.swing.JTable" ) {
+					name: "consultationRateTable"
+					"model": new com.jformdesigner.model.SwingTableModel( new java.util.Vector {
+						add( new java.util.Vector {
+							add( null )
+							add( null )
+							add( null )
+						} )
+						add( new java.util.Vector {
+							add( null )
+							add( null )
+							add( null )
+						} )
+					}, new java.util.Vector {
+						add( "Id" )
+						add( "Name" )
+						add( "consultationRateObject" )
+					}, new java.util.Vector {
+						add( null )
+						add( null )
+						add( null )
+					}, new java.util.Vector {
+						add( null )
+						add( null )
+						add( null )
+					}, new java.util.Vector {
+						add( null )
+						add( null )
+						add( null )
+					} )
+				} )
+			} )
+			add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+				name: "scrollPane2"
+				add( new FormComponent( "javax.swing.JTable" ) {
+					name: "departmentTable"
+					"model": new com.jformdesigner.model.SwingTableModel( new java.util.Vector {
+						add( new java.util.Vector {
+							add( null )
+							add( null )
+							add( null )
+						} )
+						add( new java.util.Vector {
+							add( null )
+							add( null )
+							add( null )
+						} )
+					}, new java.util.Vector {
+						add( "Id" )
+						add( "Name" )
+						add( "departmentObject" )
+					}, new java.util.Vector {
+						add( null )
+						add( null )
+						add( null )
+					}, new java.util.Vector {
+						add( null )
+						add( null )
+						add( null )
+					}, new java.util.Vector {
+						add( null )
+						add( null )
+						add( null )
+					} )
+				} )
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "cdLinkButton"
+				"text": "Link"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "cdLink", true ) )
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "cdUnLinkButton"
+				"text": "Unlink"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "cdUnLink", true ) )
+			} )
+			add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+				name: "scrollPane3"
+				add( new FormComponent( "javax.swing.JTable" ) {
+					name: "facilityTable"
+					"model": new com.jformdesigner.model.SwingTableModel( new java.util.Vector {
+						add( new java.util.Vector {
+							add( null )
+							add( null )
+							add( null )
+						} )
+						add( new java.util.Vector {
+							add( null )
+							add( null )
+							add( null )
+						} )
+					}, new java.util.Vector {
+						add( "Id" )
+						add( "Name" )
+						add( "facilityObject" )
+					}, new java.util.Vector {
+						add( null )
+						add( null )
+						add( null )
+					}, new java.util.Vector {
+						add( null )
+						add( null )
+						add( null )
+					}, new java.util.Vector {
+						add( null )
+						add( null )
+						add( null )
+					} )
+				} )
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "fdLinkButton"
+				"text": "Link"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "fdLink", true ) )
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "fdUnLinkButton"
+				"text": "Unlink"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "fdUnLink", true ) )
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 885, 525 )
+		} )
+	}
+}

@@ -1,0 +1,85 @@
+﻿JFDML JFormDesigner: "8.3" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class org.jdesktop.layout.GroupLayout ) {
+			"$horizontalGroup": "par l {seq l {space :p:20:p, comp allUserScrollPanel:::p:709:p, space :p:30:p, par t {comp reloadUserButton:::p:84:p, comp approveButton:::p::p, comp rejectButton:::p::p}, space ::84:x}}"
+			"$verticalGroup": "par l {seq {par l {seq l {space :p:52:p, comp allUserScrollPanel:::p:425:p}, seq l {space :p:130:p, comp reloadUserButton:::p::p, space s:::p, comp approveButton:::p::p, space s:::p, comp rejectButton:::p::p}}, space ::83:x}}"
+		} ) {
+			name: "this"
+			add( new FormContainer( "javax.swing.JScrollPane", new FormLayoutManager( class javax.swing.JScrollPane ) ) {
+				name: "allUserScrollPanel"
+				add( new FormComponent( "javax.swing.JTable" ) {
+					name: "table"
+					"model": new com.jformdesigner.model.SwingTableModel( new java.util.Vector {
+						add( new java.util.Vector {
+							add( null )
+							add( null )
+							add( null )
+							add( "" )
+							add( null )
+							add( null )
+							add( null )
+							add( null )
+						} )
+					}, new java.util.Vector {
+						add( "Id" )
+						add( "Patient Name" )
+						add( "Doctor Name" )
+						add( "Assessment Type" )
+						add( "Requested At" )
+						add( "Status" )
+						add( "Result Count" )
+						add( "object" )
+					}, new java.util.Vector {
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+					}, new java.util.Vector {
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+					}, new java.util.Vector {
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+						add( null )
+					} )
+				} )
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "reloadUserButton"
+				"text": "Reload"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "reload", true ) )
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "approveButton"
+				"text": "Approve"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "approve", true ) )
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "rejectButton"
+				"text": "Reject"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "reject", true ) )
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 930, 560 )
+		} )
+	}
+}

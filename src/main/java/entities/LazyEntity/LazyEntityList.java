@@ -56,6 +56,11 @@ public class LazyEntityList<T extends BaseEntity & ConvertToFileData> implements
         }
     }
 
+    public boolean isEmpty()
+    {
+        return lazyEntityList.isEmpty();
+    }
+
     public List<String> getIds()
     {
         List<String> ids = new ArrayList<>();

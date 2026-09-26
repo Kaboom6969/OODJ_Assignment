@@ -1,0 +1,42 @@
+﻿JFDML JFormDesigner: "8.3" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormWindow( "javax.swing.JDialog", new FormLayoutManager( class org.jdesktop.layout.GroupLayout ) {
+			"$horizontalGroup": "par l {seq {par l {seq l {space :p:37:p, par t {comp isAcceptedLabel:::p::p, comp coveragePercentagesLabel:::p::p, comp companyNameLabel:::p::p}, space s:::p, par l {comp companyNameTextField:::p:185:p, comp coveragePercentagesTextField:::p:185:p, comp isAcceptedComboBox::l:p::p}}, seq l {space :p:163:p, comp actionButton:::p::p}}, space ::56:x}}"
+			"$verticalGroup": "par l {seq l {space :p:61:p, par b {comp companyNameLabel::b:p::p, comp companyNameTextField::b:p::p}, space u:::p, par l {comp coveragePercentagesLabel:::p::p, comp coveragePercentagesTextField:::p::p}, space :p:12:p, par l {comp isAcceptedLabel:::p::p, comp isAcceptedComboBox:::p::p}, space u:::p, comp actionButton:::p::p, space ::51:x}}"
+		} ) {
+			name: "this"
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "companyNameLabel"
+				"text": "Company Name:"
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "coveragePercentagesLabel"
+				"text": "Coverage Percentages:"
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "isAcceptedLabel"
+				"text": "Is Accepted:"
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "companyNameTextField"
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "coveragePercentagesTextField"
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "actionButton"
+				"text": "Action"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "action", true ) )
+			} )
+			add( new FormComponent( "javax.swing.JComboBox" ) {
+				name: "isAcceptedComboBox"
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 445, 315 )
+		} )
+	}
+}
