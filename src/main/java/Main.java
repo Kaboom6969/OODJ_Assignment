@@ -11,7 +11,7 @@ void main() throws UnsupportedLookAndFeelException, ClassNotFoundException, Inst
 
     try
     {
-        UIManager.setLookAndFeel("com.formdev.flatlaf.FlatIntelliJLaf");
+        UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
     } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e)
     {
         try
