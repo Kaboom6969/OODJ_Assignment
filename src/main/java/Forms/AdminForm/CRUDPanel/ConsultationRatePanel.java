@@ -5,11 +5,9 @@
 package Forms.AdminForm.CRUDPanel;
 
 import Forms.AdminForm.CRUDDialog.ConsultationRateDialog;
-import Forms.AdminForm.CRUDDialog.FacilityDialog;
 import Interfaces.RefreshablePanel;
 import Operations.AdminOperation.AdminOperation;
 import entities.BusinessEntity.ConsultationRate;
-import entities.BusinessEntity.Facility;
 
 import java.awt.*;
 import java.awt.event.*;

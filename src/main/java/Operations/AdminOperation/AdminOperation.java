@@ -3,8 +3,6 @@ package Operations.AdminOperation;
 import Exceptions.EntityExceptions.EntityNotFoundException;
 import Exceptions.EntityExceptions.EntityNotMatchException;
 import Interfaces.ConvertToFileData;
-import Interfaces.Linkable;
-import Interfaces.OwnerShip;
 import Tools.EntityConvertManager;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.*;
@@ -163,6 +161,10 @@ public class AdminOperation
         return hospitalEntityAllocator.getAllBusinessEntities(ConsultationRateToFile.PREFIX);
     }
 
+    public List<Patient> getAllPatients()
+    {
+        return hospitalEntityAllocator.getAllBusinessEntities(PatientToFile.PREFIX);
+    }
     public List<Doctor> getAllDoctors()
     {
         return hospitalEntityAllocator.getAllBusinessEntities(DoctorToFile.PREFIX);
@@ -171,6 +173,35 @@ public class AdminOperation
     public List<MedicalManager> getAllMedicalManagers()
     {
         return hospitalEntityAllocator.getAllBusinessEntities(MedicalManagerToFile.PREFIX);
+    }
+    public CRUDInformation allocateInsuranceToPatient(Insurance insurance,Patient patient)
+    {
+        try
+        {
+            patient.setInsurance(insurance.getSelf());
+            hospitalEntityAllocator.saveChanges(patient);
+            return (new CRUDInformation(true, "Success to allocate insurance to patient"));
+        } catch (RuntimeException e)
+        {
+            return failure(e);
+        }
+    }
+
+    public CRUDInformation unallocatedInsuranceToPatient(Insurance insurance,Patient patient)
+    {
+        try
+        {
+            if (!patient.getInsurance().getId().equals(insurance.getId()))
+            {
+                return new CRUDInformation(false, "Insurance is not the original consultation rate's insurance");
+            }
+            patient.setInsurance(null);
+            hospitalEntityAllocator.saveChanges(patient);
+            return (new CRUDInformation(true, "Success to unallocated insurance to patient"));
+        }  catch (RuntimeException e)
+        {
+            return failure(e);
+        }
     }
     public CRUDInformation allocateConsultationRateToDepartment(ConsultationRate consultationRate,Department department)
     {

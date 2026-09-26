@@ -4,7 +4,9 @@
 
 package Forms.AdminForm;
 
-import Forms.AdminForm.CRUDPanel.*;import Forms.AdminForm.LinkPanel.AllocateConsultationRateAndFacilityToDepartment;import Forms.AdminForm.LinkPanel.AllocateDoctorToMedicalManagerPanel;import Interfaces.RefreshablePanel;import Operations.AdminOperation.AdminOperation;
+import Forms.AdminForm.CRUDPanel.*;import Forms.AdminForm.LinkPanel.AllocateConsultationRateAndFacilityToDepartment;import Forms.AdminForm.LinkPanel.AllocateDoctorToMedicalManagerPanel;
+import Forms.AdminForm.LinkPanel.AllocateInsuranceToPatientPanel;
+import Interfaces.RefreshablePanel;import Operations.AdminOperation.AdminOperation;
 import Tools.EntityConvertManager;
 import Tools.HospitalEntityAllocator;
 import Tools.PrefixHandler.PrefixFinder;
@@ -37,6 +39,7 @@ public class AdminForm extends JFrame {
         adminTab.add(new MedicalRequestPanel(this,adminOperation),"Medical Request Panel");
         adminTab.add(new AllocateDoctorToMedicalManagerPanel(adminOperation),"Allocate Doctor To Medical Manager Panel");
         adminTab.add(new AllocateConsultationRateAndFacilityToDepartment(adminOperation),"Allocate Consultation Rate And Facility To Department Panel");
+        adminTab.add(new AllocateInsuranceToPatientPanel(adminOperation),"Allocate Insurance To Patient Panel");
         adminTab.addChangeListener(e ->
         {
             if (adminTab.getSelectedComponent() instanceof RefreshablePanel rp)

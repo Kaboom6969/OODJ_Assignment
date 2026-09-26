@@ -9,11 +9,7 @@ import java.awt.event.*;
 import Forms.ComboBoxItem;
 import Operations.AdminOperation.AdminOperation;
 import entities.BaseEntity.ConsultationRateToFile;
-import entities.BaseEntity.FacilityToFile;
-import entities.BaseEntity.InsuranceToFile;
 import entities.BusinessEntity.ConsultationRate;
-import entities.BusinessEntity.Facility;
-import entities.BusinessEntity.Insurance;
 
 import java.awt.*;
 import java.util.ArrayList;

@@ -1,6 +1,5 @@
 package entities.BusinessEntity;
 
-import Exceptions.LinkerExceptions.LinkerRequireOneOnlyException;
 import Interfaces.Linkable;
 import Interfaces.OwnEntities;
 import Interfaces.OwnEntity;
@@ -9,13 +8,11 @@ import Tools.FileHandler.FileDataHandler;
 import entities.BaseEntity.BillToFile;
 import entities.BaseEntity.ConsultationRateToFile;
 import entities.BaseEntity.DepartmentToFile;
-import entities.BaseEntity.MedicalRecordToFile;
 import entities.LazyEntity.LazyEntity;
 import entities.LazyEntity.LazyEntityList;
 import entities.Linker.LinkerManager;
 
 import java.util.HashMap;
-import java.util.List;
 
 public class ConsultationRate extends BusinessEntity<ConsultationRateToFile> implements OwnEntity, OwnEntities, Linkable
 {
