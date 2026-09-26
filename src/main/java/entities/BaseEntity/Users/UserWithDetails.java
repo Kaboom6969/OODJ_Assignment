@@ -30,6 +30,8 @@ public abstract class UserWithDetails extends User
     public void setPhoneNumber(String phoneNumber)
     {
         if (phoneNumber == null || phoneNumber.isBlank()) throw new IllegalArgumentException("Phone number cannot be null or blank");
+        if (phoneNumber.contains("|") || phoneNumber.contains("\n") || phoneNumber.contains("\r"))
+            throw new IllegalArgumentException("Phone number cannot contain | or line breaks");
         String cleaned = phoneNumber.replace(" ", "").replace("-", "");
         if (cleaned.startsWith("+60"))
         {
@@ -59,33 +61,36 @@ public abstract class UserWithDetails extends User
     public UserWithDetails(String id,String name,String password,String email,Gender gender,LocalDate dateOfBirth,String phoneNumber)
     {
         super(id,name,password,email);
-        this.gender = gender;
-        this.dateOfBirth = dateOfBirth;
+        setGender(gender);
+        setDateOfBirth(dateOfBirth);
         setPhoneNumber(phoneNumber);
     }
 
     public UserWithDetails(String id, String name, String password,String email, Gender gender, String dateOfBirth,  String phoneNumber)
     {
         super(id, name, password, email);
-        this.gender = gender;
-        this.dateOfBirth = LocalDate.parse(dateOfBirth, LocalDateParser.getDateFormatterAuto(dateOfBirth));
+        setGender(gender);
+        setDateOfBirth(LocalDate.parse(dateOfBirth, LocalDateParser.getDateFormatterAuto(dateOfBirth)));
         setPhoneNumber(phoneNumber);
     }
     public UserWithDetails(String[] data)
     {
         super(data);
-        this.gender = Gender.valueOf(data[4].toUpperCase().trim());
-        this.dateOfBirth = LocalDate.parse(data[5],LocalDateParser.getDateFormatterAuto(data[5]));
+        setGender(Gender.valueOf(data[4].toUpperCase().trim()));
+        setDateOfBirth(LocalDate.parse(data[5],LocalDateParser.getDateFormatterAuto(data[5])));
         setPhoneNumber(data[6]);
     }
 
     public void setDateOfBirth(LocalDate dateOfBirth)
     {
+        if (dateOfBirth == null) throw new IllegalArgumentException("Date of birth cannot be null");
+        if (dateOfBirth.isAfter(LocalDate.now())) throw new IllegalArgumentException("Date of birth cannot be in the future");
         this.dateOfBirth = dateOfBirth;
     }
 
     public void setGender(Gender gender)
     {
+        if (gender == null) throw new IllegalArgumentException("Gender cannot be null");
         this.gender = gender;
     }
     @Override

@@ -35,16 +35,18 @@ public abstract class User extends BaseEntity
     public String getPassword() {return password;}
     public void setName(String name)
     {
-        if (name == null || name.isEmpty()) throw new IllegalArgumentException("Name cannot be null or empty");
-        if (name.contains("|")) throw new IllegalArgumentException("Name cannot contain |");
+        if (name == null || name.isBlank()) throw new IllegalArgumentException("Name cannot be null or empty");
+        if (containsFileDelimiterOrLineBreak(name))
+            throw new IllegalArgumentException("Name cannot contain | or line breaks");
         this.name = name;
     }
 
     public void setPassword(String password)
     {
         if (password == null || password.isEmpty()) throw new IllegalArgumentException("Password cannot be null or empty");
-        if (password.contains("|")) throw new IllegalArgumentException("Password cannot contain |");
-        if (password.length() < 6) throw new IllegalArgumentException("Password length must be at least 8 characters");
+        if (containsFileDelimiterOrLineBreak(password))
+            throw new IllegalArgumentException("Password cannot contain | or line breaks");
+        if (password.length() < 6) throw new IllegalArgumentException("Password length must be at least 6 characters");
         if (password.chars().noneMatch(Character::isDigit)) throw new IllegalArgumentException("Password must contains digits");
         if (password.chars().noneMatch(Character::isLetter)) throw new IllegalArgumentException("Password must contains letters");
         if (password.chars().noneMatch(Character::isUpperCase)) throw new IllegalArgumentException("Password must contains uppercase letters");
@@ -55,8 +57,9 @@ public abstract class User extends BaseEntity
 
     public void setEmail(String email)
     {
-        if (email.contains("|")) throw new IllegalArgumentException("Email cannot contain |");
         if (email == null || email.isBlank()) throw new IllegalArgumentException("Email cannot be null or empty");
+        if (containsFileDelimiterOrLineBreak(email))
+            throw new IllegalArgumentException("Email cannot contain | or line breaks");
         int atIndex = email.indexOf('@');
         if (atIndex <= 0 || atIndex == email.length() - 1) throw new IllegalArgumentException("Email format is invalid");
         if (email.indexOf('@', atIndex + 1) != -1) throw new IllegalArgumentException("Email format is invalid");
@@ -66,6 +69,11 @@ public abstract class User extends BaseEntity
         if (dotIndex <= 0 || dotIndex == domainPart.length() - 1) throw new IllegalArgumentException("Email format is invalid");
         if (email.contains(" ")) throw new IllegalArgumentException("Email cannot contain spaces");
         this.email = email;
+    }
+
+    private static boolean containsFileDelimiterOrLineBreak(String value)
+    {
+        return value.contains("|") || value.contains("\n") || value.contains("\r");
     }
     @Override
     public boolean equals(Object o)
