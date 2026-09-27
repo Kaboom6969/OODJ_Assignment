@@ -485,13 +485,3 @@ public class HospitalEntityAllocator
 
 
 }
-class EntityFile
-{
-    public FileDataHandler mainFile;
-    public final String prefix;
-
-    public EntityFile(String prefix)
-    {
-        this.prefix = prefix;
-    }
-}

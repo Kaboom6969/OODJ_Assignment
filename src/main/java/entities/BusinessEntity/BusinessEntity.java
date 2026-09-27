@@ -11,7 +11,6 @@ import entities.LazyEntity.LazyEntity;
 
 public abstract class BusinessEntity<T extends BaseEntity & ConvertToFileData> implements OwnerShip, Linkable
 {
-    private FileDataHandler selfFile;
     protected LazyEntity<T> self;
     public String getPrefix()
     {
