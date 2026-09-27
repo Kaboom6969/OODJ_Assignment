@@ -3,8 +3,6 @@ package Forms.DoctorForm;
 import Forms.BaseFrame;
 import Tools.HospitalEntityAllocator;
 import entities.BusinessEntity.Doctor;
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
 
 public class DoctorPanelTest extends BaseFrame
 {

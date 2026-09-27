@@ -2,8 +2,6 @@ package entities.Linker;
 
 import Exceptions.IdPrefixExceptions.IdPrefixReapeatedException;
 import Exceptions.LinkerExceptions.LinkerException;
-import Exceptions.LinkerExceptions.LinkerNotFoundException;
-import Tools.FileHandler.FileDataHandler;
 import Tools.PrefixHandler.PrefixFinder;
 
 import java.util.Objects;

@@ -16,8 +16,8 @@ import java.util.HashMap;
 
 public class Patient extends BusinessEntity<PatientToFile> implements OwnEntity, OwnEntities, Linkable
 {
-    private LazyEntity<InsuranceToFile> insurance;
-    private LazyEntityList<AppointmentToFile> appointments;
+    private final LazyEntity<InsuranceToFile> insurance;
+    private final LazyEntityList<AppointmentToFile> appointments;
 
     public InsuranceToFile getInsurance()
     {

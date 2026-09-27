@@ -6,7 +6,6 @@ import Interfaces.OwnEntity;
 import Tools.EntityHandler;
 import Tools.FileHandler.FileDataHandler;
 import entities.BaseEntity.AppointmentToFile;
-import entities.BaseEntity.DepartmentToFile;
 import entities.BaseEntity.FeedbackToFile;
 import entities.LazyEntity.LazyEntity;
 import entities.Linker.LinkerManager;
@@ -16,7 +15,7 @@ import java.util.List;
 
 public class Feedback extends BusinessEntity<FeedbackToFile> implements OwnEntity, Linkable
 {
-    private LazyEntity<AppointmentToFile> appointment;
+    private final LazyEntity<AppointmentToFile> appointment;
 
     public AppointmentToFile getAppointment()
     {

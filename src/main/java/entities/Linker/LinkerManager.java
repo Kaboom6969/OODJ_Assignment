@@ -34,7 +34,7 @@ public class LinkerManager implements ConvertToFileData
 
     private Class<? extends BaseEntity> classFirst;
     private Class<? extends BaseEntity> classSecond;
-    private List<Linker> linkers;
+    private final List<Linker> linkers;
 
     public List<Linker> getLinkers()
     {

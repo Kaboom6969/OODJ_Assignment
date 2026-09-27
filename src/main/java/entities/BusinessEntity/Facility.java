@@ -1,6 +1,5 @@
 package entities.BusinessEntity;
 
-import Exceptions.LinkerExceptions.LinkerRequireOneOnlyException;
 import Interfaces.Linkable;
 import Interfaces.OwnEntities;
 import Interfaces.OwnEntity;
@@ -9,18 +8,16 @@ import Tools.FileHandler.FileDataHandler;
 import entities.BaseEntity.AppointmentToFile;
 import entities.BaseEntity.DepartmentToFile;
 import entities.BaseEntity.FacilityToFile;
-import entities.BaseEntity.Users.DoctorToFile;
 import entities.LazyEntity.LazyEntity;
 import entities.LazyEntity.LazyEntityList;
 import entities.Linker.LinkerManager;
 
 import java.util.HashMap;
-import java.util.List;
 
 public class Facility extends BusinessEntity<FacilityToFile> implements OwnEntity, OwnEntities, Linkable
 {
-    private LazyEntity<DepartmentToFile> belongsToDepartment;
-    private LazyEntityList<AppointmentToFile> appointments;
+    private final LazyEntity<DepartmentToFile> belongsToDepartment;
+    private final LazyEntityList<AppointmentToFile> appointments;
 
     public DepartmentToFile getBelongsToDepartment()
     {

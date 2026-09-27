@@ -1,7 +1,6 @@
 package Tools.LinkerHandlers;
 
 import Tools.EntityConvertManager;
-import Tools.FileHandler.FileDataHandler;
 import Tools.PrefixHandler.PrefixFinder;
 import entities.BaseEntity.BaseEntity;
 import entities.Linker.Linker;

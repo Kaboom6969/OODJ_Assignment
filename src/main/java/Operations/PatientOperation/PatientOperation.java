@@ -7,8 +7,9 @@ import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.AppointmentToFile;
 import entities.BaseEntity.AppointmentToFile.AppointmentStatus;
 import entities.BaseEntity.BillToFile;
-import entities.BaseEntity.FeedbackToFile;
+import entities.BaseEntity.DepartmentToFile;
 import entities.BaseEntity.FacilityToFile;
+import entities.BaseEntity.FeedbackToFile;
 import entities.BaseEntity.InsuranceToFile;
 import entities.BaseEntity.MedicalRecordToFile;
 import entities.BaseEntity.PrescriptionToFile;
@@ -16,12 +17,11 @@ import entities.BaseEntity.Users.DoctorToFile;
 import entities.BaseEntity.Users.PatientToFile;
 import entities.BaseEntity.Users.UserWithDetails;
 import entities.BusinessEntity.Appointment;
+import entities.BusinessEntity.Department;
 import entities.BusinessEntity.Doctor;
 import entities.BusinessEntity.Facility;
 import entities.BusinessEntity.MedicalRecord;
 import entities.BusinessEntity.Patient;
-import entities.BusinessEntity.Department;
-import entities.BaseEntity.DepartmentToFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -40,7 +40,7 @@ public class PatientOperation implements PatientService
     private static final long SLOT_DURATION_MINUTES = 30;
     // allocator is a HospitalEntityAllocator object responsible for loading and saving hospital data.
     private final HospitalEntityAllocator allocator;
-    private Patient patient;
+    private final Patient patient;
 
     // 1. Creates patient operations for the supplied allocator and logged-in patient.
     public PatientOperation(HospitalEntityAllocator allocator, Patient patient)

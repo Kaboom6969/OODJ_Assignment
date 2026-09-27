@@ -8,10 +8,10 @@ public class MedicalRecordToFile extends BaseEntity implements ConvertToFileData
 {
     public static final String PREFIX = "MR";
 
-    private double temperature;
-    private int heartRate;
-    private int systolicPressure;
-    private int diastolicPressure;
+    private final double temperature;
+    private final int heartRate;
+    private final int systolicPressure;
+    private final int diastolicPressure;
     private String diagnosis;
     private String consultationNote;
 

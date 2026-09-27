@@ -16,8 +16,8 @@ import java.util.HashMap;
 
 public class ConsultationRate extends BusinessEntity<ConsultationRateToFile> implements OwnEntity, OwnEntities, Linkable
 {
-    private LazyEntity<DepartmentToFile> belongsToDepartment;
-    private LazyEntityList<BillToFile> bills;
+    private final LazyEntity<DepartmentToFile> belongsToDepartment;
+    private final LazyEntityList<BillToFile> bills;
 
     public DepartmentToFile getBelongsToDepartment()
     {

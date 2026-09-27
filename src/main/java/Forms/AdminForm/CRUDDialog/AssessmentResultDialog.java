@@ -10,13 +10,12 @@ import entities.BaseEntity.MedicalRequestToFile;
 import entities.BusinessEntity.AssessmentResult;
 import entities.BusinessEntity.MedicalRequest;
 
+import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.*;
-import javax.swing.GroupLayout;
 
 /**
  * @author leezh

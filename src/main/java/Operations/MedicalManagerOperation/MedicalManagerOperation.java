@@ -3,11 +3,24 @@ package Operations.MedicalManagerOperation;
 import Exceptions.EntityExceptions.EntityNotFoundException;
 import Exceptions.EntityExceptions.EntityNotMatchException;
 import Tools.HospitalEntityAllocator;
-import entities.BaseEntity.*;
+import entities.BaseEntity.AppointmentToFile;
+import entities.BaseEntity.BillToFile;
+import entities.BaseEntity.ConsultationRateToFile;
+import entities.BaseEntity.DepartmentToFile;
+import entities.BaseEntity.DoctorShiftToFile;
+import entities.BaseEntity.FacilityToFile;
+import entities.BaseEntity.FeedbackToFile;
 import entities.BaseEntity.Users.DoctorToFile;
 import entities.BaseEntity.Users.MedicalManagerToFile;
 import entities.BaseEntity.Users.UserWithDetails;
-import entities.BusinessEntity.*;
+import entities.BusinessEntity.Appointment;
+import entities.BusinessEntity.Bill;
+import entities.BusinessEntity.ConsultationRate;
+import entities.BusinessEntity.Department;
+import entities.BusinessEntity.Doctor;
+import entities.BusinessEntity.DoctorShift;
+import entities.BusinessEntity.Facility;
+import entities.BusinessEntity.MedicalManager;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -26,7 +39,7 @@ public class MedicalManagerOperation {
 
     // Store allocator reference instead of direct FileDataHandler
     private final HospitalEntityAllocator allocator;
-    private MedicalManager medicalManager;
+    private final MedicalManager medicalManager;
 
     // Constructor to inject the allocator
     public MedicalManagerOperation(HospitalEntityAllocator allocator, MedicalManager medicalManager) {

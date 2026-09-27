@@ -4,27 +4,27 @@
 
 package Forms.LoginForm;
 
-import java.awt.event.*;
-
 import Forms.AdminForm.AdminForm;
 import Forms.BaseFrame;
-import Forms.DoctorForm.DoctorPanel;
 import Forms.DoctorForm.DoctorPanelTest;
 import Forms.MedicalManagerForm.MedicalManagerForm;
 import Forms.PatientForm.PatientForm;
 import Operations.LoginOperation.LoginOperation;
-import Tools.EntityConvertManager;
 import Tools.HospitalEntityAllocator;
-import Tools.PrefixHandler.PrefixFinder;
-import entities.BaseEntity.Users.*;
+import entities.BaseEntity.Users.AdminToFile;
+import entities.BaseEntity.Users.DoctorToFile;
+import entities.BaseEntity.Users.MedicalManagerToFile;
+import entities.BaseEntity.Users.PatientToFile;
+import entities.BaseEntity.Users.User;
 import entities.BusinessEntity.Admin;
 import entities.BusinessEntity.Doctor;
 import entities.BusinessEntity.MedicalManager;
 import entities.BusinessEntity.Patient;
 
 import javax.swing.*;
-import javax.swing.GroupLayout;
-import java.nio.file.Path;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Map;
 
 /**
@@ -40,8 +40,8 @@ public class LoginForm extends BaseFrame
             "Doctor", DoctorToFile.class,
             "Patient", PatientToFile.class
     );
-    private HospitalEntityAllocator hospitalEntityAllocator;
-    private LoginOperation loginOperation;
+    private final HospitalEntityAllocator hospitalEntityAllocator;
+    private final LoginOperation loginOperation;
     public LoginForm(HospitalEntityAllocator hospitalEntityAllocator)
     {
         this.hospitalEntityAllocator = hospitalEntityAllocator;

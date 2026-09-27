@@ -1,14 +1,8 @@
-import Exceptions.EntityExceptions.EntityNotFoundException;
-import Exceptions.EntityExceptions.EntityNotMatchException;
-import Exceptions.EntityExceptions.EntityRepeatedException;
-import Forms.AdminForm.AdminForm;
 import Forms.LoginForm.LoginForm;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.BaseEntity;
 
 import javax.swing.*;
-import java.nio.file.Path;
-
 
 
 void main() throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException

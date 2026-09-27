@@ -4,8 +4,6 @@
 
 package Forms.AdminForm.LinkPanel;
 
-import java.awt.event.*;
-
 import Interfaces.RefreshablePanel;
 import Operations.AdminOperation.AdminOperation;
 import entities.BaseEntity.Users.MedicalManagerToFile;
@@ -14,18 +12,25 @@ import entities.BusinessEntity.BusinessEntity;
 import entities.BusinessEntity.Doctor;
 import entities.BusinessEntity.MedicalManager;
 
-import java.awt.*;
-import java.util.*;
-import java.util.List;
 import javax.swing.*;
-import javax.swing.table.*;import static Forms.AdminForm.FrameHelper.getObjectFromCurrentSelectedRow;import static Forms.AdminForm.FrameHelper.getObjectFromRow;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+
+import static Forms.AdminForm.FrameHelper.getObjectFromCurrentSelectedRow;
+import static Forms.AdminForm.FrameHelper.getObjectFromRow;
 
 /**
  * @author leezh
  */
 public class AllocateDoctorToMedicalManagerPanel extends JPanel implements RefreshablePanel
 {
-    private AdminOperation adminOperation;
+    private final AdminOperation adminOperation;
     @Override
     public void refreshData()
     {
@@ -280,8 +285,8 @@ public class AllocateDoctorToMedicalManagerPanel extends JPanel implements Refre
 
     private ADTMStatus adtmStatus;
 
-    private HashMap<JTable, List<ColorStatus>> colorMap = new HashMap<>();
-    private HashMap<JTable, HashSet<String>> banMap = new HashMap<>();
+    private final HashMap<JTable, List<ColorStatus>> colorMap = new HashMap<>();
+    private final HashMap<JTable, HashSet<String>> banMap = new HashMap<>();
     private int lastSelectedDoctor = -1;
     private int lastSelectedMedicalManager = -1;
     private boolean recursion_defenser = false;

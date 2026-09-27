@@ -7,14 +7,19 @@ import Tools.EntityHandler;
 import Tools.FileHandler.FileDataHandler;
 import entities.BaseEntity.BaseEntity;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Spliterator;
 import java.util.function.Consumer;
 
 public class LazyEntityList<T extends BaseEntity & ConvertToFileData> implements Iterable<T>
 {
-    private List<LazyEntity<T>> lazyEntityList;
+    private final List<LazyEntity<T>> lazyEntityList;
 
-    private EntityHandler entityHandler;
+    private final EntityHandler entityHandler;
     private record RepeatReport (boolean isRepeated,List<List<Integer>> RepeatedIdIndex){}
 
 

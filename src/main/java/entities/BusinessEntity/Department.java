@@ -3,25 +3,21 @@ package entities.BusinessEntity;
 import Interfaces.Linkable;
 import Interfaces.OwnEntities;
 import Tools.EntityHandler;
-import entities.BaseEntity.BaseEntity;
-import entities.BaseEntity.ConsultationRateToFile;
-import entities.BaseEntity.FacilityToFile;
-import entities.LazyEntity.LazyEntityList;
 import Tools.FileHandler.FileDataHandler;
+import entities.BaseEntity.ConsultationRateToFile;
 import entities.BaseEntity.DepartmentToFile;
+import entities.BaseEntity.FacilityToFile;
 import entities.BaseEntity.Users.DoctorToFile;
-import entities.Linker.Linker;
+import entities.LazyEntity.LazyEntityList;
 import entities.Linker.LinkerManager;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public class Department extends BusinessEntity<DepartmentToFile> implements OwnEntities,Linkable
 {
-    private LazyEntityList<DoctorToFile> doctors;
-    private LazyEntityList<FacilityToFile> facilities;
-    private LazyEntityList<ConsultationRateToFile> consultations;
+    private final LazyEntityList<DoctorToFile> doctors;
+    private final LazyEntityList<FacilityToFile> facilities;
+    private final LazyEntityList<ConsultationRateToFile> consultations;
 
     public LazyEntityList<DoctorToFile> getDoctors()
     {

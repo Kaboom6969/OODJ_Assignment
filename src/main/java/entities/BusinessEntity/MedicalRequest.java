@@ -6,7 +6,10 @@ import Interfaces.OwnEntities;
 import Interfaces.OwnEntity;
 import Tools.EntityHandler;
 import Tools.FileHandler.FileDataHandler;
-import entities.BaseEntity.*;
+import entities.BaseEntity.AssessmentResultToFile;
+import entities.BaseEntity.AssessmentTypeToFile;
+import entities.BaseEntity.MedicalRecordToFile;
+import entities.BaseEntity.MedicalRequestToFile;
 import entities.LazyEntity.LazyEntity;
 import entities.LazyEntity.LazyEntityList;
 import entities.Linker.LinkerManager;
@@ -16,9 +19,9 @@ import java.util.List;
 
 public class MedicalRequest extends BusinessEntity<MedicalRequestToFile> implements OwnEntity, OwnEntities, Linkable
 {
-    private LazyEntity<MedicalRecordToFile> medicalRecord;
-    private LazyEntity<AssessmentTypeToFile> assessmentType;
-    private LazyEntityList<AssessmentResultToFile> assessmentResults;
+    private final LazyEntity<MedicalRecordToFile> medicalRecord;
+    private final LazyEntity<AssessmentTypeToFile> assessmentType;
+    private final LazyEntityList<AssessmentResultToFile> assessmentResults;
 
     public MedicalRecordToFile getMedicalRecord()
     {

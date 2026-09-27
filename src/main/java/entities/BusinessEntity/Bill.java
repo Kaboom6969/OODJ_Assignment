@@ -5,7 +5,10 @@ import Interfaces.Linkable;
 import Interfaces.OwnEntity;
 import Tools.EntityHandler;
 import Tools.FileHandler.FileDataHandler;
-import entities.BaseEntity.*;
+import entities.BaseEntity.BillToFile;
+import entities.BaseEntity.ConsultationRateToFile;
+import entities.BaseEntity.InsuranceToFile;
+import entities.BaseEntity.MedicalRecordToFile;
 import entities.LazyEntity.LazyEntity;
 import entities.Linker.LinkerManager;
 
@@ -14,9 +17,9 @@ import java.util.List;
 
 public class Bill extends BusinessEntity<BillToFile> implements OwnEntity, Linkable
 {
-    private LazyEntity<MedicalRecordToFile> medicalRecord;
-    private LazyEntity<InsuranceToFile> insurance;
-    private LazyEntity<ConsultationRateToFile> consultationRate;
+    private final LazyEntity<MedicalRecordToFile> medicalRecord;
+    private final LazyEntity<InsuranceToFile> insurance;
+    private final LazyEntity<ConsultationRateToFile> consultationRate;
 
     public MedicalRecordToFile getMedicalRecord()
     {

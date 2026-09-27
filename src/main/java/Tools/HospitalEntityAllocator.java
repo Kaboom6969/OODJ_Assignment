@@ -5,15 +5,16 @@ import Exceptions.EntityExceptions.EntityNotFoundException;
 import Exceptions.EntityExceptions.EntityNotMatchException;
 import Exceptions.EntityExceptions.EntityRepeatedException;
 import Exceptions.IdPrefixExceptions.IdPrefixNotFoundException;
-import Interfaces.*;
+import Interfaces.ConvertToFileData;
+import Interfaces.Linkable;
+import Interfaces.OwnEntities;
+import Interfaces.OwnEntity;
+import Interfaces.OwnerShip;
 import Tools.FileHandler.FileDataHandler;
 import Tools.LinkerHandlers.LinkerHandler;
 import Tools.PrefixHandler.PrefixFinder;
-import entities.BaseEntity.*;
-import entities.BaseEntity.Users.DoctorToFile;
+import entities.BaseEntity.BaseEntity;
 import entities.BusinessEntity.BusinessEntity;
-import entities.BusinessEntity.Department;
-import entities.BusinessEntity.Doctor;
 import entities.LazyEntity.LazyEntity;
 import entities.LazyEntity.LazyEntityList;
 import entities.Linker.Linker;
@@ -23,14 +24,18 @@ import javax.naming.OperationNotSupportedException;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class HospitalEntityAllocator
 {
     public record FilePrefixMatchRecord(boolean isAllMatch,String propertiesName){}
-    private Map<String, FileDataHandler> prefixFileMap;
-    private Path linkerDirectory;
-    private Path entityDirectory;
+    private final Map<String, FileDataHandler> prefixFileMap;
+    private final Path linkerDirectory;
+    private final Path entityDirectory;
 
     public HospitalEntityAllocator(Path linkerDirectory,Path entityDirectory)
     {
