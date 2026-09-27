@@ -7,13 +7,20 @@ package Forms.AdminForm.CRUDDialog;
 import Forms.ComboBoxItem;
 import Operations.AdminOperation.AdminOperation;
 import entities.BaseEntity.InsuranceToFile;
+import entities.BaseEntity.Users.AdminToFile;
+import entities.BaseEntity.Users.User;
+import entities.BaseEntity.Users.UserWithDetails;
+import entities.BusinessEntity.BusinessEntity;
 import entities.BusinessEntity.Insurance;
 
-import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
+import java.awt.event.*;
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import javax.swing.*;
+import javax.swing.GroupLayout;
 
 /**
  * @author leezh
@@ -24,7 +31,7 @@ public class InsuranceDialog extends JDialog {
     {
         ADD,MODIFY
     }
-    private final Modes mode;
+    private Modes mode;
     private String id = null;
     public InsuranceDialog(Window owner,AdminOperation adminOperation)
     {

@@ -13,7 +13,7 @@ import java.util.HashMap;
 
 public class MedicalManager extends BusinessEntity<MedicalManagerToFile> implements OwnEntities, Linkable
 {
-    private final LazyEntityList<DoctorToFile> doctors;
+    private LazyEntityList<DoctorToFile> doctors;
 
     public LazyEntityList<DoctorToFile> getDoctors()
     {

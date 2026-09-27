@@ -4,25 +4,29 @@
 
 package Forms.AdminForm;
 
-import Forms.AdminForm.CRUDPanel.*;
-import Forms.AdminForm.LinkPanel.AllocateConsultationRateAndFacilityToDepartment;
-import Forms.AdminForm.LinkPanel.AllocateDoctorToMedicalManagerPanel;
+import java.awt.event.*;
+import Forms.AdminForm.CRUDPanel.*;import Forms.AdminForm.LinkPanel.AllocateConsultationRateAndFacilityToDepartment;import Forms.AdminForm.LinkPanel.AllocateDoctorToMedicalManagerPanel;
 import Forms.AdminForm.LinkPanel.AllocateInsuranceToPatientPanel;
 import Forms.BaseFrame;
-import Interfaces.RefreshablePanel;
-import Operations.AdminOperation.AdminOperation;
+import Interfaces.RefreshablePanel;import Operations.AdminOperation.AdminOperation;
+import Tools.EntityConvertManager;
 import Tools.HospitalEntityAllocator;
+import Tools.PrefixHandler.PrefixFinder;
+import entities.BaseEntity.Users.User;
+import entities.BaseEntity.Users.UserWithDetails;
 import entities.BusinessEntity.Admin;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
+import javax.swing.GroupLayout;
+import javax.swing.table.*;
+import java.util.List;
 
 /**
  * @author leezh
  */
 public class AdminForm extends BaseFrame
 {
-    private final AdminOperation adminOperation;
+    private AdminOperation adminOperation;
 
 
 

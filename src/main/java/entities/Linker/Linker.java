@@ -2,10 +2,17 @@ package entities.Linker;
 
 import Exceptions.IdPrefixExceptions.IdPrefixReapeatedException;
 import Exceptions.LinkerExceptions.LinkerException;
+import Exceptions.LinkerExceptions.LinkerNotFoundException;
+import Tools.FileHandler.FileDataHandler;
 import Tools.PrefixHandler.PrefixFinder;
 
-public record Linker(String first, String second)
+import java.util.Objects;
+
+public class Linker
 {
+    public final String first;
+    public final String second;
+
     public String getData(LinkerManager.KeyLocation keyLocation)
     {
         switch (keyLocation)
@@ -18,7 +25,6 @@ public record Linker(String first, String second)
                 throw new LinkerException("Cannot find the data");
         }
     }
-
     public Linker(String first, String second)
     {
         this.first = first;
@@ -41,6 +47,11 @@ public record Linker(String first, String second)
         if (o == null || getClass() != o.getClass()) return false;
         Linker linker = (Linker) o;
         return first.equals(linker.first) && second.equals(linker.second);
+    }
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(first, second);
     }
 
 }

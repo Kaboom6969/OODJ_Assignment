@@ -3,6 +3,7 @@ package Forms.MedicalManagerForm;
 import Forms.BaseFrame;
 import Operations.MedicalManagerOperation.MedicalManagerOperation;
 import Tools.HospitalEntityAllocator;
+import entities.BaseEntity.BaseEntity;
 import entities.BaseEntity.Users.UserWithDetails;
 import entities.BusinessEntity.Department;
 import entities.BusinessEntity.Doctor;
@@ -11,6 +12,7 @@ import entities.BusinessEntity.MedicalManager;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 

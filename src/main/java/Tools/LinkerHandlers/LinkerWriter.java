@@ -10,8 +10,8 @@ import java.nio.file.StandardOpenOption;
 public class LinkerWriter
 {
     private final LinkerManager linkerManager;
-    private final Path directory;
-    private final String fileName;
+    private Path directory;
+    private String fileName;
 
     public LinkerWriter(LinkerManager linkerManager, Path directory, String fileName)
     {

@@ -5,8 +5,10 @@ import Interfaces.Linkable;
 import Interfaces.OwnEntity;
 import Tools.EntityHandler;
 import Tools.FileHandler.FileDataHandler;
+import entities.BaseEntity.DepartmentToFile;
 import entities.BaseEntity.DoctorShiftToFile;
 import entities.BaseEntity.Users.DoctorToFile;
+import entities.BaseEntity.Users.MedicalManagerToFile;
 import entities.LazyEntity.LazyEntity;
 import entities.Linker.LinkerManager;
 
@@ -15,7 +17,7 @@ import java.util.List;
 
 public class DoctorShift extends BusinessEntity<DoctorShiftToFile> implements OwnEntity, Linkable
 {
-    private final LazyEntity<DoctorToFile> belongsToDoctor;
+    private LazyEntity<DoctorToFile> belongsToDoctor;
     public DoctorToFile getBelongsToDoctor()
     {
         return belongsToDoctor.getSelf();

@@ -11,7 +11,7 @@ public class FeedbackToFile extends BaseEntity implements ConvertToFileData
 
     private int rating;
     private String comment;
-    private final LocalDateTime createdTime;
+    private LocalDateTime createdTime;
 
     public int getRating()
     {

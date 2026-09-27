@@ -12,13 +12,12 @@ import entities.BaseEntity.BaseEntity;
 import entities.BaseEntity.Users.PatientToFile;
 import entities.BaseEntity.Users.UserWithDetails;
 import entities.BusinessEntity.Appointment;
-import entities.BusinessEntity.AssessmentType;
 import entities.BusinessEntity.Doctor;
-
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
+import entities.BusinessEntity.AssessmentType;
 import java.awt.event.ActionListener;
 import java.util.List;
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -26,9 +25,9 @@ import java.util.List;
  */
 public class DoctorPanel extends javax.swing.JPanel {
 
-    private final HospitalEntityAllocator allocator;
-    private final Doctor doctor;
-    private final DoctorOperation doctorOperation;
+    private HospitalEntityAllocator allocator;
+    private Doctor doctor;
+    private DoctorOperation doctorOperation;
     private JFrame parentFrame;
 
     public DoctorPanel(HospitalEntityAllocator allocator, Doctor doctor) {
@@ -1392,7 +1391,7 @@ public class DoctorPanel extends javax.swing.JPanel {
     private javax.swing.JTextField temperatureField;
     private javax.swing.JButton updateStatusButton;
     // End of variables declaration//GEN-END:variables
-    static void main(String[] args) {
+    public static void main(String[] args) {
         BaseEntity.setIdNumberWidth(4);
 
         HospitalEntityAllocator allocator

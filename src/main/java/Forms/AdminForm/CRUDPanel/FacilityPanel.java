@@ -4,15 +4,16 @@
 
 package Forms.AdminForm.CRUDPanel;
 
-import Forms.AdminForm.CRUDDialog.FacilityDialog;
+import Forms.AdminForm.CRUDDialog.FacilityDialog;import Forms.AdminForm.CRUDDialog.InsuranceDialog;
 import Interfaces.RefreshablePanel;
 import Operations.AdminOperation.AdminOperation;
-import entities.BusinessEntity.Facility;
+import entities.BusinessEntity.Facility;import entities.BusinessEntity.Insurance;
 
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.GroupLayout;
+import javax.swing.table.*;
 
 import static Forms.AdminForm.FrameHelper.getObjectFromCurrentSelectedRow;
 
@@ -21,8 +22,8 @@ import static Forms.AdminForm.FrameHelper.getObjectFromCurrentSelectedRow;
  */
 public class FacilityPanel extends JPanel implements RefreshablePanel
 {
-    private final AdminOperation adminOperation;
-    private final Window frameWindow;
+    private AdminOperation adminOperation;
+    private Window frameWindow;
     @Override
     public void refreshData()
     {

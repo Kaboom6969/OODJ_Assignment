@@ -18,7 +18,7 @@ public class FacilityToFile extends BaseEntity implements ConvertToFileData
     }
 
     private String name;
-    private final FacilityType facilityType;
+    private FacilityType facilityType;
     private int capacity;
     private boolean available;
 

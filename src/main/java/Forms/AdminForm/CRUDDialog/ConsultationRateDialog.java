@@ -4,16 +4,18 @@
 
 package Forms.AdminForm.CRUDDialog;
 
+import java.awt.event.*;
+
 import Forms.ComboBoxItem;
 import Operations.AdminOperation.AdminOperation;
 import entities.BaseEntity.ConsultationRateToFile;
 import entities.BusinessEntity.ConsultationRate;
 
-import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.*;
+import javax.swing.GroupLayout;
 
 /**
  * @author leezh
@@ -24,7 +26,7 @@ public class ConsultationRateDialog extends JDialog {
     {
         ADD,MODIFY
     }
-    private final Modes mode;
+    private Modes mode;
     private String id = null;
     public ConsultationRateDialog(Window owner, AdminOperation adminOperation)
     {

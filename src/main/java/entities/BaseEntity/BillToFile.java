@@ -15,10 +15,10 @@ public class BillToFile extends BaseEntity implements ConvertToFileData
         PAID
     }
 
-    private final int consultationFee;
-    private final int assessmentFee;
-    private final int insuranceDeduction;
-    private final LocalDateTime issuedAt;
+    private int consultationFee;
+    private int assessmentFee;
+    private int insuranceDeduction;
+    private LocalDateTime issuedAt;
     private BillStatus status;
     private LocalDateTime paidAt;
 

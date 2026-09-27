@@ -1,27 +1,32 @@
 package entities.BusinessEntity;
 
+import Exceptions.LinkerExceptions.LinkerRequireOneOnlyException;
 import Interfaces.Linkable;
 import Interfaces.OwnEntities;
 import Interfaces.OwnEntity;
-import Tools.EntityHandler;
-import Tools.FileHandler.FileDataHandler;
 import entities.BaseEntity.AppointmentToFile;
-import entities.BaseEntity.DepartmentToFile;
+import entities.BaseEntity.BaseEntity;
 import entities.BaseEntity.DoctorShiftToFile;
-import entities.BaseEntity.Users.DoctorToFile;
 import entities.BaseEntity.Users.MedicalManagerToFile;
 import entities.LazyEntity.LazyEntity;
+import Tools.EntityHandler;
+import Tools.FileHandler.FileDataHandler;
+import entities.BaseEntity.DepartmentToFile;
+import entities.BaseEntity.Users.DoctorToFile;
 import entities.LazyEntity.LazyEntityList;
+import entities.Linker.Linker;
 import entities.Linker.LinkerManager;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class Doctor extends BusinessEntity<DoctorToFile> implements OwnEntity, OwnEntities,Linkable
 {
-    private final LazyEntity<DepartmentToFile> belongsToDepartment;
-    private final LazyEntity<MedicalManagerToFile> belongsToMedicalManager;
-    private final LazyEntityList<DoctorShiftToFile> doctorShifts;
-    private final LazyEntityList<AppointmentToFile> appointments;
+    private LazyEntity<DepartmentToFile> belongsToDepartment;
+    private LazyEntity<MedicalManagerToFile> belongsToMedicalManager;
+    private LazyEntityList<DoctorShiftToFile> doctorShifts;
+    private LazyEntityList<AppointmentToFile> appointments;
     public DepartmentToFile getBelongsToDepartment()
     {
         return belongsToDepartment.getSelf();

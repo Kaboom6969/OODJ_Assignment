@@ -4,7 +4,7 @@ import Tools.EntityConvertManager;import Tools.HospitalEntityAllocator;import en
 
 public class LoginOperation
 {
-    private final HospitalEntityAllocator hospitalEntityAllocator;
+    private HospitalEntityAllocator hospitalEntityAllocator;
 
     public LoginOperation(HospitalEntityAllocator hospitalEntityAllocator)
     {

@@ -81,7 +81,8 @@ public abstract class User extends BaseEntity
         if (!super.equals(o)) return false;
         if (!(Objects.equals(name, ((User)o).name))) return false;
         if (!Objects.equals(password, ((User)o).password)) return false;
-        return Objects.equals(email, ((User) o).email);
+        if (!Objects.equals(email, ((User)o).email)) return false;
+        return true;
     }
     @Override
     public int hashCode()

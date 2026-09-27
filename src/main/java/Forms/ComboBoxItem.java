@@ -2,8 +2,8 @@ package Forms;
 
 public class ComboBoxItem<T>
 {
-    private final T item;
-    private final String itemName;
+    private T item;
+    private String itemName;
 
     public ComboBoxItem(T item, String itemName)
     {

@@ -2,5 +2,5 @@ package Interfaces;
 
 public interface ConvertToFileData
 {
-    String toFileData();
+    public String toFileData();
 }

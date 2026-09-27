@@ -1,5 +1,7 @@
 package Exceptions.LazyEntityExceptions.LazyEntityListExceptions;
 
+import Exceptions.LazyEntityExceptions.LazyEntityListExceptions.LazyEntityListException;
+
 public class LazyEntityListEntityCantGetException extends LazyEntityListException
 {
     public LazyEntityListEntityCantGetException(String message)

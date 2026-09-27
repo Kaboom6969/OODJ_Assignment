@@ -18,7 +18,7 @@ public class MedicalRequestToFile extends BaseEntity implements ConvertToFileDat
         REJECTED
     }
 
-    private final LocalDateTime requestTime;
+    private LocalDateTime requestTime;
     private String remark;
     private RequestStatus status;
 

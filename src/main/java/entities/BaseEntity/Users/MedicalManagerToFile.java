@@ -1,6 +1,7 @@
 package entities.BaseEntity.Users;
 
 import Interfaces.ConvertToFileData;
+import entities.BaseEntity.Users.UserWithDetails;
 
 import java.time.LocalDate;
 

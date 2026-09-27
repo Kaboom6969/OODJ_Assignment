@@ -14,8 +14,8 @@ import java.util.HashMap;
 
 public class AssessmentType extends BusinessEntity<AssessmentTypeToFile> implements OwnEntities, Linkable
 {
-    private final LazyEntityList<MedicalRequestToFile> medicalRequests;
-    private final LazyEntityList<AssessmentResultToFile> assessmentResults;
+    private LazyEntityList<MedicalRequestToFile> medicalRequests;
+    private LazyEntityList<AssessmentResultToFile> assessmentResults;
 
     public LazyEntityList<MedicalRequestToFile> getMedicalRequests()
     {
