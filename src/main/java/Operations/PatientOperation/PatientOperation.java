@@ -452,7 +452,7 @@ public class PatientOperation implements PatientService
         if (comment == null || comment.trim().isEmpty()) {
             throw new FeedbackValidationException("Comment cannot be empty.");
         }
-        if (comment.contains("|") || comment.contains("\\n") || comment.contains("\\r")) {
+        if (comment.contains("|") || comment.contains("\n") || comment.contains("\r")) {
             throw new FeedbackValidationException("Comment cannot contain the '|' character or line breakers.");
         }
 
