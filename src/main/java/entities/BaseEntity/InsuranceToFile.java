@@ -8,7 +8,15 @@ public class InsuranceToFile extends BaseEntity implements ConvertToFileData
 {
     public static final String PREFIX = "IN";
 
-    private final String companyName;
+    private String companyName;
+
+    public void setCompanyName(String companyName)
+    {
+        if (companyName == null || companyName.isEmpty() || companyName.contains("|"))
+            throw new IllegalArgumentException("Name must be at least 1 character long and no | ");
+        this.companyName = companyName;
+    }
+
     private int coveragePercentage;
     private boolean accepted;
 
@@ -42,7 +50,7 @@ public class InsuranceToFile extends BaseEntity implements ConvertToFileData
     public InsuranceToFile(String id, String companyName, int coveragePercentage, boolean accepted)
     {
         super(id);
-        this.companyName = companyName;
+        setCompanyName(companyName);
         setCoveragePercentage(coveragePercentage);
         this.accepted = accepted;
     }

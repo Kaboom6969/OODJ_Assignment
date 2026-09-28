@@ -29,6 +29,8 @@ public class ConsultationRateToFile extends BaseEntity implements ConvertToFileD
 
     public void setName(String name)
     {
+        if (name == null || name.isEmpty() || name.contains("|"))
+            throw new IllegalArgumentException("Name must be at least 1 character long and no | ");
         this.name = name;
     }
 

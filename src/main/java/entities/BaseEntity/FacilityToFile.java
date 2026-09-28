@@ -44,6 +44,8 @@ public class FacilityToFile extends BaseEntity implements ConvertToFileData
 
     public void setName(String name)
     {
+        if (name == null || name.isEmpty() || name.contains("|"))
+            throw new IllegalArgumentException("Name must be at least 1 character long and no | ");
         this.name = name;
     }
 
@@ -61,7 +63,7 @@ public class FacilityToFile extends BaseEntity implements ConvertToFileData
     public FacilityToFile(String id, String name, FacilityType facilityType, int capacity, boolean available)
     {
         super(id);
-        this.name = name;
+        setName(name);
         this.facilityType = facilityType;
         setCapacity(capacity);
         this.available = available;
