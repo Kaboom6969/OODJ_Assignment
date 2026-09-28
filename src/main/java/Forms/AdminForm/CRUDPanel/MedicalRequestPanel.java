@@ -110,7 +110,11 @@ public class MedicalRequestPanel extends JPanel implements RefreshablePanel
         if (medicalRequest == null) return;
         medicalRequest.getSelf().setStatus(MedicalRequestToFile.RequestStatus.REJECTED);
         AdminOperation.CRUDInformation crudInformation = adminOperation.update(medicalRequest);
-        if (crudInformation.isSuccess()) JOptionPane.showMessageDialog(frameWindow,"Successfully rejected the request");
+        if (crudInformation.isSuccess())
+        {
+            adminOperation.tryGenerateBill(medicalRequest);
+            JOptionPane.showMessageDialog(frameWindow, "Successfully rejected the request");
+        }
         else JOptionPane.showMessageDialog(frameWindow,"Failed to reject the request\n" + crudInformation.message());
         reload(null);
     }
