@@ -283,7 +283,10 @@ public class FileDataHandler
             {
                 Files.delete(backUpFile);
             }
-            catch (IOException _){}
+            catch (IOException ie)
+            {
+                throw new  RuntimeException(ie);
+            }
             return;
         }
 
