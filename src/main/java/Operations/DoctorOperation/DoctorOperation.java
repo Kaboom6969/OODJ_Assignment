@@ -5,6 +5,7 @@
 package Operations.DoctorOperation;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -15,6 +16,8 @@ import java.util.Set;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.AppointmentToFile;
 import entities.BaseEntity.AssessmentTypeToFile;
+import entities.BaseEntity.BillToFile;
+import entities.BaseEntity.InsuranceToFile;
 import entities.BaseEntity.MedicalRecordToFile;
 import entities.BaseEntity.MedicalRequestToFile;
 import entities.BaseEntity.PrescriptionToFile;
@@ -23,7 +26,10 @@ import entities.BaseEntity.Users.PatientToFile;
 import entities.BaseEntity.Users.UserWithDetails;
 import entities.BusinessEntity.Appointment;
 import entities.BusinessEntity.AssessmentType;
+import entities.BusinessEntity.Bill;
+import entities.BusinessEntity.ConsultationRate;
 import entities.BusinessEntity.Doctor;
+import entities.BusinessEntity.Facility;
 import entities.BusinessEntity.MedicalRecord;
 import entities.BusinessEntity.MedicalRequest;
 import entities.BusinessEntity.Patient;
@@ -87,6 +93,112 @@ public class DoctorOperation {
         self.setDateOfBirth(validatedProfile.getDateOfBirth());
         self.setPhoneNumber(validatedProfile.getPhoneNumber());
         allocator.saveChanges(doctor);
+    }
+    public Bill generateBill(String appointmentId, String consultationRateId)
+    {
+        if (appointmentId == null || appointmentId.isBlank())
+            throw new IllegalArgumentException("Appointment must be selected.");
+
+        if (consultationRateId == null || consultationRateId.isBlank())
+            throw new IllegalArgumentException("Consultation rate must be selected.");
+
+        Appointment appointment = allocator.getBusinessEntity(appointmentId);
+        if (appointment.getDoctor() == null || !appointment.getDoctor().getId().equals(doctor.getId()))
+        {
+            throw new IllegalArgumentException("Appointment does not belong to this doctor.");
+        }
+        if (appointment.getSelf().getStatus() != AppointmentToFile.AppointmentStatus.COMPLETED)
+        {
+            throw new IllegalStateException("Appointment must be completed before generating a bill.");
+        }
+
+        if (appointment.getMedicalRecord() == null)
+        {
+            throw new IllegalStateException("Medical record has not been created.");
+        }
+        MedicalRecord medicalRecord = allocator.getBusinessEntity(appointment.getMedicalRecord().getId());
+
+        if (medicalRecord.getBill() != null)
+        {
+            throw new IllegalStateException("A bill has already been generated for this medical record.");
+        }
+        ConsultationRate consultationRate = allocator.getBusinessEntity(consultationRateId);
+
+        if (!consultationRate.getSelf().isActive())
+        {
+            throw new IllegalStateException("Selected consultation rate is inactive.");
+        }
+
+        Facility facility = allocator.getBusinessEntity(appointment.getFacility().getId());
+
+        if (facility.getBelongsToDepartment() == null)
+        {
+            throw new IllegalStateException("Appointment facility has no department.");
+        }
+
+        if (consultationRate.getBelongsToDepartment() == null)
+        {
+            throw new IllegalStateException("Consultation rate has no department.");
+        }
+
+        if (!facility.getBelongsToDepartment().getId().equals(consultationRate.getBelongsToDepartment().getId()))
+        {
+            throw new IllegalArgumentException("Consultation rate does not belong to the facility department.");
+        }
+        int consultationFee = consultationRate.getSelf().getPrice();
+        int assessmentFee = 0;
+        for (MedicalRequestToFile requestData : medicalRecord.getMedicalRequests())
+        {
+            switch (requestData.getStatus())
+            {
+                case COMPLETED ->
+                {
+                    MedicalRequest request = allocator.getBusinessEntity(requestData.getId());
+
+                    assessmentFee = Math.addExact(assessmentFee, request.getAssessmentType().getPrice());
+                }
+
+                case REJECTED ->
+                {
+                    // Rejected assessment no charge
+                }
+
+                default -> throw new IllegalStateException("All medical requests must be completed or rejected " +
+                                "before generating the bill.");
+            }
+        }
+
+        Patient patient = allocator.getBusinessEntity(appointment.getPatient().getId());
+
+        InsuranceToFile insurance = patient.getInsurance();
+
+        int subtotal = Math.addExact(consultationFee, assessmentFee);
+        int insuranceDeduction = 0;
+        if (insurance != null && insurance.isAccepted())
+        {
+            long deduction = (long) subtotal * insurance.getCoveragePercentage() / 100;
+            insuranceDeduction = Math.toIntExact(deduction);
+        }
+
+        BillToFile billData = new BillToFile
+        (
+                null,
+                consultationFee,
+                assessmentFee,
+                insuranceDeduction,
+                LocalDateTime.now()
+        );
+
+        allocator.assignNewId(billData);
+        Bill bill = allocator.convertToBusinessEntity(billData, true);
+        bill.setMedicalRecord(medicalRecord.getSelf());
+        bill.setConsultationRate(consultationRate.getSelf());
+        if (insurance != null && insurance.isAccepted())
+        {
+            bill.setInsurance(insurance);
+        }
+        allocator.saveChanges(bill);
+        return bill;
     }
 
     public void updateAppointmentStatus(
