@@ -64,7 +64,13 @@ public class AssessmentResultDialog extends JDialog {
                 medicalRequest.getAssessmentResults().add(assessmentResult.getSelf());
                 medicalRequest.getSelf().setStatus(MedicalRequestToFile.RequestStatus.COMPLETED);
                 crudInformation = adminOperation.update(medicalRequest);
-                if (crudInformation.isSuccess()) adminOperation.tryGenerateBill(medicalRequest);
+                if (crudInformation.isSuccess())
+                {
+                    try
+                    {
+                        adminOperation.tryGenerateBill(medicalRequest);
+                    } catch (Exception _){}
+                }
             }
         } catch (RuntimeException re)
         {

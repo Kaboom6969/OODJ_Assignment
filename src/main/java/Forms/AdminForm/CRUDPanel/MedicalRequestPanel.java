@@ -112,8 +112,11 @@ public class MedicalRequestPanel extends JPanel implements RefreshablePanel
         AdminOperation.CRUDInformation crudInformation = adminOperation.update(medicalRequest);
         if (crudInformation.isSuccess())
         {
-            adminOperation.tryGenerateBill(medicalRequest);
             JOptionPane.showMessageDialog(frameWindow, "Successfully rejected the request");
+            try
+            {
+                adminOperation.tryGenerateBill(medicalRequest);
+            } catch (Exception _){}
         }
         else JOptionPane.showMessageDialog(frameWindow,"Failed to reject the request\n" + crudInformation.message());
         reload(null);
