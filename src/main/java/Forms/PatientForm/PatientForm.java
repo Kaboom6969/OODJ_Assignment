@@ -346,9 +346,18 @@ public class PatientForm extends BaseFrame {
                 });
             }
         }
+
         // Install the model even when there are no bills, so the empty table keeps its columns.
         billingTb.setModel(tableModel);
         billingTb.removeColumn(billingTb.getColumn("object"));
+        billingTb.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+        billingTb.getColumnModel().getColumn(0).setPreferredWidth(60);
+        billingTb.getColumnModel().getColumn(1).setPreferredWidth(90);
+        billingTb.getColumnModel().getColumn(2).setPreferredWidth(100);
+        billingTb.getColumnModel().getColumn(3).setPreferredWidth(100);
+        billingTb.getColumnModel().getColumn(4).setPreferredWidth(60);
+        billingTb.getColumnModel().getColumn(5).setPreferredWidth(130);
+        billingTb.getColumnModel().getColumn(6).setPreferredWidth(60);
         refreshPayButton();
     }
 

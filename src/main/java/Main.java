@@ -1,7 +1,6 @@
 import Forms.LoginForm.LoginForm;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.BaseEntity;
-
 import javax.swing.*;
 
 
