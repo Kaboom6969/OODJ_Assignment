@@ -181,7 +181,7 @@ public class UserDialog extends JDialog
                 {
                     crudInformation =
                             adminOperation.add(packData(null), (((ComboBoxItem<Class<?>>) Objects.requireNonNull(roleComboBox.getSelectedItem())).getItem()));
-                    registerData = new RegisterData(nameTextField.getText(),passwordTextField.getText(), (Class<? extends User>) ((ComboBoxItem<Class<?>>) roleComboBox.getSelectedItem()).getItem());
+                    if (crudInformation.isSuccess()) registerData = new RegisterData(nameTextField.getText(),passwordTextField.getText(), (Class<? extends User>) ((ComboBoxItem<Class<?>>) roleComboBox.getSelectedItem()).getItem());
                 } catch (RuntimeException re)
                 {
                     crudInformation = new AdminOperation.CRUDInformation(false, re.getMessage());
