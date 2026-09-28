@@ -116,11 +116,6 @@ public class AssessmentTypePanel extends JPanel implements RefreshablePanel
             JOptionPane.showMessageDialog(this, "Please select a assessment type");
             return;
         }
-        if (!assessmentType.getAssessmentResults().isEmpty() || !assessmentType.getMedicalRequests().isEmpty())
-        {
-            JOptionPane.showMessageDialog(this, "This assessment type is link to another entity,cannot delete it");
-            return;
-        }
         AdminOperation.CRUDInformation crudInformation = adminOperation.delete(assessmentType);
         if (crudInformation.isSuccess())
         {

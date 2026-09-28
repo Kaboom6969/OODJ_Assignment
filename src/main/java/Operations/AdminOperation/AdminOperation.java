@@ -80,12 +80,58 @@ public class AdminOperation
     {
         try
         {
+            String blockedReason = getDeleteBlockedReason(businessEntity);
+            if (blockedReason != null)
+            {
+                return new CRUDInformation(false, blockedReason);
+            }
             hospitalEntityAllocator.deleteBusinessEntity(businessEntity);
             return new CRUDInformation(true,"Success");
-        } catch (EntityNotMatchException | EntityNotFoundException e)
+        } catch (EntityNotMatchException | EntityNotFoundException | RuntimeException e)
         {
             return failure(e);
         }
+    }
+
+    private String getDeleteBlockedReason(BusinessEntity<?> businessEntity)
+    {
+        List<String> blockers = new ArrayList<>();
+        switch (businessEntity)
+        {
+            case Doctor doctor ->
+            {
+                addDeleteBlocker(blockers, "appointments", doctor.getAppointments().getIds());
+                addDeleteBlocker(blockers, "doctor shifts", doctor.getDoctorShifts().getIds());
+            }
+            case Patient patient ->
+                    addDeleteBlocker(blockers, "appointments", patient.getAppointments().getIds());
+            case Facility facility ->
+                    addDeleteBlocker(blockers, "appointments", facility.getAppointments().getIds());
+            case ConsultationRate consultationRate ->
+                    addDeleteBlocker(blockers, "bills", consultationRate.getBills().getIds());
+            case AssessmentType assessmentType ->
+            {
+                addDeleteBlocker(blockers, "medical requests", assessmentType.getMedicalRequests().getIds());
+                addDeleteBlocker(blockers, "assessment results", assessmentType.getAssessmentResults().getIds());
+            }
+            default -> { }
+        }
+
+        if (blockers.isEmpty()) return null;
+        return "Cannot delete " + businessEntity.getId() +
+                " because it is still required by " + String.join("; ", blockers);
+    }
+
+    private void addDeleteBlocker(List<String> blockers, String relationName, List<String> ids)
+    {
+        if (ids.isEmpty()) return;
+        int previewSize = Math.min(ids.size(), 5);
+        String preview = String.join(", ", ids.subList(0, previewSize));
+        if (ids.size() > previewSize)
+        {
+            preview += " ... (" + ids.size() + " total)";
+        }
+        blockers.add(relationName + ": " + preview);
     }
 
     public <T extends BaseEntity & ConvertToFileData> CRUDInformation add(List<String> data,Class<?> clazz)
