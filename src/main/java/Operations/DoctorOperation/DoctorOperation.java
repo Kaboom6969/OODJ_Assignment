@@ -13,6 +13,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import Operations.OtherOperation;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.AppointmentToFile;
 import entities.BaseEntity.AssessmentTypeToFile;
@@ -99,112 +100,16 @@ public class DoctorOperation {
     }
     public Bill generateBill(String appointmentId)
     {
-        if (appointmentId == null || appointmentId.isBlank())
-        {
-            throw new IllegalArgumentException("Appointment must be selected.");
-        }
-        Appointment appointment = allocator.getBusinessEntity(appointmentId);
-        if (appointment.getDoctor() == null ||
-                !appointment.getDoctor().getId().equals(doctor.getId()))
+        Appointment appointment =
+                allocator.getBusinessEntity(appointmentId);
+
+        if (appointment.getDoctor() == null || !appointment.getDoctor().getId().equals(doctor.getId()))
         {
             throw new IllegalArgumentException("Appointment does not belong to this doctor.");
         }
-        if (appointment.getSelf().getStatus() != AppointmentToFile.AppointmentStatus.COMPLETED)
-        {
-            throw new IllegalStateException("Appointment must be completed before generating a bill.");
-        }
-        if (appointment.getMedicalRecord() == null)
-        {
-            throw new IllegalStateException("Medical record has not been created.");
-        }
-        MedicalRecord medicalRecord = allocator.getBusinessEntity(appointment.getMedicalRecord().getId());
-        if (medicalRecord.getBill() != null)
-        {
-            throw new IllegalStateException("A bill has already been generated for this medical record.");
-        }
-        if (appointment.getFacility() == null)
-        {
-            throw new IllegalStateException("Appointment facility is unavailable.");
-        }
-        Facility facility = allocator.getBusinessEntity(appointment.getFacility().getId());
-        DepartmentToFile departmentData = facility.getBelongsToDepartment();
-        if (departmentData == null)
-        {
-            throw new IllegalStateException("Appointment facility has no department.");
-        }
-        Department department = allocator.getBusinessEntity(departmentData.getId());
-        List<ConsultationRateToFile> activeRates = new ArrayList<>();
-        for (ConsultationRateToFile rate : department.getConsultations())
-        {
-            if (rate.isActive())
-            {
-                activeRates.add(rate);
-            }
-        }
-        if (activeRates.isEmpty())
-        {
-            throw new IllegalStateException("The facility department has no active consultation rate.");
-        }
-        if (activeRates.size() > 1)
-        {
-            throw new IllegalStateException(
-                    "The facility department has more than one active " +
-                            "consultation rate. Please ask an administrator " +
-                            "to correct the configuration."
-            );
-        }
-        ConsultationRate consultationRate = allocator.getBusinessEntity(activeRates.get(0).getId());
-        int consultationFee = consultationRate.getSelf().getPrice();
-        int assessmentFee = 0;
-        for (MedicalRequestToFile requestData : medicalRecord.getMedicalRequests())
-        {
-            switch (requestData.getStatus())
-            {
-                case COMPLETED ->
-                {
-                    MedicalRequest request = allocator.getBusinessEntity(requestData.getId());
-                    assessmentFee = Math.addExact(assessmentFee, request.getAssessmentType().getPrice());
-                }
-                case REJECTED ->
-                {
-                }
-                default -> throw new IllegalStateException(
-                        "All medical requests must be completed or " +
-                                "rejected before generating the bill."
-                );
-            }
-        }
-        if (appointment.getPatient() == null)
-        {
-            throw new IllegalStateException("Appointment patient is unavailable.");
-        }
-        Patient patient = allocator.getBusinessEntity(appointment.getPatient().getId());
-        InsuranceToFile insurance = patient.getInsurance();
-        int subtotal = Math.addExact(consultationFee, assessmentFee);
-        int insuranceDeduction = 0;
-        if (insurance != null && insurance.isAccepted())
-        {
-            long deduction = (long) subtotal * insurance.getCoveragePercentage() / 100;
-            insuranceDeduction = Math.toIntExact(deduction);
-        }
-        BillToFile billData = new BillToFile(
-                null,
-                consultationFee,
-                assessmentFee,
-                insuranceDeduction,
-                LocalDateTime.now()
-        );
-        allocator.assignNewId(billData);
-        Bill bill = allocator.convertToBusinessEntity(billData, true);
-        bill.setMedicalRecord(medicalRecord.getSelf());
-        bill.setConsultationRate(consultationRate.getSelf());
-        if (insurance != null && insurance.isAccepted())
-        {
-            bill.setInsurance(insurance);
-        }
-        allocator.saveChanges(bill);
-        return bill;
+        return new OtherOperation(allocator).generateBill(appointmentId);
     }
+
 
     public void updateAppointmentStatus(
             String appointmentId,
@@ -623,6 +528,13 @@ public class DoctorOperation {
                 = allocator.getBusinessEntity(
                         record.getId()
                 );
+        if (medicalRecord.getBill() != null)
+        {
+            throw new IllegalStateException(
+                    "Cannot create a medical request after the bill " +
+                            "has been generated."
+            );
+        }
 
         // Find the exact assessment type selected by the doctor
         AssessmentType selectedAssessmentType;
