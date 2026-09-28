@@ -17,6 +17,7 @@ import entities.BaseEntity.Users.DoctorToFile;
 import entities.BaseEntity.Users.PatientToFile;
 import entities.BaseEntity.Users.UserWithDetails;
 import entities.BusinessEntity.Appointment;
+import entities.BusinessEntity.Bill;
 import entities.BusinessEntity.Department;
 import entities.BusinessEntity.Doctor;
 import entities.BusinessEntity.Facility;
@@ -507,5 +508,37 @@ public class PatientOperation implements PatientService
             }
         }
         return billList;
+    }
+    public void payBill(String billId)
+    {
+        if (billId == null || billId.isBlank())
+        {
+            throw new IllegalArgumentException("Bill must be selected.");
+        }
+        Patient currentPatient = allocator.getBusinessEntity(patient.getId());
+
+        for (AppointmentToFile appointmentData : currentPatient.getAppointments())
+        {
+            Appointment appointment = allocator.getBusinessEntity(appointmentData.getId());
+
+            MedicalRecordToFile medicalRecordData = appointment.getMedicalRecord();
+
+            if (medicalRecordData == null) continue;
+
+            MedicalRecord medicalRecord = allocator.getBusinessEntity(medicalRecordData.getId());
+
+            BillToFile billData = medicalRecord.getBill();
+
+            if (billData == null) continue;
+
+            if (billData.getId().equals(billId))
+            {
+                Bill bill = allocator.getBusinessEntity(billId);
+                bill.getSelf().markPaid(LocalDateTime.now());
+                allocator.saveChanges(bill);
+                return;
+            }
+        }
+        throw new IllegalArgumentException("This bill does not belong to the current patient.");
     }
 }

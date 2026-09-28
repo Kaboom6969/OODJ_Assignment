@@ -85,6 +85,16 @@ public class PatientForm extends BaseFrame {
                 refreshAssessmentTable();
             }
         });
+        billingTb.setSelectionMode(
+                ListSelectionModel.SINGLE_SELECTION
+        );
+        billingTb.getSelectionModel().addListSelectionListener(e ->
+        {
+            if (e.getValueIsAdjusting()) return;
+            refreshPayButton();
+        });
+
+        refreshPayButton();
         updateAppointmentActionButtons();
     }
 
@@ -182,6 +192,25 @@ public class PatientForm extends BaseFrame {
             }
         }
         timeLs.setModel(slotModel);
+    }
+    //refresh pay button
+    private void refreshPayButton()
+    {
+        payButton.setEnabled(false);
+
+        int selectedViewRow = billingTb.getSelectedRow();
+        if (selectedViewRow == -1) return;
+
+        int selectedModelRow =
+                billingTb.convertRowIndexToModel(selectedViewRow);
+
+        BillToFile bill = (BillToFile) billingTb
+                .getModel()
+                .getValueAt(selectedModelRow, 7);
+
+        payButton.setEnabled(
+                bill.getStatus() == BillToFile.BillStatus.UNPAID
+        );
     }
 
     // Tab 3: All Appoinments
@@ -285,27 +314,42 @@ public class PatientForm extends BaseFrame {
         
         List<BillToFile> billingRecords = operation.loadBillingList();
         DefaultTableModel tableModel = new DefaultTableModel(
-                new Object[] {"Assessment Fee", "Consultation Fee", "Insurance Deduct",
-                        "Total", "Issued At", "Status"}, 0) {
+                new Object[]
+                {
+                        "Bill ID",
+                        "Assessment Fee",
+                        "Consultation Fee",
+                        "Insurance Deduct",
+                        "Total",
+                        "Issued At",
+                        "Status",
+                        "object"
+                }, 0)
+        {
             @Override
-            public boolean isCellEditable(int row, int column) {
+            public boolean isCellEditable(int row, int column)
+            {
                 return false;
             }
         };
         if (billingRecords != null) {
             for (BillToFile bill : billingRecords) {
                 tableModel.addRow(new Object[] {
-                    "RM " + bill.getAssessmentFee(),
-                    "RM " + bill.getConsultationFee(),
-                    "RM " + bill.getInsuranceDeduction(),
-                    "RM " + bill.getMoney(),
-                    bill.getIssuedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
-                    bill.getStatus()
+                        bill.getId(),
+                        "RM " + bill.getAssessmentFee(),
+                        "RM " + bill.getConsultationFee(),
+                        "RM " + bill.getInsuranceDeduction(),
+                        "RM " + bill.getMoney(),
+                        bill.getIssuedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                        bill.getStatus(),
+                        bill
                 });
             }
         }
         // Install the model even when there are no bills, so the empty table keeps its columns.
         billingTb.setModel(tableModel);
+        billingTb.removeColumn(billingTb.getColumn("object"));
+        refreshPayButton();
     }
 
     // Tab 4: Medical History
@@ -479,6 +523,7 @@ public class PatientForm extends BaseFrame {
         jLabel16 = new javax.swing.JLabel();
         jScrollPane7 = new javax.swing.JScrollPane();
         billingTb = new javax.swing.JTable();
+        payButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -538,7 +583,7 @@ public class PatientForm extends BaseFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(184, 184, 184)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 385, Short.MAX_VALUE)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 465, Short.MAX_VALUE)
                     .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                         .addComponent(jPanel6, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
@@ -575,7 +620,7 @@ public class PatientForm extends BaseFrame {
 
         timeLs.setModel(new javax.swing.AbstractListModel<String>()
         {
-            final String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
         });
@@ -612,7 +657,7 @@ public class PatientForm extends BaseFrame {
 
         doctorLs.setModel(new javax.swing.AbstractListModel<String>()
         {
-            final String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
         });
@@ -642,7 +687,7 @@ public class PatientForm extends BaseFrame {
                     .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(ratingLbl, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 163, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 53, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 154, Short.MAX_VALUE)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -733,7 +778,7 @@ public class PatientForm extends BaseFrame {
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGap(29, 29, 29)
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 697, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(28, Short.MAX_VALUE))
+                .addContainerGap(109, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -820,7 +865,7 @@ public class PatientForm extends BaseFrame {
                 .addComponent(jLabel17)
                 .addGap(230, 230, 230))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                .addGap(0, 29, Short.MAX_VALUE)
+                .addGap(0, 109, Short.MAX_VALUE)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 720, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel4Layout.createSequentialGroup()
@@ -919,7 +964,7 @@ public class PatientForm extends BaseFrame {
             }
         )
         {
-            final boolean[] canEdit = new boolean []
+            boolean[] canEdit = new boolean []
             {
                 false, true, false, false, false, true
             };
@@ -931,6 +976,10 @@ public class PatientForm extends BaseFrame {
         });
         jScrollPane7.setViewportView(billingTb);
 
+        payButton.setBackground(new java.awt.Color(253, 253, 238));
+        payButton.setText("Pay");
+        payButton.addActionListener(this::payButtonActionPerformed);
+
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
         jPanel7.setLayout(jPanel7Layout);
         jPanel7Layout.setHorizontalGroup(
@@ -938,12 +987,8 @@ public class PatientForm extends BaseFrame {
             .addGroup(jPanel7Layout.createSequentialGroup()
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel7Layout.createSequentialGroup()
-                        .addGap(283, 283, 283)
-                        .addComponent(jLabel12))
-                    .addGroup(jPanel7Layout.createSequentialGroup()
                         .addGap(66, 66, 66)
-                        .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel7Layout.createSequentialGroup()
                                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addGroup(jPanel7Layout.createSequentialGroup()
@@ -953,26 +998,33 @@ public class PatientForm extends BaseFrame {
                                     .addGroup(jPanel7Layout.createSequentialGroup()
                                         .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addGap(18, 18, 18)
-                                        .addComponent(usernameTf))
+                                        .addComponent(usernameTf, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addGroup(jPanel7Layout.createSequentialGroup()
                                         .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addGap(18, 18, 18)
                                         .addComponent(emailTf1, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addGroup(jPanel7Layout.createSequentialGroup()
                                         .addComponent(resetPwBtn)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addGap(50, 50, 50)
                                         .addComponent(editProfileBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGap(89, 89, 89)
                                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 283, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 645, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(43, Short.MAX_VALUE))
+                            .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 645, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(jPanel7Layout.createSequentialGroup()
+                        .addGap(327, 327, 327)
+                        .addComponent(payButton, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel7Layout.createSequentialGroup()
+                        .addGap(295, 295, 295)
+                        .addComponent(jLabel12)))
+                .addContainerGap(124, Short.MAX_VALUE))
         );
         jPanel7Layout.setVerticalGroup(
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel7Layout.createSequentialGroup()
-                .addGap(22, 22, 22)
+                .addContainerGap()
                 .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(17, 17, 17)
                 .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -996,11 +1048,13 @@ public class PatientForm extends BaseFrame {
                     .addGroup(jPanel7Layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel16)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 147, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(290, 290, 290))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(payButton)
+                .addGap(289, 289, 289))
         );
 
         jTabbedPane1.addTab("Profile", jPanel7);
@@ -1304,6 +1358,67 @@ public class PatientForm extends BaseFrame {
         goToParent();
     }//GEN-LAST:event_logoutButtonActionPerformed
 
+    private void payButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_payButtonActionPerformed
+    {//GEN-HEADEREND:event_payButtonActionPerformed
+        int selectedViewRow = billingTb.getSelectedRow();
+
+        if (selectedViewRow == -1)
+        {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Please select a bill."
+            );
+            return;
+        }
+
+        int selectedModelRow =
+                billingTb.convertRowIndexToModel(selectedViewRow);
+
+        BillToFile bill = (BillToFile) billingTb
+                .getModel()
+                .getValueAt(selectedModelRow, 7);
+
+        if (bill.getStatus() == BillToFile.BillStatus.PAID)
+        {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "This bill has already been paid."
+            );
+            return;
+        }
+
+        int result = JOptionPane.showConfirmDialog(
+                this,
+                "Pay Bill " + bill.getId()
+                        + "?\nTotal: RM " + bill.getMoney(),
+                "Confirm Payment",
+                JOptionPane.YES_NO_OPTION
+        );
+
+        if (result != JOptionPane.YES_OPTION) return;
+
+        try
+        {
+            operation.payBill(bill.getId());
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Payment successful."
+            );
+
+            populateProfileTab();
+        }
+        catch (RuntimeException exception)
+        {
+            JOptionPane.showMessageDialog(
+                    this,
+                    exception.getMessage(),
+                    "Payment Failed",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }//GEN-LAST:event_payButtonActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1403,6 +1518,7 @@ public class PatientForm extends BaseFrame {
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JButton logoutButton;
     private javax.swing.JTable medicalTbl;
+    private javax.swing.JButton payButton;
     private javax.swing.JLabel ratingLbl;
     private javax.swing.JButton resetPwBtn;
     private javax.swing.JList<String> timeLs;
