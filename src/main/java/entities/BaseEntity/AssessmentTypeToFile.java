@@ -16,8 +16,21 @@ public class AssessmentTypeToFile extends BaseEntity implements ConvertToFileDat
         MEDICAL_IMAGING
     }
 
-    private final String name;
-    private final AssessmentCategory category;
+    public void setName(String name)
+    {
+        if (name == null || name.isEmpty() || name.contains("|"))
+            throw new IllegalArgumentException("name must contain at least 1 character and no |");
+        this.name = name;
+    }
+
+    private String name;
+    private AssessmentCategory category;
+
+    public void setCategory(AssessmentCategory category)
+    {
+        this.category = category;
+    }
+
     private int price;
 
     public String getName()
@@ -44,8 +57,8 @@ public class AssessmentTypeToFile extends BaseEntity implements ConvertToFileDat
     public AssessmentTypeToFile(String id, String name, AssessmentCategory category, int price)
     {
         super(id);
-        this.name = name;
-        this.category = category;
+        setName(name);
+        setCategory(category);
         setPrice(price);
     }
 

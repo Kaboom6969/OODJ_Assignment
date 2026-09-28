@@ -327,7 +327,7 @@ public class PatientOperation implements PatientService
             throw new BookingValidationException("Reason cannot be empty.");
         }
         // otherwise will crash the delimiter-based file format when saving to disk, as '|' is used as a field separator.
-        if (reason.contains("|") || reason.contains("\\n") || reason.contains("\\r")) {
+        if (reason.contains("|") || reason.contains("\n") || reason.contains("\r")) {
             throw new BookingValidationException("Reason cannot contain the '|' character or line breakers.");
         }
 
