@@ -4,6 +4,14 @@
  */
 package Operations.DoctorOperation;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.AppointmentToFile;
 import entities.BaseEntity.AssessmentTypeToFile;
@@ -19,14 +27,6 @@ import entities.BusinessEntity.Doctor;
 import entities.BusinessEntity.MedicalRecord;
 import entities.BusinessEntity.MedicalRequest;
 import entities.BusinessEntity.Patient;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
 
 public class DoctorOperation {
 
@@ -61,14 +61,9 @@ public class DoctorOperation {
             String phone) {
         LocalDate birthDate;
         try {
-            birthDate = LocalDate.parse(
-                    dob,
-                    DateTimeFormatter.ISO_LOCAL_DATE
-            );
+            birthDate = LocalDate.parse(dob,DateTimeFormatter.ISO_LOCAL_DATE);
         } catch (DateTimeParseException | NullPointerException e) {
-            throw new IllegalArgumentException(
-                    "Date of Birth must be a real date in YYYY-MM-DD format."
-            );
+            throw new IllegalArgumentException("Date of Birth must be a real date in YYYY-MM-DD format.");
         }
 
         if (doctor == null)
@@ -188,106 +183,67 @@ public class DoctorOperation {
         validateSafeText(appointmentId, "Appointment ID");
 
         if (appointmentId == null || appointmentId.trim().isEmpty()) {
-            throw new IllegalArgumentException(
-                    "Appointment ID cannot be empty."
-            );
+                throw new IllegalArgumentException("Appointment ID cannot be empty.");
         }
 
         if (patientId == null || patientId.trim().isEmpty()) {
-            throw new IllegalArgumentException(
-                    "Patient ID cannot be empty."
-            );
+                throw new IllegalArgumentException("Patient ID cannot be empty.");
         }
 
         if (temperature <= 0) {
-            throw new IllegalArgumentException(
-                    "Temperature must be greater than 0."
-            );
+            throw new IllegalArgumentException("Temperature must be greater than 0.");
         }
 
         if (heartRate <= 0) {
-            throw new IllegalArgumentException(
-                    "Heart rate must be greater than 0."
-            );
+            throw new IllegalArgumentException( "Heart rate must be greater than 0.");
         }
 
         if (systolicPressure <= 0 || diastolicPressure <= 0) {
-            throw new IllegalArgumentException(
-                    "Blood pressure must be greater than 0."
-            );
+            throw new IllegalArgumentException("Blood pressure must be greater than 0.");
         }
 
         if (diagnosis == null || diagnosis.trim().isEmpty()) {
-            throw new IllegalArgumentException(
-                    "Diagnosis cannot be empty."
-            );
+            throw new IllegalArgumentException("Diagnosis cannot be empty.");
         }
 
         if (consultationNote == null || consultationNote.trim().isEmpty()) {
-            throw new IllegalArgumentException(
-                    "Consultation note cannot be empty."
-            );
+            throw new IllegalArgumentException("Consultation note cannot be empty.");
         }
 
         Patient patient;
 
         try {
-            patient
-                    = allocator.getBusinessEntity(
-                            patientId.trim()
-                    );
+            patient = allocator.getBusinessEntity(patientId.trim());
         } catch (Exception e) {
-            throw new IllegalArgumentException(
-                    "Patient not found."
-            );
+            throw new IllegalArgumentException("Patient not found.");
         }
 
         Appointment selectedAppointment;
 
         try {
-            selectedAppointment
-                    = allocator.getBusinessEntity(
-                            appointmentId.trim()
-                    );
+            selectedAppointment = allocator.getBusinessEntity(appointmentId.trim());
         } catch (Exception e) {
-            throw new IllegalArgumentException(
-                    "Appointment not found."
-            );
+            throw new IllegalArgumentException("Appointment not found.");
         }
 
-        if (selectedAppointment.getDoctor() == null
-                || !selectedAppointment.getDoctor()
-                        .getId()
-                        .equals(doctor.getId())) {
-
-            throw new IllegalArgumentException(
-                    "Appointment does not belong to this doctor."
-            );
+        if (selectedAppointment.getDoctor() == null|| !selectedAppointment.getDoctor().getId().equals(doctor.getId())) 
+        {
+            throw new IllegalArgumentException("Appointment does not belong to this doctor.");
         }
 
-        if (selectedAppointment.getPatient() == null
-                || !selectedAppointment.getPatient()
-                        .getId()
-                        .equals(patientId.trim())) {
-
-            throw new IllegalArgumentException(
-                    "Appointment does not belong to this patient."
-            );
+        if (selectedAppointment.getPatient() == null || !selectedAppointment.getPatient().getId().equals(patientId.trim()))
+        {
+            throw new IllegalArgumentException("Appointment does not belong to this patient.");
         }
 
-        if (selectedAppointment.getSelf().getStatus()
-                != AppointmentToFile.AppointmentStatus.COMPLETED) {
-
-            throw new IllegalArgumentException(
-                    "Appointment must be completed before consultation."
-            );
+        if (selectedAppointment.getSelf().getStatus() != AppointmentToFile.AppointmentStatus.COMPLETED) 
+        {
+            throw new IllegalArgumentException("Appointment must be completed before consultation.");
         }
 
 
         if (selectedAppointment.getMedicalRecord() != null) {
-            throw new IllegalArgumentException(
-                    "A medical record already exists for this appointment."
-            );
+            throw new IllegalArgumentException("A medical record already exists for this appointment.");
         }
 
         MedicalRecordToFile medicalRecord
