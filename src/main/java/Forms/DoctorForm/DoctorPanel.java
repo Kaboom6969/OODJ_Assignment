@@ -13,6 +13,7 @@ import entities.BaseEntity.Users.PatientToFile;
 import entities.BaseEntity.Users.UserWithDetails;
 import entities.BusinessEntity.Appointment;
 import entities.BusinessEntity.AssessmentType;
+import entities.BusinessEntity.Bill;
 import entities.BusinessEntity.Doctor;
 
 import javax.swing.*;
@@ -262,6 +263,7 @@ public class DoctorPanel extends javax.swing.JPanel {
         updateStatusButton = new javax.swing.JButton();
         jScrollPane4 = new javax.swing.JScrollPane();
         appointmentTable = new javax.swing.JTable();
+        finalizeConsultationButton = new javax.swing.JButton();
         jPanel6 = new javax.swing.JPanel();
         jScrollPane5 = new javax.swing.JScrollPane();
         medicalRecordsTable = new javax.swing.JTable();
@@ -727,27 +729,34 @@ public class DoctorPanel extends javax.swing.JPanel {
         ));
         jScrollPane4.setViewportView(appointmentTable);
 
+        finalizeConsultationButton.setText("Finalize Consultation");
+        finalizeConsultationButton.addActionListener(this::finalizeConsultationButtonActionPerformed);
+
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
-                .addContainerGap(238, Short.MAX_VALUE)
+                .addGap(238, 238, 238)
                 .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
                         .addComponent(jLabel28)
                         .addGap(112, 112, 112))
                     .addComponent(jScrollPane4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
+                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel5Layout.createSequentialGroup()
+                                .addGap(64, 64, 64)
+                                .addComponent(updateStatusButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jLabel33))
                         .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
-                                .addComponent(jLabel33)
-                                .addGap(18, 18, 18)
-                                .addComponent(newStatusBox, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel5Layout.createSequentialGroup()
-                                .addComponent(updateStatusButton)
-                                .addGap(59, 59, 59)))
-                        .addGap(114, 114, 114)))
+                                .addGap(18, 18, Short.MAX_VALUE)
+                                .addComponent(newStatusBox, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(114, 114, 114))
+                            .addGroup(jPanel5Layout.createSequentialGroup()
+                                .addGap(49, 49, 49)
+                                .addComponent(finalizeConsultationButton)))))
                 .addGap(176, 176, 176))
         );
         jPanel5Layout.setVerticalGroup(
@@ -762,7 +771,9 @@ public class DoctorPanel extends javax.swing.JPanel {
                     .addComponent(newStatusBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel33))
                 .addGap(18, 18, 18)
-                .addComponent(updateStatusButton)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(updateStatusButton)
+                    .addComponent(finalizeConsultationButton))
                 .addContainerGap(119, Short.MAX_VALUE))
         );
 
@@ -1463,6 +1474,32 @@ public class DoctorPanel extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_logoutButtonActionPerformed
 
+    private void finalizeConsultationButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_finalizeConsultationButtonActionPerformed
+        String appointmentId = getSelectedAppointmentId();
+
+        if (appointmentId == null) {
+            return;
+        }
+
+        try {
+            Bill bill = doctorOperation.generateBill(appointmentId);
+
+            JOptionPane.showMessageDialog(
+                    this,"Bill generated successfully.\n\n"
+                    + "Bill ID: " + bill.getSelf().getId() + "\n"
+                    + "Total Amount: RM " + bill.getSelf().getMoney(),
+                    "Bill Generated",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+            loadAppointmentTable();
+
+        } catch (RuntimeException e) {
+
+            JOptionPane.showMessageDialog(this,e.getMessage(),"Generate Bill Failed",JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_finalizeConsultationButtonActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox<String> appointmentComboBox;
@@ -1477,6 +1514,7 @@ public class DoctorPanel extends javax.swing.JPanel {
     private javax.swing.JTextField dosageField;
     private javax.swing.JTextField durationField;
     private javax.swing.JTextField emailField;
+    private javax.swing.JButton finalizeConsultationButton;
     private javax.swing.JTextField frequencyField;
     private javax.swing.JComboBox<String> genderBox;
     private javax.swing.JTextField heartRateField;
