@@ -3,6 +3,7 @@ package Operations.AdminOperation;
 import Exceptions.EntityExceptions.EntityNotFoundException;
 import Exceptions.EntityExceptions.EntityNotMatchException;
 import Interfaces.ConvertToFileData;
+import Operations.OtherOperation;
 import Tools.EntityConvertManager;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.AssessmentTypeToFile;
@@ -26,6 +27,7 @@ import entities.BusinessEntity.Doctor;
 import entities.BusinessEntity.Facility;
 import entities.BusinessEntity.Insurance;
 import entities.BusinessEntity.MedicalManager;
+import entities.BusinessEntity.MedicalRecord;
 import entities.BusinessEntity.MedicalRequest;
 import entities.BusinessEntity.Patient;
 
@@ -132,6 +134,37 @@ public class AdminOperation
             preview += " ... (" + ids.size() + " total)";
         }
         blockers.add(relationName + ": " + preview);
+    }
+    public boolean tryGenerateBill(MedicalRequest medicalRequest)
+    {
+        if (medicalRequest == null)
+        {
+            throw new IllegalArgumentException("Medical request cannot be null.");
+        }
+        if (medicalRequest.getMedicalRecord() == null)
+        {
+            throw new IllegalStateException("Medical request has no medical record.");
+        }
+        MedicalRecord medicalRecord = hospitalEntityAllocator.getBusinessEntity(medicalRequest.getMedicalRecord().getId());
+        if (medicalRecord.getBill() != null)
+        {
+            return false;
+        }
+        for (MedicalRequestToFile request : medicalRecord.getMedicalRequests())
+        {
+            if (request.getStatus() != MedicalRequestToFile.RequestStatus.COMPLETED && request.getStatus() != MedicalRequestToFile.RequestStatus.REJECTED)
+            {
+                return false;
+            }
+        }
+        if (medicalRecord.getAppointment() == null)
+        {
+            throw new IllegalStateException("Medical record has no appointment.");
+        }
+        String appointmentId = medicalRecord.getAppointment().getId();
+        OtherOperation billingOperation = new OtherOperation(hospitalEntityAllocator);
+        billingOperation.generateBill(appointmentId);
+        return true;
     }
 
     public <T extends BaseEntity & ConvertToFileData> CRUDInformation add(List<String> data,Class<?> clazz)
