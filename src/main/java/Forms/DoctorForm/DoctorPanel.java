@@ -5,6 +5,7 @@
 package Forms.DoctorForm;
 
 import Operations.DoctorOperation.DoctorOperation;
+import Operations.OtherOperation;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.AppointmentToFile;
 import entities.BaseEntity.AssessmentTypeToFile;
