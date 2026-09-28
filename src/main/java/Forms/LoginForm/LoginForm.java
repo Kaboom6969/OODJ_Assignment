@@ -111,7 +111,8 @@ public class LoginForm extends BaseFrame
         UserDialog.RegisterData registerData = userDialog.getRegisterData();
         if (registerData == null)
         {
-            JOptionPane.showMessageDialog(this,"Error While Registering User!","Error",JOptionPane.ERROR_MESSAGE);
+            if (userDialog.isNeedRegisterWarning())
+                JOptionPane.showMessageDialog(this,"Error While Registering User!","Error",JOptionPane.ERROR_MESSAGE);
             return;
         }
         var user = loginOperation.login(registerData.username(),registerData.password(),registerData.userClass());

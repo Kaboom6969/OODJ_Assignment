@@ -19,6 +19,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +46,13 @@ public class UserDialog extends JDialog
     }
 
     private RegisterData registerData;
+
+    public boolean isNeedRegisterWarning()
+    {
+        return needRegisterWarning;
+    }
+
+    private boolean needRegisterWarning = true;
     private final Modes mode;
     private String id = null;
     public UserDialog(Window owner, AdminOperation adminOperation)
@@ -57,9 +66,25 @@ public class UserDialog extends JDialog
         initComponents();
         genderComboBox.setModel(new DefaultComboBoxModel<>(UserWithDetails.Gender.values()));
         initRoleComboItems(roleComboBox);
+        if (isRegister)
+        {
+            roleComboBox.setSelectedIndex(1);
+            roleComboBox.setVisible(false);
+            roleLabel.setVisible(false);
+        }
         actionButton.setText(isRegister ? "Register" : "Add");
         mode = isRegister ? Modes.REGISTER : Modes.ADD;
         this.adminOperation = adminOperation;
+        addWindowListener(new WindowAdapter()
+        {
+            @Override
+            public void windowClosing(WindowEvent e)
+            {
+                needRegisterWarning = false;
+                dispose();
+            }
+        });
+
     }
     public UserDialog(Window owner,AdminOperation adminOperation, BusinessEntity<? extends User> user)
     {
