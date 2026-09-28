@@ -48,3 +48,4 @@ MR0047|36.9|85|127|76|Seasonal allergy|Clinical consultation note 47
 MR0048|36.2|62|128|77|Minor joint inflammation|Clinical consultation note 48
 MR0049|36.3|63|129|78|Respiratory irritation|Clinical consultation note 49
 MR0050|36.4|64|105|79|Routine observation|Clinical consultation note 50
+MR0051|38.0|120|20|50|Fever|take a good rest

@@ -48,3 +48,4 @@ PR0047|Amoxicillin|200 mg|3 times daily|10|Take after meal|2026-01-16T11:10:00
 PR0048|Ibuprofen|250 mg|1 times daily|3|Take after meal|2026-01-17T11:10:00
 PR0049|Cetirizine|300 mg|2 times daily|4|Take after meal|2026-01-18T11:10:00
 PR0050|Omeprazole|100 mg|3 times daily|5|Take after meal|2026-01-19T11:10:00
+PR0051|medication|3|2times|30|scs|2026-09-28T12:34:31.499477
