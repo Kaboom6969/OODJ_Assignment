@@ -27,6 +27,7 @@ import entities.BusinessEntity.Doctor;
 import entities.BusinessEntity.MedicalRecord;
 import entities.BusinessEntity.MedicalRequest;
 import entities.BusinessEntity.Patient;
+import java.util.Comparator;
 
 public class DoctorOperation {
 
@@ -61,17 +62,19 @@ public class DoctorOperation {
             String phone) {
         LocalDate birthDate;
         try {
-            birthDate = LocalDate.parse(dob,DateTimeFormatter.ISO_LOCAL_DATE);
+            birthDate = LocalDate.parse(dob, DateTimeFormatter.ISO_LOCAL_DATE);
         } catch (DateTimeParseException | NullPointerException e) {
             throw new IllegalArgumentException("Date of Birth must be a real date in YYYY-MM-DD format.");
         }
 
-        if (doctor == null)
+        if (doctor == null) {
             throw new IllegalStateException("Current doctor is unavailable.");
+        }
 
         DoctorToFile self = doctor.getSelf();
-        if (self == null)
+        if (self == null) {
             throw new IllegalStateException("Current doctor data is unavailable.");
+        }
 
         // Validate every value before changing the current in-memory doctor.
         DoctorToFile validatedProfile = new DoctorToFile(
@@ -183,11 +186,11 @@ public class DoctorOperation {
         validateSafeText(appointmentId, "Appointment ID");
 
         if (appointmentId == null || appointmentId.trim().isEmpty()) {
-                throw new IllegalArgumentException("Appointment ID cannot be empty.");
+            throw new IllegalArgumentException("Appointment ID cannot be empty.");
         }
 
         if (patientId == null || patientId.trim().isEmpty()) {
-                throw new IllegalArgumentException("Patient ID cannot be empty.");
+            throw new IllegalArgumentException("Patient ID cannot be empty.");
         }
 
         if (temperature <= 0) {
@@ -195,7 +198,7 @@ public class DoctorOperation {
         }
 
         if (heartRate <= 0) {
-            throw new IllegalArgumentException( "Heart rate must be greater than 0.");
+            throw new IllegalArgumentException("Heart rate must be greater than 0.");
         }
 
         if (systolicPressure <= 0 || diastolicPressure <= 0) {
@@ -226,21 +229,17 @@ public class DoctorOperation {
             throw new IllegalArgumentException("Appointment not found.");
         }
 
-        if (selectedAppointment.getDoctor() == null|| !selectedAppointment.getDoctor().getId().equals(doctor.getId())) 
-        {
+        if (selectedAppointment.getDoctor() == null || !selectedAppointment.getDoctor().getId().equals(doctor.getId())) {
             throw new IllegalArgumentException("Appointment does not belong to this doctor.");
         }
 
-        if (selectedAppointment.getPatient() == null || !selectedAppointment.getPatient().getId().equals(patientId.trim()))
-        {
+        if (selectedAppointment.getPatient() == null || !selectedAppointment.getPatient().getId().equals(patientId.trim())) {
             throw new IllegalArgumentException("Appointment does not belong to this patient.");
         }
 
-        if (selectedAppointment.getSelf().getStatus() != AppointmentToFile.AppointmentStatus.COMPLETED) 
-        {
+        if (selectedAppointment.getSelf().getStatus() != AppointmentToFile.AppointmentStatus.COMPLETED) {
             throw new IllegalArgumentException("Appointment must be completed before consultation.");
         }
-
 
         if (selectedAppointment.getMedicalRecord() != null) {
             throw new IllegalArgumentException("A medical record already exists for this appointment.");
@@ -588,6 +587,10 @@ public class DoctorOperation {
             patients.add(patient.getSelf());
         }
 
+        patients.sort(
+                Comparator.comparing(PatientToFile::getId)
+        );
+
         return patients;
     }
 
@@ -599,5 +602,32 @@ public class DoctorOperation {
         }
 
         return appointments;
+    }
+
+    public List<Appointment> getMedicalRecordsForPatient(String patientId) {
+        List<Appointment> records = new ArrayList<>();
+
+        if (patientId == null || patientId.trim().isEmpty()) {
+            return records;
+        }
+
+        for (AppointmentToFile appointmentFile : doctor.getAppointments()) {
+
+            Appointment appointment
+                    = allocator.getBusinessEntity(appointmentFile.getId());
+
+            PatientToFile patient = appointment.getPatient();
+
+            if (patient == null
+                    || !patient.getId().equals(patientId.trim())) {
+                continue;
+            }
+
+            if (appointment.getMedicalRecord() != null) {
+                records.add(appointment);
+            }
+        }
+
+        return records;
     }
 }
