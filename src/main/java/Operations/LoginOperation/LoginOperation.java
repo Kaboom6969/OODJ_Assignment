@@ -10,7 +10,7 @@ public class LoginOperation
     {
         this.hospitalEntityAllocator = hospitalEntityAllocator;
     }
-    public BusinessEntity<?> login(String username, String password,Class<? extends User> userClass)
+    public BusinessEntity<? extends User> login(String username, String password,Class<? extends User> userClass)
     {
         var users = hospitalEntityAllocator.getAllBusinessEntities(EntityConvertManager.getPrefixMap().get(userClass));
         for (BusinessEntity<?> userBusiness : users)
@@ -18,7 +18,7 @@ public class LoginOperation
             User user = userClass.cast(userBusiness.getSelf());
             if (user.getName().equals(username) && user.getPassword().equals(password))
             {
-                return userBusiness;
+                return (BusinessEntity<? extends User>) userBusiness;
             }
         }
         return null;

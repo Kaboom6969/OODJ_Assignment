@@ -5,10 +5,12 @@
 package Forms.LoginForm;
 
 import Forms.AdminForm.AdminForm;
+import Forms.AdminForm.CRUDDialog.UserDialog;
 import Forms.BaseFrame;
 import Forms.DoctorForm.DoctorPanelTest;
 import Forms.MedicalManagerForm.MedicalManagerForm;
 import Forms.PatientForm.PatientForm;
+import Operations.AdminOperation.AdminOperation;
 import Operations.LoginOperation.LoginOperation;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.Users.AdminToFile;
@@ -17,6 +19,7 @@ import entities.BaseEntity.Users.MedicalManagerToFile;
 import entities.BaseEntity.Users.PatientToFile;
 import entities.BaseEntity.Users.User;
 import entities.BusinessEntity.Admin;
+import entities.BusinessEntity.BusinessEntity;
 import entities.BusinessEntity.Doctor;
 import entities.BusinessEntity.MedicalManager;
 import entities.BusinessEntity.Patient;
@@ -59,15 +62,8 @@ public class LoginForm extends BaseFrame
     {
 
     }
-
-    private void login(ActionEvent e)
+    private void login(BusinessEntity<? extends User> user)
     {
-        if (nameField.getText().isEmpty() || passwordField.getText().isEmpty())
-        {
-            JOptionPane.showMessageDialog(this, "Please fill all the fields!", "Warning", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        var user = loginOperation.login(nameField.getText(),passwordField.getText(),roleMap.get((String)roleComboBox.getSelectedItem()));
         if (user == null)
         {
             JOptionPane.showMessageDialog(this, "Invalid username or password!", "Warning", JOptionPane.WARNING_MESSAGE);
@@ -96,6 +92,33 @@ public class LoginForm extends BaseFrame
         this.setVisible(false);
     }
 
+    private void login(ActionEvent e)
+    {
+        if (nameField.getText().isEmpty() || passwordField.getText().isEmpty())
+        {
+            JOptionPane.showMessageDialog(this, "Please fill all the fields!", "Warning", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        var user = loginOperation.login(nameField.getText(),passwordField.getText(),roleMap.get((String)roleComboBox.getSelectedItem()));
+        login(user);
+
+    }
+
+    private void register(ActionEvent e)
+    {
+        UserDialog userDialog = new UserDialog(this,new AdminOperation(hospitalEntityAllocator,null),true);
+        userDialog.setVisible(true);
+        UserDialog.RegisterData registerData = userDialog.getRegisterData();
+        if (registerData == null)
+        {
+            JOptionPane.showMessageDialog(this,"Error While Registering User!","Error",JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        var user = loginOperation.login(registerData.username(),registerData.password(),registerData.userClass());
+        login(user);
+
+    }
+
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents  @formatter:off
         nameLabel = new JLabel();
@@ -105,6 +128,7 @@ public class LoginForm extends BaseFrame
         roleComboBox = new JComboBox<>();
         roleLabel = new JLabel();
         passwordField = new JPasswordField();
+        registerButton = new JButton();
 
         //======== this ========
         var contentPane = getContentPane();
@@ -136,30 +160,39 @@ public class LoginForm extends BaseFrame
         //---- roleLabel ----
         roleLabel.setText("Role:");
 
+        //---- registerButton ----
+        registerButton.setText("Register");
+        registerButton.addActionListener(e -> register(e));
+
         GroupLayout contentPaneLayout = new GroupLayout(contentPane);
         contentPane.setLayout(contentPaneLayout);
         contentPaneLayout.setHorizontalGroup(
             contentPaneLayout.createParallelGroup()
-                .addGroup(GroupLayout.Alignment.TRAILING, contentPaneLayout.createSequentialGroup()
+                .addGroup(contentPaneLayout.createSequentialGroup()
                     .addContainerGap(68, Short.MAX_VALUE)
                     .addGroup(contentPaneLayout.createParallelGroup()
-                        .addGroup(contentPaneLayout.createSequentialGroup()
+                        .addGroup(GroupLayout.Alignment.TRAILING, contentPaneLayout.createSequentialGroup()
                             .addGroup(contentPaneLayout.createParallelGroup()
                                 .addGroup(contentPaneLayout.createSequentialGroup()
-                                    .addGap(25, 25, 25)
-                                    .addComponent(nameLabel, GroupLayout.PREFERRED_SIZE, 40, GroupLayout.PREFERRED_SIZE))
-                                .addComponent(passwordLabel, GroupLayout.Alignment.TRAILING, GroupLayout.PREFERRED_SIZE, 65, GroupLayout.PREFERRED_SIZE)
-                                .addComponent(roleLabel, GroupLayout.Alignment.TRAILING))
-                            .addGap(58, 58, 58)
-                            .addGroup(contentPaneLayout.createParallelGroup()
-                                .addComponent(roleComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                .addGroup(contentPaneLayout.createParallelGroup(GroupLayout.Alignment.TRAILING, false)
-                                    .addComponent(passwordField, GroupLayout.Alignment.LEADING)
-                                    .addComponent(nameField, GroupLayout.Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 134, GroupLayout.PREFERRED_SIZE))))
-                        .addGroup(contentPaneLayout.createSequentialGroup()
-                            .addGap(65, 65, 65)
-                            .addComponent(loginButton)))
-                    .addGap(61, 61, 61))
+                                    .addGroup(contentPaneLayout.createParallelGroup()
+                                        .addGroup(contentPaneLayout.createSequentialGroup()
+                                            .addGap(25, 25, 25)
+                                            .addComponent(nameLabel, GroupLayout.PREFERRED_SIZE, 40, GroupLayout.PREFERRED_SIZE))
+                                        .addComponent(passwordLabel, GroupLayout.Alignment.TRAILING, GroupLayout.PREFERRED_SIZE, 65, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(roleLabel, GroupLayout.Alignment.TRAILING))
+                                    .addGap(58, 58, 58)
+                                    .addGroup(contentPaneLayout.createParallelGroup()
+                                        .addComponent(roleComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addGroup(contentPaneLayout.createParallelGroup(GroupLayout.Alignment.TRAILING, false)
+                                            .addComponent(passwordField, GroupLayout.Alignment.LEADING)
+                                            .addComponent(nameField, GroupLayout.Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 134, GroupLayout.PREFERRED_SIZE))))
+                                .addGroup(contentPaneLayout.createSequentialGroup()
+                                    .addGap(65, 65, 65)
+                                    .addComponent(loginButton)))
+                            .addGap(61, 61, 61))
+                        .addGroup(GroupLayout.Alignment.TRAILING, contentPaneLayout.createSequentialGroup()
+                            .addComponent(registerButton, GroupLayout.PREFERRED_SIZE, 104, GroupLayout.PREFERRED_SIZE)
+                            .addContainerGap())))
         );
         contentPaneLayout.setVerticalGroup(
             contentPaneLayout.createParallelGroup()
@@ -178,7 +211,9 @@ public class LoginForm extends BaseFrame
                         .addComponent(roleLabel))
                     .addGap(18, 18, 18)
                     .addComponent(loginButton)
-                    .addGap(43, 43, 43))
+                    .addGap(3, 3, 3)
+                    .addComponent(registerButton)
+                    .addContainerGap())
         );
         pack();
         setLocationRelativeTo(getOwner());
@@ -193,5 +228,6 @@ public class LoginForm extends BaseFrame
     private JComboBox<String> roleComboBox;
     private JLabel roleLabel;
     private JPasswordField passwordField;
+    private JButton registerButton;
     // JFormDesigner - End of variables declaration  //GEN-END:variables  @formatter:on
 }

@@ -33,18 +33,32 @@ public class UserDialog extends JDialog
 
     public enum Modes
     {
-        ADD,MODIFY
+        ADD,MODIFY,REGISTER
     }
+
+    public record RegisterData(String username, String password, Class<? extends User> userClass){}
+
+    public RegisterData getRegisterData()
+    {
+        return registerData;
+    }
+
+    private RegisterData registerData;
     private final Modes mode;
     private String id = null;
-    public UserDialog(Window owner,AdminOperation adminOperation)
+    public UserDialog(Window owner, AdminOperation adminOperation)
     {
-        super(owner, "Add User", ModalityType.APPLICATION_MODAL);
+        this(owner, adminOperation, false);
+    }
+
+    public UserDialog(Window owner, AdminOperation adminOperation, boolean isRegister)
+    {
+        super(owner, isRegister ? "Register User" : "Add User", ModalityType.APPLICATION_MODAL);
         initComponents();
         genderComboBox.setModel(new DefaultComboBoxModel<>(UserWithDetails.Gender.values()));
         initRoleComboItems(roleComboBox);
-        actionButton.setText("Add");
-        mode = Modes.ADD;
+        actionButton.setText(isRegister ? "Register" : "Add");
+        mode = isRegister ? Modes.REGISTER : Modes.ADD;
         this.adminOperation = adminOperation;
     }
     public UserDialog(Window owner,AdminOperation adminOperation, BusinessEntity<? extends User> user)
@@ -161,6 +175,19 @@ public class UserDialog extends JDialog
                 {
                     crudInformation = new AdminOperation.CRUDInformation(false, re.getMessage());
                 }
+                break;
+            case REGISTER:
+                try
+                {
+                    crudInformation =
+                            adminOperation.add(packData(null), (((ComboBoxItem<Class<?>>) Objects.requireNonNull(roleComboBox.getSelectedItem())).getItem()));
+                    registerData = new RegisterData(nameTextField.getText(),passwordTextField.getText(), (Class<? extends User>) ((ComboBoxItem<Class<?>>) roleComboBox.getSelectedItem()).getItem());
+                } catch (RuntimeException re)
+                {
+                    crudInformation = new AdminOperation.CRUDInformation(false, re.getMessage());
+                }
+                break;
+
         }
         int icon = JOptionPane.INFORMATION_MESSAGE;
         if (!crudInformation.isSuccess()) icon = JOptionPane.ERROR_MESSAGE;
