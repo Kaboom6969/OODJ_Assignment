@@ -86,13 +86,10 @@ public class AdminForm extends BaseFrame
         contentPaneLayout.setVerticalGroup(
             contentPaneLayout.createParallelGroup()
                 .addGroup(contentPaneLayout.createSequentialGroup()
-                    .addGroup(contentPaneLayout.createParallelGroup()
-                        .addGroup(contentPaneLayout.createSequentialGroup()
-                            .addGap(39, 39, 39)
-                            .addComponent(logOutButton, GroupLayout.PREFERRED_SIZE, 439, GroupLayout.PREFERRED_SIZE))
-                        .addGroup(contentPaneLayout.createSequentialGroup()
-                            .addContainerGap()
-                            .addComponent(adminTab, GroupLayout.PREFERRED_SIZE, 551, GroupLayout.PREFERRED_SIZE)))
+                    .addContainerGap()
+                    .addGroup(contentPaneLayout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
+                        .addComponent(adminTab, GroupLayout.DEFAULT_SIZE, 551, Short.MAX_VALUE)
+                        .addComponent(logOutButton, GroupLayout.DEFAULT_SIZE, 551, Short.MAX_VALUE))
                     .addContainerGap(22, Short.MAX_VALUE))
         );
         pack();
