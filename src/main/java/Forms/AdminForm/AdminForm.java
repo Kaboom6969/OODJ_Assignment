@@ -79,7 +79,7 @@ public class AdminForm extends BaseFrame
                 .addGroup(contentPaneLayout.createSequentialGroup()
                     .addContainerGap()
                     .addComponent(adminTab, GroupLayout.PREFERRED_SIZE, 890, GroupLayout.PREFERRED_SIZE)
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(logOutButton)
                     .addContainerGap())
         );
@@ -88,12 +88,12 @@ public class AdminForm extends BaseFrame
                 .addGroup(contentPaneLayout.createSequentialGroup()
                     .addGroup(contentPaneLayout.createParallelGroup()
                         .addGroup(contentPaneLayout.createSequentialGroup()
-                            .addContainerGap()
-                            .addComponent(adminTab, GroupLayout.PREFERRED_SIZE, 507, GroupLayout.PREFERRED_SIZE))
-                        .addGroup(contentPaneLayout.createSequentialGroup()
                             .addGap(39, 39, 39)
-                            .addComponent(logOutButton, GroupLayout.PREFERRED_SIZE, 439, GroupLayout.PREFERRED_SIZE)))
-                    .addContainerGap(16, Short.MAX_VALUE))
+                            .addComponent(logOutButton, GroupLayout.PREFERRED_SIZE, 439, GroupLayout.PREFERRED_SIZE))
+                        .addGroup(contentPaneLayout.createSequentialGroup()
+                            .addContainerGap()
+                            .addComponent(adminTab, GroupLayout.PREFERRED_SIZE, 551, GroupLayout.PREFERRED_SIZE)))
+                    .addContainerGap(22, Short.MAX_VALUE))
         );
         pack();
         setLocationRelativeTo(getOwner());
