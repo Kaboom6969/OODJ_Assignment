@@ -509,6 +509,8 @@ public class PatientOperation implements PatientService
         }
         return billList;
     }
+
+    // 3. Marks a bill as paid, if it belongs to the current patient. Patient -> Appointment -> MedicalRecord -> Bill.
     public void payBill(String billId)
     {
         if (billId == null || billId.isBlank())
@@ -517,24 +519,20 @@ public class PatientOperation implements PatientService
         }
         Patient currentPatient = allocator.getBusinessEntity(patient.getId());
 
+        // Iterate through the patient's appointments to find the bill
         for (AppointmentToFile appointmentData : currentPatient.getAppointments())
         {
             Appointment appointment = allocator.getBusinessEntity(appointmentData.getId());
-
             MedicalRecordToFile medicalRecordData = appointment.getMedicalRecord();
-
-            if (medicalRecordData == null) continue;
+            if (medicalRecordData == null) continue;                // skip those appointments that have no medical record
 
             MedicalRecord medicalRecord = allocator.getBusinessEntity(medicalRecordData.getId());
-
             BillToFile billData = medicalRecord.getBill();
-
-            if (billData == null) continue;
-
-            if (billData.getId().equals(billId))
+            if (billData == null) continue;                        // skip those medical records that have no bill
+            if (billData.getId().equals(billId))                   // check the bill ID matches
             {
                 Bill bill = allocator.getBusinessEntity(billId);
-                bill.getSelf().markPaid(LocalDateTime.now());
+                bill.getSelf().markPaid(LocalDateTime.now());       //mark as paid
                 allocator.saveChanges(bill);
                 return;
             }
