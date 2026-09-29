@@ -972,6 +972,7 @@ public class PatientForm extends BaseFrame {
         jScrollPane7.setViewportView(billingTb);
 
         payButton.setText("Pay");
+        payButton.addActionListener(this::payButtonActionPerformed);
 
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
         jPanel7.setLayout(jPanel7Layout);
@@ -1360,18 +1361,7 @@ public class PatientForm extends BaseFrame {
     private void payButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_payButtonActionPerformed
     {//GEN-HEADEREND:event_payButtonActionPerformed
         int selectedViewRow = billingTb.getSelectedRow();
-
-        if (selectedViewRow == -1)
-        {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Please select a bill."
-            );
-            return;
-        }
-
-        int selectedModelRow =
-                billingTb.convertRowIndexToModel(selectedViewRow);
+        int selectedModelRow = billingTb.convertRowIndexToModel(selectedViewRow);
 
         BillToFile bill = (BillToFile) billingTb
                 .getModel()
@@ -1379,15 +1369,11 @@ public class PatientForm extends BaseFrame {
 
         if (bill.getStatus() == BillToFile.BillStatus.PAID)
         {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "This bill has already been paid."
-            );
+            JOptionPane.showMessageDialog(this,"This bill has already been paid.");
             return;
         }
 
-        int result = JOptionPane.showConfirmDialog(
-                this,
+        int result = JOptionPane.showConfirmDialog(this,
                 "Pay Bill " + bill.getId()
                         + "?\nTotal: RM " + bill.getMoney(),
                 "Confirm Payment",
@@ -1399,12 +1385,10 @@ public class PatientForm extends BaseFrame {
         try
         {
             operation.payBill(bill.getId());
-
             JOptionPane.showMessageDialog(
                     this,
                     "Payment successful."
             );
-
             populateProfileTab();
         }
         catch (RuntimeException exception)
