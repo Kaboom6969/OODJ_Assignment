@@ -98,6 +98,7 @@ public class EntityConvertManager
         prefixMap = new HashMap<>();
         businessEntityMap = new HashMap<>();
         businessConvertMap = new HashMap<>();
+        // PREFIX is the shared registry key between IDs, text files, base entities and business entities.
         try (ScanResult scanResult = new ClassGraph()
                 .enableClassInfo()
                 .acceptPackages("entities")

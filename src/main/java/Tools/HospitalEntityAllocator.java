@@ -138,6 +138,7 @@ public class HospitalEntityAllocator
         String prefix = PrefixFinder.findPrefix(id);
         Class<? extends BusinessEntity<?>> businessEntityClass = EntityConvertManager.getBusinessEntityMap().get(prefix);
         Class<? extends BaseEntity> baseEntityClass = EntityConvertManager.getEntityMap().get(prefix);
+        // LazyEntity field types declare which linker and entity-file handlers the business object needs.
         for (Field field : businessEntityClass.getDeclaredFields())
         {
             if (field.getType() != LazyEntity.class && field.getType() != LazyEntityList.class) continue;

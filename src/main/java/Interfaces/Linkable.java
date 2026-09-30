@@ -28,6 +28,7 @@ public interface Linkable
         {
             throw new IllegalStateException("Self ID is empty");
         }
+        // Rebuild linker rows from the current LazyEntity fields; the generic type identifies the other side.
         classBaseEntitySelf =
                 ((Class<?>) ((ParameterizedType)
                         classThatCallRightNow.getGenericSuperclass()).
