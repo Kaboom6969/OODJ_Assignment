@@ -348,6 +348,9 @@ public class PatientOperation implements PatientService
         appointment.setDoctor(doctor.getSelf());
         appointment.setFacility(facility.getSelf());
         allocator.saveChanges(appointment);
+
+        // Keep this login session in sync with the appointment/linker just saved to disk.
+        patient.getAppointments().add(appointment.getSelf());
     }
 
     // 8. Reschedules an existing appointment to a new time. Appointment -> AppointmentToFile.
