@@ -5,10 +5,10 @@
 package Operations.DoctorOperation;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -17,10 +17,6 @@ import Operations.OtherOperation;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.AppointmentToFile;
 import entities.BaseEntity.AssessmentTypeToFile;
-import entities.BaseEntity.BillToFile;
-import entities.BaseEntity.ConsultationRateToFile;
-import entities.BaseEntity.DepartmentToFile;
-import entities.BaseEntity.InsuranceToFile;
 import entities.BaseEntity.MedicalRecordToFile;
 import entities.BaseEntity.MedicalRequestToFile;
 import entities.BaseEntity.PrescriptionToFile;
@@ -30,14 +26,10 @@ import entities.BaseEntity.Users.UserWithDetails;
 import entities.BusinessEntity.Appointment;
 import entities.BusinessEntity.AssessmentType;
 import entities.BusinessEntity.Bill;
-import entities.BusinessEntity.ConsultationRate;
-import entities.BusinessEntity.Department;
 import entities.BusinessEntity.Doctor;
-import entities.BusinessEntity.Facility;
 import entities.BusinessEntity.MedicalRecord;
 import entities.BusinessEntity.MedicalRequest;
 import entities.BusinessEntity.Patient;
-import java.util.Comparator;
 
 public class DoctorOperation {
 
@@ -50,6 +42,7 @@ public class DoctorOperation {
         this.doctor = doctor;
     }
 
+    // Prevent characters that could break the pipe-separated text file format.
     private void validateSafeText(String value, String fieldName) {
         if (value != null
                 && (value.contains("|")
@@ -63,6 +56,7 @@ public class DoctorOperation {
         }
     }
 
+    // Update the current doctor's profile information after validating the input.
     public void updateProfile(
             String name,
             String password,
@@ -70,13 +64,16 @@ public class DoctorOperation {
             String dob,
             String email,
             String phone) {
-        LocalDate birthDate;
+        LocalDate birthDate;    // Store the converted date of birth.
+        
+        // Validate and convert the date of birth into LocalDate format.
         try {
             birthDate = LocalDate.parse(dob, DateTimeFormatter.ISO_LOCAL_DATE);
         } catch (DateTimeParseException | NullPointerException e) {
             throw new IllegalArgumentException("Date of Birth must be a real date in YYYY-MM-DD format.");
         }
 
+        // Ensure a current doctor is available.
         if (doctor == null) {
             throw new IllegalStateException("Current doctor is unavailable.");
         }
@@ -88,59 +85,64 @@ public class DoctorOperation {
 
         // Validate every value before changing the current in-memory doctor.
         DoctorToFile validatedProfile = new DoctorToFile(
-                self.getId(), name, password, email, gender, birthDate, phone);
-
+            self.getId(), name, password, email, gender, birthDate, phone);
+        
         self.setName(validatedProfile.getName());
         self.setPassword(validatedProfile.getPassword());
         self.setEmail(validatedProfile.getEmail());
         self.setGender(validatedProfile.getGender());
         self.setDateOfBirth(validatedProfile.getDateOfBirth());
         self.setPhoneNumber(validatedProfile.getPhoneNumber());
+
+        // Save the updated doctor profile.
         allocator.saveChanges(doctor);
     }
+
+    // Generate a bill for the selected appointment.
     public Bill generateBill(String appointmentId)
     {
-        Appointment appointment =
-                allocator.getBusinessEntity(appointmentId);
+        // The appointment must belong to the current doctor.
+        Appointment appointment = allocator.getBusinessEntity(appointmentId);
 
+        // Check that the appointment belongs to the current doctor.
         if (appointment.getDoctor() == null || !appointment.getDoctor().getId().equals(doctor.getId()))
         {
             throw new IllegalArgumentException("Appointment does not belong to this doctor.");
         }
+
+        // Delegate the actual bill generation to OtherOperation.
         return new OtherOperation(allocator).generateBill(appointmentId);
     }
 
+    // Update the status of an appointment assigned to the current doctor.
+    public void updateAppointmentStatus(String appointmentId,AppointmentToFile.AppointmentStatus status) {
 
-    public void updateAppointmentStatus(
-            String appointmentId,
-            AppointmentToFile.AppointmentStatus status) {
+        // Validate that the appointment ID is not null or empty.
         if (appointmentId == null || appointmentId.trim().isEmpty()) {
-            throw new IllegalArgumentException(
-                    "Appointment ID cannot be empty."
-            );
+            throw new IllegalArgumentException("Appointment ID cannot be empty.");
         }
 
+        // Validate that a valid appointment status is provided.
         if (status == null) {
-            throw new IllegalArgumentException(
-                    "Appointment status cannot be empty."
-            );
+            throw new IllegalArgumentException("Appointment status cannot be empty.");
         }
 
         AppointmentToFile appointment;
 
+        // Retrieve the appointment from the current doctor's appointment list.
         try {
             appointment = doctor.getAppointments().get(appointmentId.trim());
         } catch (Exception e) {
-            throw new IllegalArgumentException(
-                    "Appointment not found."
-            );
+            throw new IllegalArgumentException("Appointment not found.");
         }
 
+        // Apply the new appointment status selected by the doctor.
         appointment.setStatus(status);
-
+        // Save the updated appointment information.
         allocator.saveChanges(doctor);
     }
 
+    // Retrieve an appointment from the current doctor's appointment list.
     public AppointmentToFile getAppointment(String appointmentId) {
         if (appointmentId == null || appointmentId.trim().isEmpty()) {
             throw new IllegalArgumentException(
@@ -149,15 +151,14 @@ public class DoctorOperation {
         }
 
         try {
-            return doctor.getAppointments()
-                    .get(appointmentId.trim());
+            return doctor.getAppointments().get(appointmentId.trim());
         } catch (Exception e) {
-            throw new IllegalArgumentException(
-                    "Appointment not found."
-            );
+            throw new IllegalArgumentException("Appointment not found.");
         }
     }
 
+    // Retrieve the patient associated with an appointment.
+    // The appointment must belong to the current doctor.
     public PatientToFile getAppointmentPatient(String appointmentId) {
         if (appointmentId == null || appointmentId.trim().isEmpty()) {
             throw new IllegalArgumentException(
@@ -166,19 +167,13 @@ public class DoctorOperation {
         }
 
         try {
-            Appointment appointment
-                    = allocator.getBusinessEntity(appointmentId.trim());
+            Appointment appointment = allocator.getBusinessEntity(appointmentId.trim());
 
-            if (appointment.getDoctor() == null
-                    || !appointment.getDoctor()
-                            .getId()
-                            .equals(doctor.getId())) {
-
-                throw new IllegalArgumentException(
-                        "Appointment does not belong to this doctor."
-                );
+            if (appointment.getDoctor() == null || !appointment.getDoctor().getId().equals(doctor.getId())) {
+                throw new IllegalArgumentException("Appointment does not belong to this doctor.");
             }
 
+            // Return the patient linked to the selected appointment.
             return appointment.getPatient();
 
         } catch (IllegalArgumentException e) {
@@ -201,7 +196,7 @@ public class DoctorOperation {
             String diagnosis,
             String consultationNote) {
 
-        //validation
+        // Validate the consultation input before processing the request.
         validateSafeText(patientId, "Patient ID");
         validateSafeText(diagnosis, "Diagnosis");
         validateSafeText(consultationNote, "Consultation note");
@@ -237,6 +232,7 @@ public class DoctorOperation {
 
         Patient patient;
 
+        // Retrieve the selected patient from the data layer.
         try {
             patient = allocator.getBusinessEntity(patientId.trim());
         } catch (Exception e) {
@@ -245,28 +241,34 @@ public class DoctorOperation {
 
         Appointment selectedAppointment;
 
+        // Retrieve the appointment selected by the doctor.
         try {
             selectedAppointment = allocator.getBusinessEntity(appointmentId.trim());
         } catch (Exception e) {
             throw new IllegalArgumentException("Appointment not found.");
         }
 
+        // Make sure the appointment belongs to the current doctor.
         if (selectedAppointment.getDoctor() == null || !selectedAppointment.getDoctor().getId().equals(doctor.getId())) {
             throw new IllegalArgumentException("Appointment does not belong to this doctor.");
         }
 
+        // Make sure the appointment belongs to the selected patient.
         if (selectedAppointment.getPatient() == null || !selectedAppointment.getPatient().getId().equals(patientId.trim())) {
             throw new IllegalArgumentException("Appointment does not belong to this patient.");
         }
 
+        // A consultation can only be recorded after the appointment is completed.
         if (selectedAppointment.getSelf().getStatus() != AppointmentToFile.AppointmentStatus.COMPLETED) {
             throw new IllegalArgumentException("Appointment must be completed before consultation.");
         }
 
+        // Prevent duplicate medical records for the same appointment.
         if (selectedAppointment.getMedicalRecord() != null) {
             throw new IllegalArgumentException("A medical record already exists for this appointment.");
         }
 
+        // Create a new medical record using the consultation information.
         MedicalRecordToFile medicalRecord
                 = new MedicalRecordToFile(
                         null,
@@ -279,9 +281,11 @@ public class DoctorOperation {
                 );
 
         allocator.assignNewId(medicalRecord);
+        // Link the new medical record to the selected appointment.
         selectedAppointment.setMedicalRecord(medicalRecord);
         allocator.saveChanges(selectedAppointment);
     }
+
 
     public void savePrescription(
             String patientId,
@@ -292,7 +296,7 @@ public class DoctorOperation {
             int durationDays,
             String instructions) {
 
-        //validation
+        // Validate all prescription input before processing the request.
         validateSafeText(patientId, "Patient ID");
         validateSafeText(medicationName, "Medication name");
         validateSafeText(dosage, "Dosage");
@@ -418,6 +422,7 @@ public class DoctorOperation {
         allocator.saveChanges(medicalRecord);
     }
 
+    
     public void sendMedicalRequest(
             String patientId,
             String appointmentId,
@@ -528,6 +533,8 @@ public class DoctorOperation {
                 = allocator.getBusinessEntity(
                         record.getId()
                 );
+        
+        // Prevent a medical request from being created after the bill has been generated.
         if (medicalRecord.getBill() != null)
         {
             throw new IllegalStateException(
@@ -550,6 +557,7 @@ public class DoctorOperation {
             );
         }
 
+        // Ensure a specific medical request assessment type is selected.
         if (selectedAssessmentType.getSelf().getCategory()
                 == AssessmentTypeToFile.AssessmentCategory.GENERAL_CHECKUP) {
 
@@ -593,36 +601,43 @@ public class DoctorOperation {
         allocator.saveChanges(medicalRecord);
     }
 
+    // Retrieve all unique patients who have appointments with the current doctor.
     public List<PatientToFile> getMyPatients() {
+        
+        // LinkedHashSet prevents the same patient from appearing multiple times.
         Set<String> patientIds = new LinkedHashSet<>();
 
+        // Go through all appointments assigned to the current doctor.
         for (AppointmentToFile appointmentFile : doctor.getAppointments()) {
-            Appointment appointment
-                    = allocator.getBusinessEntity(appointmentFile.getId());
 
+            // allocate appointment object according the ids
+            Appointment appointment = allocator.getBusinessEntity(appointmentFile.getId());
+            // get patient from appoinment
             PatientToFile patient = appointment.getPatient();
 
+            // Add the patient ID if a patient is associated with the appointment.
             if (patient != null) {
                 patientIds.add(patient.getId());
             }
         }
 
+        // Create a list to store the complete patient information.
         List<PatientToFile> patients = new ArrayList<>();
 
+        // Retrieve each patient using the collected patient IDs.
         for (String patientId : patientIds) {
-            Patient patient
-                    = allocator.getBusinessEntity(patientId);
-
+            Patient patient = allocator.getBusinessEntity(patientId);
             patients.add(patient.getSelf());
         }
 
-        patients.sort(
-                Comparator.comparing(PatientToFile::getId)
-        );
+         // Sort the patients by their patient ID.
+        patients.sort(Comparator.comparing(PatientToFile::getId));
 
+        // Return the sorted list of unique patients.
         return patients;
     }
 
+    // Return all appointments assigned to the current doctor.
     public List<AppointmentToFile> getMyAppointments() {
         List<AppointmentToFile> appointments = new ArrayList<>();
 
@@ -633,6 +648,8 @@ public class DoctorOperation {
         return appointments;
     }
 
+    // Retrieve medical records belonging to the selected patient
+    // from appointments handled by the current doctor. 
     public List<Appointment> getMedicalRecordsForPatient(String patientId) {
         List<Appointment> records = new ArrayList<>();
 

@@ -4,8 +4,14 @@
  */
 package Forms.DoctorForm;
 
+import java.awt.event.ActionListener;
+import java.util.List;
+
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+
 import Operations.DoctorOperation.DoctorOperation;
-import Operations.OtherOperation;
 import Tools.HospitalEntityAllocator;
 import entities.BaseEntity.AppointmentToFile;
 import entities.BaseEntity.AssessmentTypeToFile;
@@ -16,11 +22,6 @@ import entities.BusinessEntity.Appointment;
 import entities.BusinessEntity.AssessmentType;
 import entities.BusinessEntity.Bill;
 import entities.BusinessEntity.Doctor;
-
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.awt.event.ActionListener;
-import java.util.List;
 
 /**
  *
@@ -43,34 +44,34 @@ public class DoctorPanel extends javax.swing.JPanel {
         // =========================
         // Patient Consultation
         // =========================
+        // Load the doctor's patients and appointments when the panel is opened.
         loadPatientList();
         loadAppointmentTable();
 
+        // When a patient is selected, load the appointments belonging to that patient.
         patientComboBox.addActionListener(e -> {
 
-            Object selectedItem
-                    = patientComboBox.getSelectedItem();
+            Object selectedItem = patientComboBox.getSelectedItem();
 
+            // Clear the appointment list if no patient is selected.
             if (selectedItem == null) {
                 appointmentComboBox.removeAllItems();
                 return;
             }
 
-            String patientId
-                    = selectedItem.toString().split(" - ")[0];
-
+            // Extract the patient ID from the selected combo box item.
+            String patientId = selectedItem.toString().split(" - ")[0];
+            // Load the selected patient's completed appointments.
             loadConsultationAppointmentList(patientId);
         });
 
-        if (patientComboBox.getSelectedItem() != null) {
 
-            String patientId
-                    = patientComboBox.getSelectedItem()
-                            .toString()
-                            .split(" - ")[0];
+        // if (patientComboBox.getSelectedItem() != null) {
+        //     // Extract the patient ID from the selected combo box item.
+        //     String patientId = patientComboBox.getSelectedItem().toString().split(" - ")[0];
 
-            loadConsultationAppointmentList(patientId);
-        }
+        //     loadConsultationAppointmentList(patientId);
+        // }
 
         // =========================
         // Prescription
@@ -93,15 +94,15 @@ public class DoctorPanel extends javax.swing.JPanel {
             loadPrescriptionAppointmentList(patientId);
         });
 
-        if (prescriptionPatientComboBox.getSelectedItem() != null) {
+        // if (prescriptionPatientComboBox.getSelectedItem() != null) {
 
-            String patientId
-                    = prescriptionPatientComboBox.getSelectedItem()
-                            .toString()
-                            .split(" - ")[0];
+        //     String patientId
+        //             = prescriptionPatientComboBox.getSelectedItem()
+        //                     .toString()
+        //                     .split(" - ")[0];
 
-            loadPrescriptionAppointmentList(patientId);
-        }
+        //     loadPrescriptionAppointmentList(patientId);
+        // }
 
         // =========================
         // Medical Request
@@ -124,18 +125,18 @@ public class DoctorPanel extends javax.swing.JPanel {
             loadRequestAppointmentList(patientId);
         });
 
-        if (requestPatientComboBox.getSelectedItem() != null) {
+        // if (requestPatientComboBox.getSelectedItem() != null) {
 
-            String patientId
-                    = requestPatientComboBox.getSelectedItem()
-                            .toString()
-                            .split(" - ")[0];
+        //     String patientId
+        //             = requestPatientComboBox.getSelectedItem()
+        //                     .toString()
+        //                     .split(" - ")[0];
 
-            loadRequestAppointmentList(patientId);
-        }
+        //     loadRequestAppointmentList(patientId);
+        // }
         // =========================
-// Medical Records
-// =========================
+        // Medical Records
+        // =========================
         loadRecordPatientList();
 
         recordPatientComboBox.addActionListener(e -> {
@@ -154,18 +155,20 @@ public class DoctorPanel extends javax.swing.JPanel {
             loadMedicalRecords(patientId);
         });
 
-        if (recordPatientComboBox.getSelectedItem() != null) {
+        // if (recordPatientComboBox.getSelectedItem() != null) {
 
-            String patientId
-                    = recordPatientComboBox.getSelectedItem()
-                            .toString()
-                            .split(" - ")[0];
+        //     String patientId
+        //             = recordPatientComboBox.getSelectedItem()
+        //                     .toString()
+        //                     .split(" - ")[0];
 
-            loadMedicalRecords(patientId);
-        }
+        //     loadMedicalRecords(patientId);
+        // }
 
+        // Load the available assessment types for medical requests.
         loadAssessmentTypeList();
 
+        // Load the current doctor's profile information into the form.
         doctorIdField.setText(doctor.getSelf().getId());
         nameField.setText(doctor.getSelf().getName());
         passwordField.setText(doctor.getSelf().getPassword());
@@ -175,6 +178,7 @@ public class DoctorPanel extends javax.swing.JPanel {
         phoneField.setText(doctor.getSelf().getPhoneNumber());
     }
 
+    // Allow the parent frame to provide the logout action for the DoctorPanel.
     public void addLogoutListener(ActionListener listener) {
         logoutButton.addActionListener(listener);
     }
@@ -867,18 +871,24 @@ public class DoctorPanel extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    // Load all appointments assigned to the current doctor into the appointment table.
     private void loadAppointmentTable() {
+        
+        // Retrieve the table model to update the appointment table data.
         DefaultTableModel model = (DefaultTableModel) appointmentTable.getModel();
 
+        // Clear existing rows before loading the latest appointment data.
         model.setRowCount(0);
 
+        // Retrieve all appointments assigned to the current doctor.
         List<AppointmentToFile> appointments = doctorOperation.getMyAppointments();
 
+        // Process each appointment and add its information to the table.
         for (AppointmentToFile appointment : appointments) {
             Appointment appointmentBusiness = allocator.getBusinessEntity(appointment.getId());
-
             PatientToFile patient = appointmentBusiness.getPatient();
 
+            // Add the appointment ID, patient information, time, and status to the table.
             model.addRow(new Object[]{
                 appointment.getId(),
                 patient.getId() + " - " + patient.getName(),
@@ -888,18 +898,21 @@ public class DoctorPanel extends javax.swing.JPanel {
         }
     }
 
+    // Load the doctor's patients into the prescription patient ComboBox.
     private void loadPrescriptionPatientList() {
+        // Clear the existing patient list before loading fresh data.
         prescriptionPatientComboBox.removeAllItems();
 
+        // Retrieve the doctor's patients from DoctorOperation.
         List<PatientToFile> patients = doctorOperation.getMyPatients();
 
+        // Add each patient to the ComboBox using the patient ID and name.
         for (PatientToFile patient : patients) {
-            prescriptionPatientComboBox.addItem(
-                    patient.getId() + " - " + patient.getName()
-            );
+            prescriptionPatientComboBox.addItem(patient.getId() + " - " + patient.getName());
         }
     }
 
+    // Load completed appointments belonging to the selected patient for prescription.
     private void loadPrescriptionAppointmentList(String patientId) {
         appointmentPrescriptionComboBox.removeAllItems();
 
@@ -908,23 +921,20 @@ public class DoctorPanel extends javax.swing.JPanel {
 
         for (AppointmentToFile appointment : appointments) {
 
-            if (appointment.getStatus()
-                    != AppointmentToFile.AppointmentStatus.COMPLETED) {
+            // Only completed appointments can be selected for a prescription.
+            if (appointment.getStatus()!= AppointmentToFile.AppointmentStatus.COMPLETED) {
                 continue;
             }
 
-            Appointment appointmentBusiness
-                    = allocator.getBusinessEntity(
-                            appointment.getId()
-                    );
+            Appointment appointmentBusiness = allocator.getBusinessEntity(appointment.getId());
+            PatientToFile patient = appointmentBusiness.getPatient();
 
-            PatientToFile patient
-                    = appointmentBusiness.getPatient();
-
+            // Skip appointments that do not belong to the selected patient.
             if (!patient.getId().equals(patientId)) {
                 continue;
             }
 
+            // Add the matching appointment to the ComboBox.
             appointmentPrescriptionComboBox.addItem(
                     appointment.getId()
                     + " - "
@@ -935,6 +945,7 @@ public class DoctorPanel extends javax.swing.JPanel {
         }
     }
 
+    // Load the doctor's patients into the medical request patient ComboBox.
     private void loadRequestPatientList() {
         requestPatientComboBox.removeAllItems();
 
@@ -947,6 +958,7 @@ public class DoctorPanel extends javax.swing.JPanel {
         }
     }
 
+    // Load the doctor's patients into the medical record patient ComboBox.
     private void loadRecordPatientList() {
         recordPatientComboBox.removeAllItems();
 
@@ -960,6 +972,7 @@ public class DoctorPanel extends javax.swing.JPanel {
         }
     }
 
+    // Load the selected patient's medical records into the table.
     private void loadMedicalRecords(String patientId) {
 
         DefaultTableModel model
@@ -971,13 +984,15 @@ public class DoctorPanel extends javax.swing.JPanel {
                 = doctorOperation.getMedicalRecordsForPatient(patientId);
 
         for (Appointment appointment : appointments) {
-
+            // Skip the appointment if no medical record is available.
             if (appointment.getMedicalRecord() == null) {
                 continue;
             }
 
+            // Retrieve the medical record linked to the appointment.
             var record = appointment.getMedicalRecord();
 
+            // Combine systolic and diastolic pressure into one blood pressure value.
             String bloodPressure
                     = record.getSystolicPressure()
                     + "/"
@@ -994,6 +1009,7 @@ public class DoctorPanel extends javax.swing.JPanel {
         }
     }
 
+    // Clear all medical record rows from the table.
     private void clearMedicalRecordsTable() {
 
         DefaultTableModel model
@@ -1002,16 +1018,16 @@ public class DoctorPanel extends javax.swing.JPanel {
         model.setRowCount(0);
     }
 
+    // Load completed appointments belonging to the selected patient for a medical request.
     private void loadRequestAppointmentList(String patientId) {
+        // Clear the previous appointment list.
         appointmentRequestComboBox.removeAllItems();
-
-        List<AppointmentToFile> appointments
-                = doctorOperation.getMyAppointments();
+        List<AppointmentToFile> appointments = doctorOperation.getMyAppointments();
 
         for (AppointmentToFile appointment : appointments) {
 
-            if (appointment.getStatus()
-                    != AppointmentToFile.AppointmentStatus.COMPLETED) {
+            // Skip appointments that are not completed.
+            if (appointment.getStatus()!= AppointmentToFile.AppointmentStatus.COMPLETED) {
                 continue;
             }
 
@@ -1023,6 +1039,7 @@ public class DoctorPanel extends javax.swing.JPanel {
             PatientToFile patient
                     = appointmentBusiness.getPatient();
 
+            // Skip appointments that do not belong to the selected patient.
             if (!patient.getId().equals(patientId)) {
                 continue;
             }
@@ -1037,10 +1054,12 @@ public class DoctorPanel extends javax.swing.JPanel {
         }
     }
 
+    // Get the appointment ID from the selected row in the appointment table.
     private String getSelectedAppointmentId() {
 
         int selectedRow = appointmentTable.getSelectedRow();
 
+        // Make sure an appointment is selected before continuing.
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(
                     this,
@@ -1049,27 +1068,29 @@ public class DoctorPanel extends javax.swing.JPanel {
             return null;
         }
 
+        // Return the appointment ID from the first column.
         return appointmentTable
                 .getValueAt(selectedRow, 0)
                 .toString();
     }
 
+    // Load available assessment types for the medical request ComboBox.
     private void loadAssessmentTypeList() {
         requestTypeBox.removeAllItems();
 
-        for (Object entity
-                : allocator.getAllBusinessEntities(
-                        AssessmentTypeToFile.PREFIX
-                )) {
+        // Retrieve all assessment types from the data layer.
+        for (Object entity : allocator.getAllBusinessEntities(AssessmentTypeToFile.PREFIX)) {
+            
+            // Convert the retrieved entity into an AssessmentType object.
+            AssessmentType assessmentType = (AssessmentType) entity;
 
-            AssessmentType assessmentType
-                    = (AssessmentType) entity;
-
+            // Skip general checkup because a specific medical request type is required.
             if (assessmentType.getSelf().getCategory()
-                    == AssessmentTypeToFile.AssessmentCategory.GENERAL_CHECKUP) {
+                 == AssessmentTypeToFile.AssessmentCategory.GENERAL_CHECKUP) {
                 continue;
             }
 
+            // Add the assessment type ID, name, and category to the ComboBox.
             requestTypeBox.addItem(
                     assessmentType.getSelf().getId()
                     + " - "
@@ -1101,9 +1122,11 @@ public class DoctorPanel extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_diagnosisFieldActionPerformed
 
+    // Load the current doctor's patients into the consultation patient ComboBox.
     private void loadPatientList() {
         patientComboBox.removeAllItems();
 
+        // Retrieve the doctor's patients from DoctorOperation.
         List<PatientToFile> patients = doctorOperation.getMyPatients();
 
         for (PatientToFile patient : patients) {
@@ -1113,27 +1136,25 @@ public class DoctorPanel extends javax.swing.JPanel {
         }
     }
 
+    // Load completed appointments belonging to the selected patient for consultation.
     private void loadConsultationAppointmentList(String patientId) {
         appointmentComboBox.removeAllItems();
 
-        List<AppointmentToFile> appointments
-                = doctorOperation.getMyAppointments();
+        // Retrieve the current doctor's appointments.
+        List<AppointmentToFile> appointments = doctorOperation.getMyAppointments();
 
         for (AppointmentToFile appointment : appointments) {
 
+            // Only completed appointments can be selected for consultation.
             if (appointment.getStatus()
                     != AppointmentToFile.AppointmentStatus.COMPLETED) {
                 continue;
             }
 
-            Appointment appointmentBusiness
-                    = allocator.getBusinessEntity(
-                            appointment.getId()
-                    );
+            Appointment appointmentBusiness = allocator.getBusinessEntity(appointment.getId());
+            PatientToFile patient = appointmentBusiness.getPatient();
 
-            PatientToFile patient
-                    = appointmentBusiness.getPatient();
-
+            // Skip appointments that do not belong to the selected patient.
             if (!patient.getId().equals(patientId)) {
                 continue;
             }
@@ -1148,10 +1169,13 @@ public class DoctorPanel extends javax.swing.JPanel {
         }
     }
 
-
+    // Handle the Save Consultation button.
+    // Collect the form data and pass it to DoctorOperation.
     private void saveConsultationButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveConsultationButtonActionPerformed
+        // Get the selected patient from the ComboBox.
         Object selectedItem = patientComboBox.getSelectedItem();
 
+        // Make sure a patient is selected.
         if (selectedItem == null) {
             JOptionPane.showMessageDialog(
                     this,
@@ -1160,6 +1184,7 @@ public class DoctorPanel extends javax.swing.JPanel {
             return;
         }
 
+        // Extract the patient ID from the selected item.
         String selectedPatient
                 = selectedItem.toString();
 
@@ -1169,6 +1194,7 @@ public class DoctorPanel extends javax.swing.JPanel {
         Object selectedAppointment
                 = appointmentComboBox.getSelectedItem();
 
+        // Make sure an appointment is selected.
         if (selectedAppointment == null) {
             JOptionPane.showMessageDialog(
                     this,
@@ -1182,14 +1208,14 @@ public class DoctorPanel extends javax.swing.JPanel {
                         .split(" - ")[0];
 
         try {
+            
             double temperature = Double.parseDouble(temperatureField.getText().trim());
-
             int heartRate = Integer.parseInt(heartRateField.getText().trim());
             int systolicPressure = Integer.parseInt(systolicPressureField.getText().trim());
             int diastolicPressure = Integer.parseInt(diastolicPressureField.getText().trim());
-
             String diagnosis = diagnosisField.getText().trim();
             String consultationNote = consultationNoteArea.getText().trim();
+
             doctorOperation.saveConsultation(
                     patientId,
                     appointmentId,
@@ -1202,11 +1228,13 @@ public class DoctorPanel extends javax.swing.JPanel {
             );
 
             JOptionPane.showMessageDialog(this, "Consultation saved successfully.");
-
+    
+            // Handle invalid input.
         } catch (NumberFormatException e) {
 
             JOptionPane.showMessageDialog(this, "Please enter valid numbers for vital signs.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
 
+            // Display validation errors returned by DoctorOperation.
         } catch (IllegalArgumentException e) {
 
             JOptionPane.showMessageDialog(this, e.getMessage(), "Save Failed", JOptionPane.ERROR_MESSAGE);
@@ -1217,23 +1245,31 @@ public class DoctorPanel extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_dosageFieldActionPerformed
 
+    // Handle the Update Status button.
+    // Update the selected appointment's status through DoctorOperation.
     private void updateStatusButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateStatusButtonActionPerformed
+        // Get the selected appointment row from the table.
         int selectedRow = appointmentTable.getSelectedRow();
 
+        // Make sure an appointment is selected.
         if (selectedRow == -1) {
             javax.swing.JOptionPane.showMessageDialog(this, "Please select an appointment.");
             return;
         }
 
+        // Get the appointment ID from the selected row.
         String appointmentId = appointmentTable.getValueAt(selectedRow, 0).toString();
         String selectedStatus = newStatusBox.getSelectedItem().toString();
-
+        
+        // Convert the selected text into an AppointmentStatus value.
         AppointmentToFile.AppointmentStatus status = AppointmentToFile.AppointmentStatus.valueOf(selectedStatus);
 
         try {
+            // Update the displayed status in the appointment table.
             doctorOperation.updateAppointmentStatus(appointmentId, status);
             appointmentTable.setValueAt(status.name(), selectedRow, 3);
 
+            // Refresh the appointment ComboBoxes so they reflect the new status.
             refreshAppointmentDropdowns();
 
             JOptionPane.showMessageDialog(this, "Appointment status updated successfully.");
@@ -1244,8 +1280,11 @@ public class DoctorPanel extends javax.swing.JPanel {
 
     }//GEN-LAST:event_updateStatusButtonActionPerformed
 
-    private void issuePrescriptionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_issuePrescriptionButtonActionPerformed
 
+    // Handle the Issue Prescription button.
+    // Collect prescription information and pass it to DoctorOperation.
+    private void issuePrescriptionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_issuePrescriptionButtonActionPerformed
+        // Get the selected patient.
         Object selectedItem = prescriptionPatientComboBox.getSelectedItem();
 
         if (selectedItem == null) {
@@ -1253,11 +1292,14 @@ public class DoctorPanel extends javax.swing.JPanel {
             return;
         }
 
+        //Convert selected item to string
         String selectedPatient = selectedItem.toString();
+        // Extract the patient ID from the selected patient.
         String patientId = selectedPatient.split(" - ")[0];
 
-        Object selectedAppointment
-                = appointmentPrescriptionComboBox.getSelectedItem();
+        // Get the selected appointment.
+        Object selectedAppointment = appointmentPrescriptionComboBox.getSelectedItem();
+
 
         if (selectedAppointment == null) {
             JOptionPane.showMessageDialog(
@@ -1290,19 +1332,23 @@ public class DoctorPanel extends javax.swing.JPanel {
 
             JOptionPane.showMessageDialog(this, "Prescription issued successfully.");
 
+        // Handle invalid duration input.
         } catch (NumberFormatException e) {
 
             JOptionPane.showMessageDialog(this, "Duration days must be a valid number.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
 
+        // Display validation errors returned by DoctorOperation.
         } catch (IllegalArgumentException e) {
 
             JOptionPane.showMessageDialog(this, e.getMessage(), "Prescription Failed", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_issuePrescriptionButtonActionPerformed
 
+    // Handle the Submit Request button.
+    // Collect the selected patient, appointment and assessment type,
+    // then send the medical request through DoctorOperation.
     private void submitRequestButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_submitRequestButtonActionPerformed
-        Object selectedItem
-                = requestPatientComboBox.getSelectedItem();
+        Object selectedItem = requestPatientComboBox.getSelectedItem();
 
         if (selectedItem == null) {
             JOptionPane.showMessageDialog(
@@ -1391,6 +1437,7 @@ public class DoctorPanel extends javax.swing.JPanel {
 
 
     private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
+        // Get the updated profile information from the form.
         String name = nameField.getText().trim();
 
         String password
@@ -1406,6 +1453,7 @@ public class DoctorPanel extends javax.swing.JPanel {
         String phone = phoneField.getText().trim();
 
         try {
+            // Pass the updated profile information to DoctorOperation.
             doctorOperation.updateProfile(
                     name,
                     password,
@@ -1429,12 +1477,15 @@ public class DoctorPanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_saveButtonActionPerformed
 
+
+    // Refresh all appointment ComboBoxes after an appointment status changes.
     private void refreshAppointmentDropdowns() {
 
         // Patient Consultation
         Object consultationPatient
                 = patientComboBox.getSelectedItem();
 
+        // Refresh the consultation appointments if a patient is selected.
         if (consultationPatient != null) {
 
             String patientId
@@ -1484,16 +1535,21 @@ public class DoctorPanel extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_logoutButtonActionPerformed
 
+    // Handle the Generate Bill button.
+    // Get the selected appointment and request bill generation through DoctorOperation.
     private void finalizeConsultationButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_finalizeConsultationButtonActionPerformed
         String appointmentId = getSelectedAppointmentId();
 
+        // Stop the operation if no appointment is selected.
         if (appointmentId == null) {
             return;
         }
 
         try {
+            // Generate the bill for the selected appointment.
             Bill bill = doctorOperation.generateBill(appointmentId);
 
+            // Display the generated bill ID and total amount to the doctor.
             JOptionPane.showMessageDialog(
                     this,"Bill generated successfully.\n\n"
                     + "Bill ID: " + bill.getSelf().getId() + "\n"
@@ -1502,10 +1558,11 @@ public class DoctorPanel extends javax.swing.JPanel {
                     JOptionPane.INFORMATION_MESSAGE
             );
 
+            // Refresh the appointment table to display the latest information.
             loadAppointmentTable();
 
         } catch (RuntimeException e) {
-
+            // Display an error message if bill generation fails.
             JOptionPane.showMessageDialog(this,e.getMessage(),"Generate Bill Failed",JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_finalizeConsultationButtonActionPerformed
